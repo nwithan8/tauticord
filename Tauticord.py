@@ -109,10 +109,13 @@ async def on_ready():
     tautulli_channel = client.get_channel(DISCORD_CHANNEL_ID)
     #await tautulli_channel.send(content="Hello world!") #<---- UNCOMMENT AND RUN ONCE
     last_bot_message_id = ""
-    async for msg in tautulli_channel.history(limit=100):
-        if msg.author == client.user:
-            last_bot_message_id = msg.id
-            break
+    while last_bot_message_id == "":
+        async for msg in tautulli_channel.history(limit=100):
+            if msg.author == client.user:
+                last_bot_message_id = msg.id
+                break
+        if last_bot_message_id == "":
+            await tautulli_channel.send(content="Hello world!")
     message = await tautulli_channel.fetch_message(last_bot_message_id)
     while True:
         message = await update(message, tautulli_channel)
