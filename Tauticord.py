@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import re
 import json
@@ -8,7 +8,6 @@ from collections import defaultdict
 from decimal import *
 import math
 import asyncio
-from discord.ext.commands import Bot
 import time
 
 #Tautulli settings
@@ -28,7 +27,7 @@ emoji_numbers = [u"1\u20e3",u"2\u20e3",u"3\u20e3",u"4\u20e3",u"5\u20e3",u"6\u20e
 session_ids = []
 
 def request(cmd, params):
-    return requests.get(TAUTULLI_URL + "/api/v2?apikey=" + TAUTULLI_API_KEY + "&" + str(params) + "&cmd=" + str(cmd)) if params != None else requests.get(TAUTULLI_BASE_URL + "/api/v2?apikey=" + TAUTULLI_API_KEY + "&cmd=" + str(cmd))
+    return requests.get(TAUTULLI_URL + "/api/v2?apikey=" + TAUTULLI_API_KEY + "&" + str(params) + "&cmd=" + str(cmd)) if params != None else requests.get(TAUTULLI_URL + "/api/v2?apikey=" + TAUTULLI_API_KEY + "&cmd=" + str(cmd))
 
 def add_reactions(message, count):
     for i in range(1,count):
@@ -105,7 +104,6 @@ async def update(previous_message, tautulli_channel):
             await stopStream(reaction, session_ids, tautulli_channel)
     return new_message
 
-
 @client.event
 async def on_ready():
     tautulli_channel = client.get_channel(DISCORD_CHANNEL_ID)
@@ -115,6 +113,7 @@ async def on_ready():
         if msg.author == client.user:
             last_bot_message_id = msg.id
             break
+    message = await tautulli_channel.fetch_message(last_bot_message_id)
     while True:
         message = await update(message, tautulli_channel)
 
