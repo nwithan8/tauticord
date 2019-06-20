@@ -27,7 +27,7 @@ Administrator (the bot owner) can react to Tauticord's messages to terminate a s
 - A Discord server
 
 # Setup
-HOW TO MAKE A DISCORD BOT: https://discordpy.readthedocs.io/en/rewrite/discord.html
+HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
 
 Tuaticord requires the following permissions:
 - Read Messages
