@@ -37,9 +37,6 @@ Run the following command to install the required Python packages:
 Run the script with the following command:
 
 	python3 Tauticord.py
-	
-**Important:** During each refresh, the bot finds and deletes its last message, replacing it with a new one. When the bot starts for the first time, there are no previous messages, which can cause it to error and quit.
-Uncomment line 112 ( #await tautulli_channel.send(content="Hello world!") ) and run the bot once to get it to make an initial dummy message. You can then comment the line out again, and the bot should run as normal as long as there are previous messages from Tauticord in the Discord channel.
 
 # To come
 This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request. Make sure to also join my Discord server (https://discord.gg/47KN8bg) for questions or ideas about Tauticord.
