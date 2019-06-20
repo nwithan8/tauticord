@@ -30,11 +30,11 @@ Administrator (the bot owner) can react to Tauticord's messages to terminate a s
 HOW TO MAKE A DISCORD BOT: https://discordpy.readthedocs.io/en/rewrite/discord.html
 
 Tuaticord requires the following permissions:
-	- Read Messages
-	- Send Messages
-	- Manage Messages
-	- Read Message History
-	- Add Reactions
+- Read Messages
+- Send Messages
+- Manage Messages
+- Read Message History
+- Add Reactions
 
 Run the following command to install the required Python packages:
 
