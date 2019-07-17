@@ -48,4 +48,8 @@ Run the script with the following command:
 # To come
 This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request. Make sure to also join my Discord server for questions or ideas about Tauticord.
 
-<div align="center"><p><iframe src="https://discordapp.com/widget?id=472537215457689601&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe><p></div>
+<div align="center">
+	<p>
+		<a href="https://discord.gg/Q4YbQt"><img src="https://discordapp.com/api/guilds/376697605029101569/widget.png?style=banner2" alt="" /></a>
+	</p>
+</div>
