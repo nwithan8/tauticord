@@ -46,4 +46,6 @@ Run the script with the following command:
 	python3 Tauticord.py
 
 # To come
-This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request. Make sure to also join my Discord server (https://discord.gg/47KN8bg) for questions or ideas about Tauticord.
+This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request. Make sure to also join my Discord server for questions or ideas about Tauticord.
+
+<iframe src="https://discordapp.com/widget?id=472537215457689601&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
