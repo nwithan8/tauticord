@@ -50,6 +50,6 @@ This bot is still a work in progress. If you have any ideas for improving or add
 
 <div align="center">
 	<p>
-		<a href="https://discord.gg/Q4YbQt"><img src="https://discordapp.com/api/guilds/376697605029101569/widget.png?style=banner2" alt="" /></a>
+		<a href="https://discord.gg/Q4YbQt"><img src="https://discordapp.com/api/guilds/472537215457689601/widget.png?style=banner2" alt="" /></a>
 	</p>
 </div>
