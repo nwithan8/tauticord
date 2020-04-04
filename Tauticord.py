@@ -25,6 +25,7 @@ client = discord.Client()
 #Numbers 1-9
 emoji_numbers = [u"1\u20e3",u"2\u20e3",u"3\u20e3",u"4\u20e3",u"5\u20e3",u"6\u20e3",u"7\u20e3",u"8\u20e3",u"9\u20e3"]
 session_ids = []
+old_count = 0
 
 def request(cmd, params):
     return requests.get(TAUTULLI_URL + "/api/v2?apikey=" + TAUTULLI_API_KEY + "&" + str(params) + "&cmd=" + str(cmd)) if params != None else requests.get(TAUTULLI_URL + "/api/v2?apikey=" + TAUTULLI_API_KEY + "&cmd=" + str(cmd))
@@ -82,19 +83,22 @@ def refresh():
         return final_message, count
     except KeyError:
         return "**Connection lost.**", 0
-        
-    
+
+
 async def update(message, tautulli_channel):
+    global old_count
     data, count = refresh()
-	await message.clear_reactions()
     await message.edit(content=data)
-    for i in range(count):
-        await message.add_reaction(emoji_numbers[i])
-    bot_owner = client.get_user(BOT_OWNER_ID)
+    if count != old_count:
+        await message.clear_reactions()
+        old_count = count
+        for i in range(count):
+            await message.add_reaction(emoji_numbers[i])
+
     reaction = ""
     user = ""
     def check(reaction, user):
-        return user == bot_owner
+        return user.id == BOT_OWNER_ID
     try:
         reaction, user = await client.wait_for('reaction_add', timeout=float(REFRESH_TIME), check=check)
     except asyncio.TimeoutError:
