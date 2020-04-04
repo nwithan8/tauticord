@@ -70,7 +70,7 @@ def refresh():
         for session in sessions:
             try:
                 count = count + 1
-                stream_message = "**(" + str(count) + ")** " + selectIcon(str(session['state'])) + " " + str(session['username']) + ": *" + str(session["full_title"]) + "*\n"
+                stream_message = "**" + str(count) + ":** " + selectIcon(str(session['state'])) + " " + str(session['username']) + ": *" + str(session["full_title"]) + "*\n"
                 stream_message = stream_message + "__Player__: " + str(session['product']) + " (" + str(session['player']) + ")\n"
                 stream_message = stream_message + "__Quality__: " + str(session['quality_profile']) + " (" + (str(round(Decimal(float(session['bandwidth'])/1024),1)) if session['bandwidth'] is not "" else "O") + " Mbps)" + (" (Transcode)" if str(session['stream_container_decision']) == 'transcode' else "")
                 final_message = final_message + "\n" + stream_message + "\n"
