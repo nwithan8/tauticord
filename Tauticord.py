@@ -39,11 +39,11 @@ async def stopStream(reaction, ids, tautulli_channel):
     loc = emoji_numbers.index(str(reaction.emoji))
     try:
         request('terminate_session','session_id=' + str(ids[loc]) + '&message=' + str(TERMINATE_MESSAGE))
-        end_notification = await tautulli_channel.send(content="Stream " + str(loc+1) + " was ended.")
-        await end_notification.delete(delay=1.0)
+        end_notification = await tautulli_channel.send(content="Stream " + str(loc+1) + " has been terminated.")
+        await end_notification.delete(delay=5.0)
     except:
         end_notification = await tautulli_channel.send(content="Something went wrong.")
-        await end_notification.delete(delay=1.0)
+        await end_notification.delete(delay=5.0)
 
 def selectIcon(state):
     switcher = {
@@ -116,7 +116,7 @@ async def update(message, tautulli_channel):
 async def on_ready():
     tautulli_channel = client.get_channel(DISCORD_CHANNEL_ID)
     await tautulli_channel.purge()
-    message = await tautulli_channel.send(content="Hello world!")
+    message = await tautulli_channel.send(content="start up")
     while True:
         message = await update(message, tautulli_channel)
 
