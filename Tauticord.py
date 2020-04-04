@@ -84,12 +84,12 @@ def refresh():
         return "**Connection lost.**", 0
         
     
-async def update(previous_message, tautulli_channel):
+async def update(message, tautulli_channel):
     data, count = refresh()
-    await previous_message.delete()
-    new_message = await tautulli_channel.send(content=data)
+	await message.clear_reactions()
+    await message.edit(content=data)
     for i in range(count):
-        await new_message.add_reaction(emoji_numbers[i])
+        await message.add_reaction(emoji_numbers[i])
     bot_owner = client.get_user(BOT_OWNER_ID)
     reaction = ""
     user = ""
@@ -102,21 +102,13 @@ async def update(previous_message, tautulli_channel):
     if reaction:
         if user.id == BOT_OWNER_ID:
             await stopStream(reaction, session_ids, tautulli_channel)
-    return new_message
+    return message
 
 @client.event
 async def on_ready():
     tautulli_channel = client.get_channel(DISCORD_CHANNEL_ID)
-    #await tautulli_channel.send(content="Hello world!") #<---- UNCOMMENT AND RUN ONCE
-    last_bot_message_id = ""
-    while last_bot_message_id == "":
-        async for msg in tautulli_channel.history(limit=100):
-            if msg.author == client.user:
-                last_bot_message_id = msg.id
-                break
-        if last_bot_message_id == "":
-            await tautulli_channel.send(content="Hello world!")
-    message = await tautulli_channel.fetch_message(last_bot_message_id)
+    await tautulli_channel.purge()
+    message = await tautulli_channel.send(content="Hello world!")
     while True:
         message = await update(message, tautulli_channel)
 
