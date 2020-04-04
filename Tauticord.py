@@ -15,6 +15,7 @@ TAUTULLI_URL = '' #http://[IP ADDRESS]:[PORT]
 TAUTULLI_API_KEY = ''
 TERMINATE_MESSAGE = ""
 REFRESH_TIME = 15 #how often (seconds) the bot pulls new data. I'd recommend not making the bot ping Tautulli more often than every 5 seconds.
+PLEX_PASS = True
 
 #Discord Settings
 DISCORD_BOT_TOKEN = ''
@@ -78,7 +79,7 @@ def refresh():
             except ValueError:
                 session_ids.append("000")
                 pass
-        if int(stream_count) > 0:
+        if int(stream_count) > 0 and PLEX_PASS:
             final_message = final_message + "\n" + "To terminate a stream, react with the stream number."
         return final_message, count
     except KeyError:
@@ -89,23 +90,26 @@ async def update(message, tautulli_channel):
     global old_count
     data, count = refresh()
     await message.edit(content=data)
-    if count != old_count:
-        await message.clear_reactions()
-        old_count = count
-        for i in range(count):
-            await message.add_reaction(emoji_numbers[i])
 
-    reaction = ""
-    user = ""
-    def check(reaction, user):
-        return user.id == BOT_OWNER_ID
-    try:
-        reaction, user = await client.wait_for('reaction_add', timeout=float(REFRESH_TIME), check=check)
-    except asyncio.TimeoutError:
-        pass
-    if reaction:
-        if user.id == BOT_OWNER_ID:
-            await stopStream(reaction, session_ids, tautulli_channel)
+    if PLEX_PASS:
+        if count != old_count:
+            await message.clear_reactions()
+            old_count = count
+            for i in range(count):
+                await message.add_reaction(emoji_numbers[i])
+        reaction = ""
+        user = ""
+        def check(reaction, user):
+            return user.id == BOT_OWNER_ID
+        try:
+            reaction, user = await client.wait_for('reaction_add', timeout=float(REFRESH_TIME), check=check)
+        except asyncio.TimeoutError:
+            pass
+        if reaction:
+            if user.id == BOT_OWNER_ID:
+                await stopStream(reaction, session_ids, tautulli_channel)
+    else:
+        await message.clear_reactions()
     return message
 
 @client.event
