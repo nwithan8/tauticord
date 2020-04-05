@@ -89,7 +89,13 @@ def refresh():
 async def update(message, tautulli_channel):
     global old_count
     data, count = refresh()
-    await message.edit(content=data)
+
+    if tautulli_channel.last_message.id == message.id:
+        await message.edit(content=data)
+    else:
+        await tautulli_channel.purge(check=is_me)
+        message = await tautulli_channel.send(content=data)
+        old_count = 0
 
     if PLEX_PASS:
         if count != old_count:
@@ -112,10 +118,13 @@ async def update(message, tautulli_channel):
         await message.clear_reactions()
     return message
 
+def is_me(m):
+    return m.author == client.user
+
 @client.event
 async def on_ready():
     tautulli_channel = client.get_channel(DISCORD_CHANNEL_ID)
-    await tautulli_channel.purge()
+    await tautulli_channel.purge(check=is_me)
     message = await tautulli_channel.send(content="start up")
     while True:
         message = await update(message, tautulli_channel)
