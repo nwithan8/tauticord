@@ -71,7 +71,12 @@ def refresh():
         for session in sessions:
             try:
                 count = count + 1
-                stream_message = "**" + str(count) + ":** " + selectIcon(str(session['state'])) + " " + str(session['username']) + ": *" + str(session["full_title"]) + "*\n"
+                if str(session['media_type']) == "episode":
+                    full_title = str(session['grandparent_title']) + " - S" + str(session['parent_title']).replace("Season ",'').zfill(2) + "E" + str(session['media_index']).zfill(2) + " - " + str(session['title'])
+                else:
+                    full_title = str(session["full_title"])
+                
+                stream_message = "**" + str(count) + ":** " + selectIcon(str(session['state'])) + " " + str(session['friendly_name']) + ": *" + full_title + "*\n"
                 stream_message = stream_message + "__Player__: " + str(session['product']) + " (" + str(session['player']) + ")\n"
                 stream_message = stream_message + "__Quality__: " + str(session['quality_profile']) + " (" + (str(round(Decimal(float(session['bandwidth'])/1024),1)) if session['bandwidth'] is not "" else "O") + " Mbps)" + (" (Transcode)" if str(session['stream_container_decision']) == 'transcode' else "")
                 final_message = final_message + "\n" + stream_message + "\n"
@@ -90,7 +95,7 @@ async def update(message, tautulli_channel):
     global old_count
     data, count = refresh()
 
-    if tautulli_channel.last_message.id == message.id:
+    if tautulli_channel.last_message_id == message.id:
         await message.edit(content=data)
     else:
         await tautulli_channel.purge(check=is_me)
