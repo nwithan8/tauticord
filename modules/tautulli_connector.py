@@ -1,7 +1,7 @@
-import vars
+import modules.vars as vars
 import requests
 import json
-from logs import *
+from modules.logs import *
 from decimal import *
 
 session_ids = []

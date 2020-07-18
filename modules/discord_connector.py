@@ -1,7 +1,7 @@
 import discord
-import vars
+import modules.vars as vars
 import asyncio
-from logs import *
+from modules.logs import *
 
 
 async def start_bot(discord_connector):

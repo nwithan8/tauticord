@@ -7,9 +7,9 @@
 
 import config as settings
 import logging
-from logs import *
-import tautulli_connector as tautulli
-import discord_connector as discord
+from modules.logs import *
+import modules.tautulli_connector as tautulli
+import modules.discord_connector as discord
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
