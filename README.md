@@ -39,6 +39,13 @@ Copy ``config.py.sample`` to ``config.py`` and complete the variables in the fil
 Run the script with the following command:
 
 	python3 Tauticord.py
+	
+# Docker
+You can also run Tauticord as a Docker container.
+
+After copying and editing your ``config.py`` file, build the container with:
+	``docker build -t tauticord .``
+Run the container with ``docker run tauticord``
 
 # To come
 This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request.
