@@ -26,7 +26,7 @@ Administrator (the bot owner) can react to Tauticord's messages to terminate a s
 - Tautulli (formerly known as PlexPy)
 - A Discord server
 
-# Setup
+# Installation and setup
 HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
 
 Tuaticord requires the following permissions:
@@ -38,7 +38,9 @@ Tuaticord requires the following permissions:
 
 Run the following command to install the required Python packages:
 
-	pip3 install discord PlexAPI requests asyncio
+	pip3 install discord requests asyncio
+
+Copy ``config.py.sample`` to ``config.py`` and complete the variables in the file.
 
 # Usage
 Run the script with the following command:
