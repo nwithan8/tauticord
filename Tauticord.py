@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+# Copyright 2020 by Nathan Harris.
+# All rights reserved.
+# Tauticord is released as-is under the "GNU General Public License".
+# Please see the LICENSE file that should have been included as part of this package.
+
 import config as settings
 import logging
 from logs import *
