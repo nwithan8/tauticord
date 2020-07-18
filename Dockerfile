@@ -1,4 +1,11 @@
 FROM python:3
-ADD Tauticord.py /
-RUN pip3 install discord PlexAPI requests asyncio
+
+WORKDIR /app
+
+COPY requirements.txt ./
+
+RUN pip3 install -r requirements.txt
+
+COPY ./ /app
+
 CMD [ "python", "./Tauticord.py" ]
