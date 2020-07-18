@@ -30,9 +30,11 @@ def build_overview_message(stream_count=0, transcode_count=0, total_bandwidth=0,
     return overview_message
 
 
-def build_stream_message(count: int = 0, icon: str = "", username: str = "", title: str = "", product: str = "",
+def build_stream_message(session_data, count: int = 0, icon: str = "", username: str = "", title: str = "", product: str = "",
                          player: str = "", quality_profile: str = "", bandwidth: str = "0",
                          stream_container_decision: str = ""):
+    if session_data['media_type'] == 'episode':
+        title = f"{session_data.get('grandparent_title', '')} - S{session_data.get('parent_title', '').replace('Season ','').zfill(2)}E{session_data.get('media_index', '').zfill(2)} - {session_data['title']}"
     return f"{vars.session_title_message.format(count=count, icon=icon, username=username, title=title)}\n" \
            f"{vars.session_player_message.format(product=product, player=player)}\n" \
            f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(round(Decimal(float(bandwidth) / 1024), 1) if bandwidth != '' else '0'), transcoding=('(Transcode)' if stream_container_decision == 'transcode' else ''))}"
@@ -79,7 +81,7 @@ class TautulliConnector:
                 for session in sessions:
                     try:
                         count += 1
-                        stream_message = build_stream_message(count=count, icon=selectIcon(session['state']),
+                        stream_message = build_stream_message(session_data=session, count=count, icon=selectIcon(session['state']),
                                                               username=session['username'],
                                                               title=session['full_title'],
                                                               product=session['product'], player=session['player'],
