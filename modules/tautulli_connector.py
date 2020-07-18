@@ -97,6 +97,8 @@ class TautulliConnector:
                         pass
                 if int(stream_count) > 0:
                     final_message += f"\nTo terminate a stream, react with the stream number."
+                else:
+                    final_message = "No current activity."
                 info(f"Count: {count}\n"
                      f"Final message: {final_message}")
                 return final_message, count
