@@ -1,0 +1,10 @@
+# Tautulli settings
+TAUTULLI_URL = ''
+TAUTULLI_API_KEY = ''
+TERMINATE_MESSAGE = "Your stream has been terminated. Please contact the admin in the Discord."
+REFRESH_TIME = 15  # how often (seconds) the bot pulls new data. I'd recommend not making the bot ping Tautulli more often than every 5 seconds.
+
+# Discord Settings
+DISCORD_BOT_TOKEN = ''
+BOT_OWNER_ID = 0000  # Right-click on your profile picture -> "Copy ID"
+DISCORD_CHANNEL_ID = 0000  # Right-click on the channel -> "Copy ID"
