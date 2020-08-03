@@ -2,15 +2,18 @@ import discord
 import modules.vars as vars
 import asyncio
 from modules.logs import *
+import sys
 
 
-async def start_bot(discord_connector):
+async def start_bot(discord_connector, analytics):
     """
     Start the bot cycle
+    :param analytics: GoogleAnalytics object
     :param discord_connector: DiscordConnector object
     :return: None
     """
     info("Starting monitoring...")
+    analytics.event(event_category="Platform", event_action=sys.platform)
     await discord_connector.get_tautulli_channel()
     # await tautulli_channel.send(content="Hello world!") #<---- UNCOMMENT AND RUN ONCE
     message = await discord_connector.get_old_message_in_tautulli_channel()
@@ -30,19 +33,20 @@ async def add_emoji_number_reactions(message, count):
 
 
 class DiscordConnector:
-    def __init__(self, token, owner_id, refresh_time, tautulli_channel_id, tautulli_connector):
+    def __init__(self, token, owner_id, refresh_time, tautulli_channel_id, tautulli_connector, analytics):
         self.token = token
         self.owner_id = owner_id
         self.refresh_time = refresh_time
         self.tautulli_channel_id = tautulli_channel_id
         self.tautulli_channel = None
         self.tautulli = tautulli_connector
+        self.analytics = analytics
         self.client = discord.Client()
         self.on_ready = self.client.event(self.on_ready)
 
     async def on_ready(self):
         info('Connected to Discord.')
-        await start_bot(discord_connector=self)
+        await start_bot(discord_connector=self, analytics=self.analytics)
 
     def connect(self):
         info('Connecting to Discord...')

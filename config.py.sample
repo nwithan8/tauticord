@@ -8,3 +8,25 @@ REFRESH_TIME = 15  # how often (seconds) the bot pulls new data. I'd recommend n
 DISCORD_BOT_TOKEN = ''
 BOT_OWNER_ID = 0000  # Right-click on your profile picture -> "Copy ID"
 DISCORD_CHANNEL_ID = 0000  # Right-click on the channel -> "Copy ID"
+
+
+"""
+Tauticord uses Google Analytics to collect statistics such as common errors that will help with future development.
+This data is limited, anonymous, and never sold or redistributed.
+
+When and what data is collected?
+    - Whenever the bot comes online
+        - What operating system the bot is running on (Windows, Linux, MacOS, etc.)
+    - Whenever an error is logged
+        - What Python function the error occurred in.
+
+What data is NOT collected:
+- Any identifying information about the user
+- Any identifying information about the computer/machine (a random ID is generated on each analytics call, IP addresses are anonymized)
+- Settings for Discord or Tautulli, including passwords, API tokens, URLs, etc.
+- Any data from Tautulli
+- Anything typed in Discord.
+
+If you would like to opt-out of analytics, change True below to False
+"""
+ALLOW_ANALYTICS = True

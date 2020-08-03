@@ -41,10 +41,15 @@ def build_stream_message(session_data, count: int = 0, icon: str = "", username:
 
 
 class TautulliConnector:
-    def __init__(self, base_url, api_key, terminate_message):
+    def __init__(self, base_url, api_key, terminate_message, analytics):
         self.base_url = base_url
         self.api_key = api_key
         self.terminate_message = terminate_message
+        self.analytics = analytics
+
+    def _error_and_analytics(self, error_message, function_name):
+        error(error_message)
+        self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
     def request(self, cmd, params=None):
         """
@@ -92,7 +97,7 @@ class TautulliConnector:
                         final_message += f"\n{stream_message}\n"
                         session_ids.append(str(session['session_id']))
                     except ValueError as e:
-                        error(e)
+                        self._error_and_analytics(error_message=e, function_name='refresh_data (ValueError)')
                         session_ids.append("000")
                         pass
                 if int(stream_count) > 0:
@@ -103,7 +108,7 @@ class TautulliConnector:
                      f"Final message: {final_message}")
                 return final_message, count
             except KeyError as e:
-                error(e)
+                self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
         return "**Connection lost.**", 0
 
     def stop_stream(self, stream_number):
@@ -118,5 +123,5 @@ class TautulliConnector:
                          f"session_id={session_ids[stream_number]}&message={self.terminate_message}")
             return f"Stream {stream_number} was ended"
         except Exception as e:
-            error(e)
+            self._error_and_analytics(error_message=e, function_name='stop_stream')
         return "Something went wrong."
