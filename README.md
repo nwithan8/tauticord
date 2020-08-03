@@ -47,5 +47,22 @@ After copying and editing your ``config.py`` file, build the container with:
 	``docker build -t tauticord .``
 Run the container with ``docker run tauticord``
 
+# Analytics
+Tauticord uses Google Analytics to collect statistics such as common errors that will help with future development.
+**This data is limited, anonymous, and never sold or redistributed.**
+
+**When and what data is collected?**
+- Whenever the bot comes online
+	- What operating system the bot is running on (Windows, Linux, MacOS, etc.)
+- Whenever an error is logged
+ 	- What Python function the error occurred in.
+
+**What data is NOT collected:**
+- Any identifying information about the user
+- Any identifying information about the computer/machine (a random ID is generated on each analytics call, IP addresses are anonymized)
+- Settings for Discord or Tautulli, including passwords, API tokens, URLs, etc.
+- Any data from Tautulli
+- Anything typed in Discord.
+
 # To come
 This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request.
