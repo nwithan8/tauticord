@@ -51,10 +51,10 @@ class GoogleAnalytics:
         if self.do_not_track:
             return True
         if not user_id:
-            user_id = _generate_uuid(random=random_uuid_if_needed)
+            user_id = str(_generate_uuid(random=random_uuid_if_needed))
         final_params = {'v': self.version, 'tid': self.analytics_id, 't': 'event', 'cid': user_id}
         if anonymize_ip or self.anonymize_ip:
-            final_params['cid'] = 0
+            final_params['aip'] = 0
         final_params['ec'] = event_category
         final_params['ea'] = event_action
         if event_label:
@@ -69,10 +69,10 @@ class GoogleAnalytics:
         if self.do_not_track:
             return True
         if not user_id:
-            user_id = _generate_uuid(random=random_uuid_if_needed)
+            user_id = str(_generate_uuid(random=random_uuid_if_needed))
         final_params = {'v': self.version, 'tid': self.analytics_id, 't': 'pageview', 'cid': user_id}
         if anonymize_ip or self.anonymize_ip:
-            final_params['cid'] = 0
+            final_params['aip'] = 0
         if not visited_page.startswith('/'):
             visited_page = f"/{visited_page}"
         final_params['dl'] = visited_page
