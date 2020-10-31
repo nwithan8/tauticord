@@ -22,8 +22,8 @@ session_ids = []
 if __name__ == '__main__':
     info("Starting application...")
     t = tautulli.TautulliConnector(base_url=settings.TAUTULLI_URL, api_key=settings.TAUTULLI_API_KEY,
-                                   terminate_message=settings.TERMINATE_MESSAGE, analytics=analytics)
+                                   terminate_message=settings.TERMINATE_MESSAGE, analytics=analytics, use_embeds=settings.USE_EMBEDS, plex_pass=settings.PLEX_PASS)
     d = discord.DiscordConnector(token=settings.DISCORD_BOT_TOKEN, owner_id=settings.BOT_OWNER_ID,
                                  refresh_time=settings.REFRESH_TIME, tautulli_channel_id=settings.DISCORD_CHANNEL_ID,
-                                 tautulli_connector=t, analytics=analytics)
+                                 tautulli_connector=t, analytics=analytics, use_embeds=settings.USE_EMBEDS, plex_pass=settings.PLEX_PASS)
     d.connect()
