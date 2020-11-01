@@ -12,6 +12,7 @@ OVERVIEW:
 
 FOR EACH STREAM:
 - Stream state (playing, paused, stopped, loading)
+- Media type (tv show/movie/song/photo)
 - User
 - Media title
 - Product and player
