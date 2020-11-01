@@ -81,7 +81,7 @@ def build_stream_message(session_data, count: int = 0, icon: str = "", username:
         info("New media_type to pick icon for: {}: {}".format(session_data['title'], session_data['media_type']))
     return f"{vars.session_title_message.format(count=vars.emoji_numbers[count-1], icon=icon, username=username, media_type_icon=media_type_icon, title=title)}\n" \
            f"{vars.session_player_message.format(product=product, player=player)}\n" \
-           f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(humanbitrate(float(bandwidth)) if bandwidth != '' else '0'), transcoding=('(Transcode)' if stream_container_decision == 'transcode' else ''))}"
+           f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(humanbitrate(float(bandwidth)) if bandwidth != '' else '0'), transcoding=(' (Transcode)' if stream_container_decision == 'transcode' else ''))}"
            # f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(round(Decimal(float(bandwidth) / 1024), 1) if bandwidth != '' else '0'), transcoding=('(Transcode)' if stream_container_decision == 'transcode' else ''))}"
 
 
@@ -151,7 +151,7 @@ class TautulliConnector:
                             break
                     if int(stream_count) > 0:
                         if self.plex_pass:
-                            e.set_footer(text=f"\nTo terminate a stream, react with the stream number.")
+                            e.set_footer(text=f"To terminate a stream, react with the stream number.")
                     else:
                         e = discord.Embed(title="No current activity")
                     debug(f"Count: {count}")

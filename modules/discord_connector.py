@@ -96,12 +96,15 @@ class DiscordConnector:
                 break
         
         if use_old_message:
-            if self.use_embeds:
+            if self.use_embeds and (len(previous_message.embeds) == 0 or new_message.to_dict() != previous_message.embeds[0].to_dict()):
+                debug("Editing old message")
                 await previous_message.edit(embed=new_message, content=None) # reset content to None to remove startup message
-            else:
+            elif not self.use_embeds and previous_message.content != new_message:
+                debug("Editing old message")
                 await previous_message.edit(content=new_message, embed=None)
             new_message = previous_message
         else:
+            debug("Sending new message")
             try:
                 await previous_message.delete()
             except Exception as e:

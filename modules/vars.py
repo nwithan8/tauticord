@@ -23,4 +23,4 @@ lan_bandwidth_message = """(🏠 {bandwidth})"""
 
 session_title_message = """{count}—{icon} {media_type_icon} {username}: *{title}*"""
 session_player_message = """__Player__: {product} ({player})"""
-session_details_message = """__Quality__: {quality_profile} ({bandwidth}) {transcoding}"""
+session_details_message = """__Quality__: {quality_profile} ({bandwidth}){transcoding}"""
