@@ -21,6 +21,6 @@ transcodes_message = """{transcode_count} transcode{plural}"""
 bandwidth_message = """🌐 {bandwidth}"""
 lan_bandwidth_message = """(🏠 {bandwidth})"""
 
-session_title_message = """**({count})** {icon} {username}: *{title}* {media_type_icon}"""
+session_title_message = """{count}—{icon} {media_type_icon} {username}: *{title}*"""
 session_player_message = """__Player__: {product} ({player})"""
 session_details_message = """__Quality__: {quality_profile} ({bandwidth}) {transcoding}"""

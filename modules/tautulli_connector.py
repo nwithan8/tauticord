@@ -73,12 +73,13 @@ def build_stream_message(session_data, count: int = 0, icon: str = "", username:
     
     if session_data['media_type'] == 'episode':
         title = f"{session_data.get('grandparent_title', '')} - S{session_data.get('parent_title', '').replace('Season ','').zfill(2)}E{session_data.get('media_index', '').zfill(2)} - {session_data['title']}"
-        media_type_icon = '📺'
-    elif session_data['media_type'] == 'track':
-        media_type_icon = '🔈'
-    elif session_data['media_type'] == 'movie':
-        media_type_icon = '🎞'
-    return f"{vars.session_title_message.format(count=count, icon=icon, username=username, media_type_icon=media_type_icon, title=title)}\n" \
+    media_type_icons = {'episode': '📺', 'track': '🎧', 'movie': '🎞', 'clip': '🎬', 'photo': '🖼'}
+    if session_data['media_type'] in media_type_icons:
+        media_type_icon = media_type_icons[session_data['media_type']]
+    else:
+        media_type_icon = '🎁'
+        info("New media_type to pick icon for: {}: {}".format(session_data['title'], session_data['media_type']))
+    return f"{vars.session_title_message.format(count=vars.emoji_numbers[count-1], icon=icon, username=username, media_type_icon=media_type_icon, title=title)}\n" \
            f"{vars.session_player_message.format(product=product, player=player)}\n" \
            f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(humanbitrate(float(bandwidth)) if bandwidth != '' else '0'), transcoding=('(Transcode)' if stream_container_decision == 'transcode' else ''))}"
            # f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(round(Decimal(float(bandwidth) / 1024), 1) if bandwidth != '' else '0'), transcoding=('(Transcode)' if stream_container_decision == 'transcode' else ''))}"
@@ -105,7 +106,7 @@ class TautulliConnector:
         :return: request response
         """
         url = f"{self.base_url}/api/v2?apikey={self.api_key}{'&' + str(params) if params else ''}&cmd={cmd}"
-        info(f"GET {url}")
+        debug(f"GET {url}")
         return requests.get(url=url)
 
     def refresh_data(self):
@@ -117,7 +118,7 @@ class TautulliConnector:
         response = self.request("get_activity", None)
         if response:
             json_data = json.loads(response.text)
-            info(f"JSON returned by GET request: {json_data}")
+            debug(f"JSON returned by GET request: {json_data}")
             try:
                 stream_count = json_data['response']['data']['stream_count']
                 transcode_count = json_data['response']['data']['stream_count_transcode']
@@ -153,7 +154,7 @@ class TautulliConnector:
                             e.set_footer(text=f"\nTo terminate a stream, react with the stream number.")
                     else:
                         e = discord.Embed(title="No current activity")
-                    info(f"Count: {count}")
+                    debug(f"Count: {count}")
                     return e, count
                 else:
                     final_message = f"{overview_message}\n"
@@ -181,7 +182,7 @@ class TautulliConnector:
                             final_message += f"\nTo terminate a stream, react with the stream number."
                     else:
                         final_message = "No current activity."
-                    info(f"Count: {count}\n"
+                    debug(f"Count: {count}\n"
                          f"Final message: {final_message}")
                     return final_message, count
             except KeyError as e:

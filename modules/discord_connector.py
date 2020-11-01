@@ -105,7 +105,7 @@ class DiscordConnector:
             try:
                 await previous_message.delete()
             except Exception as e:
-                info("Failed to delete old (specified) message: {}".format(e))
+                debug("Failed to delete old (specified) message: {}".format(e))
                 await tautulli_channel.purge(check=is_me)
             if self.use_embeds:
                 new_message = await self.tautulli_channel.send(embed=new_message)
@@ -121,7 +121,7 @@ class DiscordConnector:
                     async for user in reaction.users():
                         if user.id == self.owner_id:
                             loc = vars.emoji_numbers.index(str(reaction.emoji))
-                            info("Stopping stream {}".format(loc))
+                            debug("Stopping stream {}".format(loc))
                             stopped_message = self.tautulli.stop_stream(stream_number=loc)
                             info(stopped_message)
                             end_notification = await self.tautulli_channel.send(content=stopped_message)
@@ -139,11 +139,10 @@ class DiscordConnector:
             try:
                 reaction, user = await self.client.wait_for('reaction_add', timeout=float(self.refresh_time), check=check)
             except asyncio.TimeoutError as e:
-                info(e)
                 pass
             else:
                 loc = vars.emoji_numbers.index(str(reaction.emoji))
-                info("Stopping stream {}".format(loc))
+                debug("Stopping stream {}".format(loc))
                 stopped_message = self.tautulli.stop_stream(stream_number=loc)
                 info(stopped_message)
                 end_notification = await self.tautulli_channel.send(content=stopped_message)
