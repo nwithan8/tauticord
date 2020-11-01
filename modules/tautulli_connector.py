@@ -9,8 +9,8 @@ session_ids = []
 
 
 def humanbitrate(B,d = 1):
-    # 'Return the given bytes as a human friendly kbps, mbps, gbps, or tbps string'
-    # Next line altered so that this takes in kilobytes instead of bytes
+    # 'Return the given kilobytes as a human friendly kbps, mbps, gbps, or tbps string'
+    # Next line altered so that this takes in kilobytes instead of bytes, as it was originally written
 	B = float(B) * 1024
 	KB = float(1024)
 	MB = float(KB ** 2) # 1,048,576
@@ -56,10 +56,6 @@ def build_overview_message(stream_count=0, transcode_count=0, total_bandwidth=0,
                                                          plural=('s' if int(stream_count) > 1 else ''))
     if transcode_count > 0:
         overview_message += f" ({vars.transcodes_message.format(transcode_count=transcode_count, plural=('s' if int(transcode_count) > 1 else ''))})"
-    # if total_bandwidth > 0:
-    #     overview_message += f" | {vars.bandwidth_message.format(bandwidth=round(Decimal(float(total_bandwidth) / 1024), 1))}"
-    #     if lan_bandwidth > 0:
-    #         overview_message += f" ({vars.lan_bandwidth_message.format(bandwidth=round(Decimal(float(lan_bandwidth) / 1024), 1))}"
     if total_bandwidth > 0:
         overview_message += f" | {vars.bandwidth_message.format(bandwidth=humanbitrate(float(total_bandwidth)))}"
         if lan_bandwidth > 0:
@@ -82,7 +78,6 @@ def build_stream_message(session_data, count: int = 0, icon: str = "", username:
     return f"{vars.session_title_message.format(count=vars.emoji_numbers[count-1], icon=icon, username=username, media_type_icon=media_type_icon, title=title)}\n" \
            f"{vars.session_player_message.format(product=product, player=player)}\n" \
            f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(humanbitrate(float(bandwidth)) if bandwidth != '' else '0'), transcoding=(' (Transcode)' if stream_container_decision == 'transcode' else ''))}"
-           # f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(round(Decimal(float(bandwidth) / 1024), 1) if bandwidth != '' else '0'), transcoding=('(Transcode)' if stream_container_decision == 'transcode' else ''))}"
 
 
 class TautulliConnector:

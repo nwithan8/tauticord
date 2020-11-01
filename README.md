@@ -25,7 +25,9 @@ Tauticord uses the Tautulli API to pull information from Tautulli and display th
     * Edit a single message with updated information rather than delete and replace (but replace if message isn't the bottom-most message in the channel)
     * Only edit/add message if message contents differ from previous message, so almost all communication with Discord is eliminated
     * Add/remove individual reactions only when neessary
-* Use of embeds and more emoji for more aesthetic output
+* Use of embeds (optional) and more symbols for more aesthetic output
+* Use convenient units for bitrate reporting
+* Include media type in stream info
 
 Administrator (the bot owner) can react to Tauticord's messages to terminate a specific stream.
 

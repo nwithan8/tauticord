@@ -15,7 +15,6 @@ async def start_bot(discord_connector, analytics):
     info("Starting monitoring...")
     analytics.event(event_category="Platform", event_action=sys.platform)
     await discord_connector.get_tautulli_channel()
-    # await tautulli_channel.send(content="Hello world!") #<---- UNCOMMENT AND RUN ONCE
     message = await discord_connector.get_old_message_in_tautulli_channel()
     while True:
         message = await discord_connector.edit_message(previous_message=message)
@@ -32,7 +31,7 @@ async def add_emoji_number_reactions(message, count):
     if count <= 0:
         return
         
-    # Only add reactions if necessary, 
+    # Only add reactions if necessary, and remove unnecessary reactions
     cache_msg = await message.channel.fetch_message(message.id)
     msg_emoji = [str(r.emoji) for r in cache_msg.reactions]
     
@@ -42,6 +41,7 @@ async def add_emoji_number_reactions(message, count):
         if i >= count or i != vars.emoji_numbers.index(e):
             emoji_to_remove.append(e)
     
+    # if all reactions need to be removed, do it all at once
     if len(emoji_to_remove) == len(msg_emoji):
         await message.clear_reactions()
         msg_emoji = []
@@ -118,6 +118,7 @@ class DiscordConnector:
         if self.plex_pass:
             await add_emoji_number_reactions(message=new_message, count=count)
             
+            # check to see if the user clicked a reaction *while* they were being added
             cache_msg = await new_message.channel.fetch_message(new_message.id)
             for reaction in cache_msg.reactions:
                 if reaction.count > 1:
@@ -132,10 +133,7 @@ class DiscordConnector:
                             await end_notification.delete()
                             await new_message.clear_reaction(str(reaction.emoji))
                             return new_message
-        
-            reaction = ""
-            user = ""
-
+                            
             def check(reaction, user):
                 return user.id == self.owner_id and reaction.message.id == new_message.id and str(reaction.emoji) in vars.emoji_numbers
 
