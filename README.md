@@ -4,20 +4,30 @@ A Discord bot that displays live data from Tautulli
 # Features
 Tauticord uses the Tautulli API to pull information from Tautulli and display them in a Discord channel, including:
 
-OVERVIEW:
-- Number of current streams
-- Number of transcoding streams
-- Total bandwidth
-- Total LAN bandwidth
+### OVERVIEW:
+* Number of current streams
+* Number of transcoding streams
+* Total bandwidth
+* Total LAN bandwidth
 
-FOR EACH STREAM:
-- Stream state (playing, paused, stopped, loading)
-- User
-- Media title
-- Product and player
-- Quality profile
-- Stream bandwidth
-- If stream is transcoding
+### FOR EACH STREAM:
+* Stream state (playing, paused, stopped, loading)
+* Media type (tv show/movie/song/photo)
+* User
+* Media title
+* Product and player
+* Quality profile
+* Stream bandwidth
+* If stream is transcoding
+
+### MODIIFIED FROM nwithan8's version in the following ways:
+* Faster and more efficient thanks to minimal communication with Discord
+    * Edit a single message with updated information rather than delete and replace (but replace if message isn't the bottom-most message in the channel)
+    * Only edit/add message if message contents differ from previous message, so almost all communication with Discord is eliminated
+    * Add/remove individual reactions only when neessary
+* Use of embeds (optional) and more symbols for more aesthetic output
+* Use convenient units for bitrate reporting
+* Include media type in stream info
 
 Administrator (the bot owner) can react to Tauticord's messages to terminate a specific stream.
 
