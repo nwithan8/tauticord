@@ -27,15 +27,13 @@ async def add_emoji_number_reactions(message, count):
     :param count: how many emojis to add
     :return: None
     """
+    
+    if count <= 0:
+        return
         
     # Only add reactions if necessary, and remove unnecessary reactions
     cache_msg = await message.channel.fetch_message(message.id)
     msg_emoji = [str(r.emoji) for r in cache_msg.reactions]
-    
-    if count <= 0:
-        if len(msg_emoji) > 0:
-            await message.clear_reactions()
-        return
     
     emoji_to_remove = []
     
