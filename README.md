@@ -19,8 +19,10 @@ Tauticord uses the Tautulli API to pull information from Tautulli and display th
 * Quality profile
 * Stream bandwidth
 * If stream is transcoding
+* Progress of stream
+* ETA of stream completion
 
-Administrator (the bot owner) can react to Tauticord's messages to terminate a specific stream.
+Administrator (the bot owner) can react to Tauticord's messages to terminate a specific stream (if they have Plex Pass).
 
 # Requirements
 - A Plex Media Server
@@ -30,9 +32,9 @@ Administrator (the bot owner) can react to Tauticord's messages to terminate a s
 # Installation and setup
 HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
 
-Run the pip command at the top of the PlexRecs.py file to install the required Python packages:
+Install requirements with:
 
-	pip3 install discord requests asyncio
+	pip3 install -r requirements.txt
 
 Copy ``config.py.sample`` to ``config.py`` and complete the variables in the file.
 
