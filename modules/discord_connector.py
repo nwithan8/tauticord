@@ -73,8 +73,14 @@ async def send_starter_message(tautulli_connector, discord_channel):
 
 
 class DiscordConnector:
-    def __init__(self, token, owner_id, refresh_time, tautulli_channel_id, tautulli_connector, analytics, use_embeds,
-                 plex_pass):
+    def __init__(self,
+                 token: str,
+                 owner_id: int,
+                 refresh_time: int,
+                 tautulli_channel_id: int,
+                 tautulli_connector,
+                 analytics,
+                 use_embeds: bool):
         self.token = token
         self.owner_id = owner_id
         self.refresh_time = refresh_time
@@ -83,7 +89,6 @@ class DiscordConnector:
         self.tautulli = tautulli_connector
         self.analytics = analytics
         self.use_embeds = use_embeds
-        self.plex_pass = plex_pass
         self.client = discord.Client()
         self.on_ready = self.client.event(self.on_ready)
 
@@ -143,7 +148,7 @@ class DiscordConnector:
             else:
                 new_message = await self.tautulli_channel.send(content=new_message)
 
-        if self.plex_pass:
+        if self.tautulli.plex_pass:
             await add_emoji_number_reactions(message=new_message, count=count)
 
             # check to see if the user clicked a reaction *while* they were being added

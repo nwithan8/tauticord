@@ -16,9 +16,7 @@ analytics = GA.GoogleAnalytics(analytics_id='UA-174268200-2',
                                anonymous_ip=True,
                                do_not_track=not settings.ALLOW_ANALYTICS)
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-
-session_ids = []
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 if __name__ == '__main__':
     info("Starting application...")
@@ -34,6 +32,5 @@ if __name__ == '__main__':
                                  tautulli_channel_id=settings.DISCORD_CHANNEL_ID,
                                  tautulli_connector=t,
                                  analytics=analytics,
-                                 use_embeds=settings.USE_EMBEDS,
-                                 plex_pass=settings.PLEX_PASS)
+                                 use_embeds=settings.USE_EMBEDS)
     d.connect()

@@ -3,50 +3,158 @@ import requests
 import json
 import discord
 from modules.logs import *
+from modules import utils
 
 session_ids = []
 
 
-def human_bitrate(B, d=1):
-    # 'Return the given kilobytes as a human friendly Kbps, Mbps, Gbps, or Tbps string'
-    # Next line altered so that this takes in kilobytes instead of bytes, as it was originally written
-    B = float(B) * 1024
-    KB = float(1024)
-    MB = float(KB ** 2)  # 1,048,576
-    GB = float(KB ** 3)  # 1,073,741,824
-    TB = float(KB ** 4)  # 1,099,511,627,776
+class Activity:
+    def __init__(self, activity_data):
+        self._data = activity_data['response']['data']
 
-    if d <= 0:
-        if B < KB:
-            return f'{B} bps'
-        elif KB <= B < MB:
-            return f'{int(B / KB):d} kbps'
-        elif MB <= B < GB:
-            return f'{int(B / MB):d} Mbps'
-        elif GB <= B < TB:
-            return f'{int(B / GB):d} Gbps'
-        elif TB <= B:
-            return f'{int(B / TB):d} Tbps'
-    else:
-        if B < KB:
-            return f'{B} bps'
-        elif KB <= B < MB:
-            return f'{int(B / KB):.{d}} kbps'
-        elif MB <= B < GB:
-            return f'{int(B / MB):.{d}f} Mbps'
-        elif GB <= B < TB:
-            return f'{int(B / GB):.{d}f} Gbps'
-        elif TB <= B:
-            return f'{int(B / TB):.{d}f} Tbps'
+    @property
+    def stream_count(self):
+        return int(self._data.get('stream_count', 0))
+
+    @property
+    def transcode_count(self):
+        return int(self._data.get('stream_count_transcode', 0))
+
+    @property
+    def total_bandwidth(self):
+        json_bandwidth = int(self._data.get('total_bandwidth', 0))
+        if json_bandwidth:
+            return utils.human_bitrate(float(json_bandwidth))
+        return None
+
+    @property
+    def lan_bandwidth(self):
+        json_bandwidth = int(self._data.get('total_bandwidth', 0))
+        if json_bandwidth:
+            return utils.human_bitrate(float(json_bandwidth))
+        return None
+
+    @property
+    def message(self):
+        overview_message = ""
+        if self.stream_count > 0:
+            overview_message += vars.sessions_message.format(stream_count=self.stream_count,
+                                                             word=utils.make_plural(word='stream',
+                                                                                    count=self.stream_count))
+        if self.transcode_count > 0:
+            overview_message += f" ({vars.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
+        if self.total_bandwidth:
+            overview_message += f" | {vars.bandwidth_message.format(bandwidth=self.total_bandwidth)}"
+            if self.lan_bandwidth:
+                overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=self.lan_bandwidth)}"
+        return overview_message
+
+    @property
+    def sessions(self):
+        return [Session(session_data=session_data) for session_data in self._data.get('sessions', [])]
 
 
-def select_icon(state):
-    """
-    Get icon for a stream state
-    :param state: stream state from Tautulli
-    :return: emoji icon
-    """
-    return vars.switcher.get(state, "")
+class Session:
+    def __init__(self, session_data):
+        self._data = session_data
+
+    @property
+    def duration_milliseconds(self):
+        return int(self._data.get('duration', 0))
+
+    @property
+    def location_milliseconds(self):
+        return int(self._data.get('view_offset', 0))
+
+    @property
+    def progress_percentage(self):
+        if not self.duration_milliseconds:
+            return 0
+        return int(self.location_milliseconds / self.duration_milliseconds)
+
+    @property
+    def progress_marker(self):
+        if not self.location_milliseconds or not self.duration_milliseconds:
+            return ""
+        current_progress_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.location_milliseconds)
+        total_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.duration_milliseconds)
+        return f"{current_progress_min_sec}/{total_min_sec}"
+
+    @property
+    def eta(self):
+        if not self.duration_milliseconds or not self.location_milliseconds:
+            return ""
+        milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
+        eta_datetime = utils.now_plus_milliseconds(milliseconds=milliseconds_remaining)
+        eta_string = utils.datetime_to_string(datetime_object=eta_datetime, template="%H:%M")
+        return eta_string
+
+    @property
+    def title(self):
+        if self._data.get('live'):
+            return f"{self._data.get('grandparent_title', '')} - {self._data['title']}"
+        elif self._data['media_type'] == 'episode':
+            return f"{self._data.get('grandparent_title', '')} - S{self._data.get('parent_title', '').replace('Season ', '').zfill(2)}E{self._data.get('media_index', '').zfill(2)} - {self._data['title']}"
+        else:
+            return self._data.get('full_title')
+
+    @property
+    def status_icon(self):
+        """
+        Get icon for a stream state
+        :return: emoji icon
+        """
+        return vars.switcher.get(self._data['state'], "")
+
+    @property
+    def type_icon(self):
+        if self._data['media_type'] in vars.media_type_icons:
+            return vars.media_type_icons[self._data['media_type']]
+        # thanks twilsonco
+        elif self._data.get('live'):
+            return vars.media_type_icons['live']
+        else:
+            info("New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
+            return '🎁'
+
+    @property
+    def id(self):
+        return self._data['session_id']
+
+    @property
+    def username(self):
+        return self._data['username']
+
+    @property
+    def product(self):
+        return self._data['product']
+
+    @property
+    def player(self):
+        return self._data['player']
+
+    @property
+    def quality_profile(self):
+        return self._data['quality_profile']
+
+    @property
+    def bandwidth(self):
+        json_bandwidth = self._data.get('bandwidth', '')
+        return utils.human_bitrate(float(json_bandwidth)) if json_bandwidth != '' else '0'
+
+    @property
+    def transcoding_stub(self):
+        return ' (Transcode)' if self.stream_container_decision == 'transcode' else ''
+
+    @property
+    def stream_container_decision(self):
+        return self._data['stream_container_decision']
+
+    def build_message(self, count: int):
+        return f"{vars.session_title_message.format(count=vars.emoji_numbers[count - 1], icon=self.status_icon, username=self.username, media_type_icon=self.type_icon, title=self.title)}\n" \
+               f"{vars.session_player_message.format(product=self.product, player=self.player)}\n" \
+               f"{vars.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
+               f"{vars.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
 
 
 def build_overview_message(stream_count: int = 0,
@@ -60,42 +168,20 @@ def build_overview_message(stream_count: int = 0,
     if transcode_count > 0:
         overview_message += f" ({vars.transcodes_message.format(transcode_count=transcode_count, plural=('s' if int(transcode_count) > 1 else ''))})"
     if total_bandwidth > 0:
-        overview_message += f" | {vars.bandwidth_message.format(bandwidth=human_bitrate(float(total_bandwidth)))}"
+        overview_message += f" | {vars.bandwidth_message.format(bandwidth=utils.human_bitrate(float(total_bandwidth)))}"
         if lan_bandwidth > 0:
-            overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=human_bitrate(float(lan_bandwidth)))}"
+            overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=utils.human_bitrate(float(lan_bandwidth)))}"
     return overview_message
 
 
-def build_stream_message(session_data,
-                         count: int = 0,
-                         icon: str = "",
-                         username: str = "",
-                         title: str = "",
-                         product: str = "",
-                         player: str = "",
-                         quality_profile: str = "",
-                         bandwidth: str = "0",
-                         stream_container_decision: str = ""):
-    if session_data.get('live'):
-        title = f"{session_data.get('grandparent_title', '')} - {session_data['title']}"
-    elif session_data['media_type'] == 'episode':
-        title = f"{session_data.get('grandparent_title', '')} - S{session_data.get('parent_title', '').replace('Season ', '').zfill(2)}E{session_data.get('media_index', '').zfill(2)} - {session_data['title']}"
-    media_type_icons = {'episode': '📺', 'track': '🎧', 'movie': '🎞', 'clip': '🎬', 'photo': '🖼', 'live': '📡'}
-    if session_data['media_type'] in media_type_icons:
-        media_type_icon = media_type_icons[session_data['media_type']]
-    # thanks twilsonco
-    elif session_data.get('live'):
-        media_type_icon = media_type_icons['live']
-    else:
-        media_type_icon = '🎁'
-        info("New media_type to pick icon for: {}: {}".format(session_data['title'], session_data['media_type']))
-    return f"{vars.session_title_message.format(count=vars.emoji_numbers[count - 1], icon=icon, username=username, media_type_icon=media_type_icon, title=title)}\n" \
-           f"{vars.session_player_message.format(product=product, player=player)}\n" \
-           f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(human_bitrate(float(bandwidth)) if bandwidth != '' else '0'), transcoding=(' (Transcode)' if stream_container_decision == 'transcode' else ''))}"
-
-
 class TautulliConnector:
-    def __init__(self, base_url, api_key, terminate_message, analytics, use_embeds, plex_pass):
+    def __init__(self,
+                 base_url: str,
+                 api_key: str,
+                 terminate_message: str,
+                 analytics,
+                 use_embeds: bool,
+                 plex_pass: bool):
         self.base_url = base_url
         self.api_key = api_key
         self.terminate_message = terminate_message
@@ -129,15 +215,9 @@ class TautulliConnector:
             json_data = json.loads(response.text)
             debug(f"JSON returned by GET request: {json_data}")
             try:
-                stream_count = json_data['response']['data']['stream_count']
-                transcode_count = json_data['response']['data']['stream_count_transcode']
-                total_bandwidth = json_data['response']['data']['total_bandwidth']
-                lan_bandwidth = json_data['response']['data']['lan_bandwidth']
-                overview_message = build_overview_message(stream_count=stream_count,
-                                                          transcode_count=transcode_count,
-                                                          total_bandwidth=total_bandwidth,
-                                                          lan_bandwidth=lan_bandwidth)
-                sessions = json_data['response']['data']['sessions']
+                activity = Activity(activity_data=json_data)
+                overview_message = activity.message
+                sessions = activity.sessions
                 count = 0
                 session_ids = []
                 if self.use_embeds:
@@ -145,28 +225,18 @@ class TautulliConnector:
                     for session in sessions:
                         try:
                             count += 1
-                            stream_message = build_stream_message(session_data=session,
-                                                                  count=count,
-                                                                  icon=select_icon(session['state']),
-                                                                  username=session['username'],
-                                                                  title=session['full_title'],
-                                                                  product=session['product'],
-                                                                  player=session['player'],
-                                                                  quality_profile=session['quality_profile'],
-                                                                  bandwidth=session['bandwidth'],
-                                                                  stream_container_decision=session[
-                                                                      'stream_container_decision']).split('\n')
+                            stream_message = session.build_message(count=count).split('\n')
                             e.add_field(name=stream_message[0],
                                         value='\n'.join(stream_message[1:]),
                                         inline=False)
-                            session_ids.append(str(session['session_id']))
+                            session_ids.append(str(session.id))
                         except ValueError as e:
                             self._error_and_analytics(error_message=e, function_name='refresh_data (ValueError)')
                             session_ids.append("000")
                             pass
                         if count >= 9:
                             break
-                    if int(stream_count) > 0:
+                    if int(activity.stream_count) > 0:
                         if self.plex_pass:
                             e.set_footer(text=f"To terminate a stream, react with the stream number.")
                     else:
@@ -178,26 +248,16 @@ class TautulliConnector:
                     for session in sessions:
                         try:
                             count += 1
-                            stream_message = build_stream_message(session_data=session,
-                                                                  count=count,
-                                                                  icon=select_icon(session['state']),
-                                                                  username=session['username'],
-                                                                  title=session['full_title'],
-                                                                  product=session['product'],
-                                                                  player=session['player'],
-                                                                  quality_profile=session['quality_profile'],
-                                                                  bandwidth=session['bandwidth'],
-                                                                  stream_container_decision=session[
-                                                                      'stream_container_decision'])
+                            stream_message = session.build_message(count=count)
                             final_message += f"\n{stream_message}\n"
-                            session_ids.append(str(session['session_id']))
+                            session_ids.append(str(session.id))
                         except ValueError as e:
                             self._error_and_analytics(error_message=e, function_name='refresh_data (ValueError)')
                             session_ids.append("000")
                             pass
                         if count >= 9:
                             break
-                    if int(stream_count) > 0:
+                    if int(activity.stream_count) > 0:
                         if self.plex_pass:
                             final_message += f"\nTo terminate a stream, react with the stream number."
                     else:
