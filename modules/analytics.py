@@ -41,8 +41,11 @@ class GoogleAnalytics:
         if self.do_not_track:
             return True
         url = _make_url(params_dict=final_params)
-        if requests.post(url=url):
-            return True
+        try:
+            if requests.post(url=url):
+                return True
+        except:
+            pass
         return False
 
     def event(self, event_category: str, event_action: str,

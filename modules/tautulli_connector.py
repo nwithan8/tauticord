@@ -3,44 +3,44 @@ import requests
 import json
 import discord
 from modules.logs import *
-from decimal import *
 
 session_ids = []
 
 
-def humanbitrate(B,d = 1):
-    # 'Return the given kilobytes as a human friendly kbps, mbps, gbps, or tbps string'
+def human_bitrate(B, d=1):
+    # 'Return the given kilobytes as a human friendly Kbps, Mbps, Gbps, or Tbps string'
     # Next line altered so that this takes in kilobytes instead of bytes, as it was originally written
-	B = float(B) * 1024
-	KB = float(1024)
-	MB = float(KB ** 2) # 1,048,576
-	GB = float(KB ** 3) # 1,073,741,824
-	TB = float(KB ** 4) # 1,099,511,627,776
-	
-	if d <= 0:
-		if B < KB:
-			return '{0} bps'.format(int(B))
-		elif KB <= B < MB:
-			return '{0:d} kbps'.format(int(B/KB))
-		elif MB <= B < GB:
-			return '{0:d} Mbps'.format(int(B/MB))
-		elif GB <= B < TB:
-			return '{0:d} Gbps'.format(int(B/GB))
-		elif TB <= B:
-			return '{0:d} Tbps'.format(int(B/TB))
-	else:
-		if B < KB:
-			return '{0} bps'.format(B)
-		elif KB <= B < MB:
-			return '{0:d} kbps'.format(int(B/KB), nd = d)
-		elif MB <= B < GB:
-			return '{0:.{nd}f} Mbps'.format(B/MB, nd = d)
-		elif GB <= B < TB:
-			return '{0:.{nd}f} Gbps'.format(B/GB, nd = d)
-		elif TB <= B:
-			return '{0:.{nd}f} Tbps'.format(B/TB, nd = d)
+    B = float(B) * 1024
+    KB = float(1024)
+    MB = float(KB ** 2)  # 1,048,576
+    GB = float(KB ** 3)  # 1,073,741,824
+    TB = float(KB ** 4)  # 1,099,511,627,776
 
-def selectIcon(state):
+    if d <= 0:
+        if B < KB:
+            return f'{B} bps'
+        elif KB <= B < MB:
+            return f'{int(B / KB):d} kbps'
+        elif MB <= B < GB:
+            return f'{int(B / MB):d} Mbps'
+        elif GB <= B < TB:
+            return f'{int(B / GB):d} Gbps'
+        elif TB <= B:
+            return f'{int(B / TB):d} Tbps'
+    else:
+        if B < KB:
+            return f'{B} bps'
+        elif KB <= B < MB:
+            return f'{int(B / KB):.{d}} kbps'
+        elif MB <= B < GB:
+            return f'{int(B / MB):.{d}f} Mbps'
+        elif GB <= B < TB:
+            return f'{int(B / GB):.{d}f} Gbps'
+        elif TB <= B:
+            return f'{int(B / TB):.{d}f} Tbps'
+
+
+def select_icon(state):
     """
     Get icon for a stream state
     :param state: stream state from Tautulli
@@ -49,7 +49,10 @@ def selectIcon(state):
     return vars.switcher.get(state, "")
 
 
-def build_overview_message(stream_count=0, transcode_count=0, total_bandwidth=0, lan_bandwidth=0):
+def build_overview_message(stream_count: int = 0,
+                           transcode_count: int = 0,
+                           total_bandwidth: int = 0,
+                           lan_bandwidth: int = 0):
     overview_message = ""
     if int(stream_count) > 0:
         overview_message += vars.sessions_message.format(stream_count=stream_count,
@@ -57,27 +60,38 @@ def build_overview_message(stream_count=0, transcode_count=0, total_bandwidth=0,
     if transcode_count > 0:
         overview_message += f" ({vars.transcodes_message.format(transcode_count=transcode_count, plural=('s' if int(transcode_count) > 1 else ''))})"
     if total_bandwidth > 0:
-        overview_message += f" | {vars.bandwidth_message.format(bandwidth=humanbitrate(float(total_bandwidth)))}"
+        overview_message += f" | {vars.bandwidth_message.format(bandwidth=human_bitrate(float(total_bandwidth)))}"
         if lan_bandwidth > 0:
-            overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=humanbitrate(float(lan_bandwidth)))}"
+            overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=human_bitrate(float(lan_bandwidth)))}"
     return overview_message
 
 
-def build_stream_message(session_data, count: int = 0, icon: str = "", username: str = "", title: str = "", product: str = "",
-                         player: str = "", quality_profile: str = "", bandwidth: str = "0",
+def build_stream_message(session_data,
+                         count: int = 0,
+                         icon: str = "",
+                         username: str = "",
+                         title: str = "",
+                         product: str = "",
+                         player: str = "",
+                         quality_profile: str = "",
+                         bandwidth: str = "0",
                          stream_container_decision: str = ""):
-    
-    if session_data['media_type'] == 'episode':
-        title = f"{session_data.get('grandparent_title', '')} - S{session_data.get('parent_title', '').replace('Season ','').zfill(2)}E{session_data.get('media_index', '').zfill(2)} - {session_data['title']}"
-    media_type_icons = {'episode': '📺', 'track': '🎧', 'movie': '🎞', 'clip': '🎬', 'photo': '🖼'}
+    if session_data.get('live'):
+        title = f"{session_data.get('grandparent_title', '')} - {session_data['title']}"
+    elif session_data['media_type'] == 'episode':
+        title = f"{session_data.get('grandparent_title', '')} - S{session_data.get('parent_title', '').replace('Season ', '').zfill(2)}E{session_data.get('media_index', '').zfill(2)} - {session_data['title']}"
+    media_type_icons = {'episode': '📺', 'track': '🎧', 'movie': '🎞', 'clip': '🎬', 'photo': '🖼', 'live': '📡'}
     if session_data['media_type'] in media_type_icons:
         media_type_icon = media_type_icons[session_data['media_type']]
+    # thanks twilsonco
+    elif session_data.get('live'):
+        media_type_icon = media_type_icons['live']
     else:
         media_type_icon = '🎁'
         info("New media_type to pick icon for: {}: {}".format(session_data['title'], session_data['media_type']))
-    return f"{vars.session_title_message.format(count=vars.emoji_numbers[count-1], icon=icon, username=username, media_type_icon=media_type_icon, title=title)}\n" \
+    return f"{vars.session_title_message.format(count=vars.emoji_numbers[count - 1], icon=icon, username=username, media_type_icon=media_type_icon, title=title)}\n" \
            f"{vars.session_player_message.format(product=product, player=player)}\n" \
-           f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(humanbitrate(float(bandwidth)) if bandwidth != '' else '0'), transcoding=(' (Transcode)' if stream_container_decision == 'transcode' else ''))}"
+           f"{vars.session_details_message.format(quality_profile=quality_profile, bandwidth=(human_bitrate(float(bandwidth)) if bandwidth != '' else '0'), transcoding=(' (Transcode)' if stream_container_decision == 'transcode' else ''))}"
 
 
 class TautulliConnector:
@@ -119,7 +133,10 @@ class TautulliConnector:
                 transcode_count = json_data['response']['data']['stream_count_transcode']
                 total_bandwidth = json_data['response']['data']['total_bandwidth']
                 lan_bandwidth = json_data['response']['data']['lan_bandwidth']
-                overview_message = build_overview_message(stream_count=stream_count, transcode_count=transcode_count, total_bandwidth=total_bandwidth, lan_bandwidth=lan_bandwidth)
+                overview_message = build_overview_message(stream_count=stream_count,
+                                                          transcode_count=transcode_count,
+                                                          total_bandwidth=total_bandwidth,
+                                                          lan_bandwidth=lan_bandwidth)
                 sessions = json_data['response']['data']['sessions']
                 count = 0
                 session_ids = []
@@ -128,15 +145,20 @@ class TautulliConnector:
                     for session in sessions:
                         try:
                             count += 1
-                            stream_message = build_stream_message(session_data=session, count=count, icon=selectIcon(session['state']),
+                            stream_message = build_stream_message(session_data=session,
+                                                                  count=count,
+                                                                  icon=select_icon(session['state']),
                                                                   username=session['username'],
                                                                   title=session['full_title'],
-                                                                  product=session['product'], player=session['player'],
+                                                                  product=session['product'],
+                                                                  player=session['player'],
                                                                   quality_profile=session['quality_profile'],
                                                                   bandwidth=session['bandwidth'],
                                                                   stream_container_decision=session[
                                                                       'stream_container_decision']).split('\n')
-                            e.add_field(name=stream_message[0], value='\n'.join(stream_message[1:]), inline=False)
+                            e.add_field(name=stream_message[0],
+                                        value='\n'.join(stream_message[1:]),
+                                        inline=False)
                             session_ids.append(str(session['session_id']))
                         except ValueError as e:
                             self._error_and_analytics(error_message=e, function_name='refresh_data (ValueError)')
@@ -156,10 +178,13 @@ class TautulliConnector:
                     for session in sessions:
                         try:
                             count += 1
-                            stream_message = build_stream_message(session_data=session, count=count, icon=selectIcon(session['state']),
+                            stream_message = build_stream_message(session_data=session,
+                                                                  count=count,
+                                                                  icon=select_icon(session['state']),
                                                                   username=session['username'],
                                                                   title=session['full_title'],
-                                                                  product=session['product'], player=session['player'],
+                                                                  product=session['product'],
+                                                                  player=session['player'],
                                                                   quality_profile=session['quality_profile'],
                                                                   bandwidth=session['bandwidth'],
                                                                   stream_container_decision=session[
@@ -178,7 +203,7 @@ class TautulliConnector:
                     else:
                         final_message = "No current activity."
                     debug(f"Count: {count}\n"
-                         f"Final message: {final_message}")
+                          f"Final message: {final_message}")
                     return final_message, count
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
