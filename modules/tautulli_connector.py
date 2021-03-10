@@ -1,7 +1,4 @@
-import json
-
 import discord
-import requests
 from tautulli.api import RawAPI
 
 from modules.logs import *
