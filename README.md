@@ -28,6 +28,7 @@ Administrator (the bot owner) can react to Tauticord's messages to terminate a s
 - A Plex Media Server
 - Tautulli (formerly known as PlexPy)
 - A Discord server
+- Python 3.7+
 
 # Installation and setup
 HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
