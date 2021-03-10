@@ -1,16 +1,19 @@
-import modules.vars as vars
-import requests
 import json
+
 import discord
+import requests
+from tautulli.api import RawAPI
+
 from modules.logs import *
 from modules import utils
+import modules.vars as vars
 
 session_ids = []
 
 
 class Activity:
     def __init__(self, activity_data):
-        self._data = activity_data['response']['data']
+        self._data = activity_data
 
     @property
     def stream_count(self):
@@ -184,6 +187,7 @@ class TautulliConnector:
                  plex_pass: bool):
         self.base_url = base_url
         self.api_key = api_key
+        self.api = RawAPI(base_url=base_url, api_key=api_key)
         self.terminate_message = terminate_message
         self.analytics = analytics
         self.use_embeds = use_embeds
@@ -193,29 +197,17 @@ class TautulliConnector:
         error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
-    def request(self, cmd, params=None):
-        """
-        Make an GET request to Tautulli's API
-        :param cmd: Tautulli command
-        :param params: Tautulli command parameters
-        :return: request response
-        """
-        url = f"{self.base_url}/api/v2?apikey={self.api_key}{'&' + str(params) if params else ''}&cmd={cmd}"
-        debug(f"GET {url}")
-        return requests.get(url=url)
-
     def refresh_data(self):
         """
         Parse activity JSON from Tautulli, prepare summary message for Discord
         :return: formatted summary message & number of active streams
         """
         global session_ids
-        response = self.request("get_activity", None)
-        if response:
-            json_data = json.loads(response.text)
-            debug(f"JSON returned by GET request: {json_data}")
+        data = self.api.activity
+        if data:
+            debug(f"JSON returned by GET request: {data}")
             try:
-                activity = Activity(activity_data=json_data)
+                activity = Activity(activity_data=data)
                 overview_message = activity.message
                 sessions = activity.sessions
                 count = 0
@@ -230,8 +222,8 @@ class TautulliConnector:
                                         value='\n'.join(stream_message[1:]),
                                         inline=False)
                             session_ids.append(str(session.id))
-                        except ValueError as e:
-                            self._error_and_analytics(error_message=e, function_name='refresh_data (ValueError)')
+                        except ValueError as error:
+                            self._error_and_analytics(error_message=error, function_name='refresh_data (ValueError)')
                             session_ids.append("000")
                             pass
                         if count >= 9:
@@ -277,9 +269,10 @@ class TautulliConnector:
         """
         info(f"User attempting to stop session {stream_number}, id {session_ids[stream_number]}")
         try:
-            self.request('terminate_session',
-                         f"session_id={session_ids[stream_number]}&message={self.terminate_message}")
-            return f"Stream {stream_number} was ended"
+            if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):
+                return f"Stream {stream_number} was stopped."
+            else:
+                return f"Stream {stream_number} could not be stopped."
         except Exception as e:
             self._error_and_analytics(error_message=e, function_name='stop_stream')
         return "Something went wrong."
