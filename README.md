@@ -1,3 +1,5 @@
+[![Donate with Bitcoin](https://en.cryptobadges.io/badge/micro/3H94aowuz4hgbvNjceZ2xeq14rjmGz4cD9)](https://en.cryptobadges.io/donate/3H94aowuz4hgbvNjceZ2xeq14rjmGz4cD9)
+
 # Tauticord
 A Discord bot that displays live data from Tautulli
 
