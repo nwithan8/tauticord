@@ -26,6 +26,8 @@ Tauticord uses the Tautulli API to pull information from Tautulli and display th
 
 Administrator (the bot owner) can react to Tauticord's messages to terminate a specific stream (if they have Plex Pass).
 
+Users can also indicate what libraries they would like monitored. Tauticord will create/update a voice channel for each library name with item counts every hour.
+
 # Requirements
 - A Plex Media Server
 - Tautulli (formerly known as PlexPy)
@@ -39,7 +41,7 @@ Install requirements with:
 
 	pip3 install -r requirements.txt
 
-Copy ``config.py.sample`` to ``config.py`` and complete the variables in the file.
+Copy ``config.yaml.example`` to ``config.yaml`` and complete the variables in the file.
 
 # Usage
 Run the script with the following command:
