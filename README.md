@@ -36,6 +36,13 @@ Users can also indicate what libraries they would like monitored. Tauticord will
 
 # Installation and setup
 HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
+Permissions required:
+- Manage Channels
+- View Channels
+- Send Messages
+- Manage Messages
+- Read Message History
+- Add Reactions
 
 Install requirements with:
 
