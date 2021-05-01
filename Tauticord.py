@@ -25,14 +25,16 @@ if __name__ == '__main__':
                                    analytics=analytics,
                                    use_embeds=config.discord_customization_details.get('UseEmbeds', True),
                                    plex_pass=config.tautulli_customization_details.get('PlexPass', False),
+                                   libraries_to_monitor=config.libraries_to_monitor,
                                    time_settings=config.time_settings
                                    )
     d = discord.DiscordConnector(token=config.discord_connection_details['BotToken'],
+                                 guild_id=config.discord_connection_details['ServerID'],
                                  owner_id=config.discord_connection_details['OwnerID'],
                                  refresh_time=config.tautulli_customization_details.get('RefreshSeconds', 15),
-                                 tautulli_channel_id=config.discord_connection_details['ChannelID'],
+                                 tautulli_channel_name=config.discord_connection_details['ChannelName'],
                                  tautulli_connector=t,
                                  analytics=analytics,
-                                 use_embeds=config.discord_customization_details.get('UseEmbeds', True)
+                                 use_embeds=config.discord_customization_details.get('UseEmbeds', True),
                                  )
     d.connect()

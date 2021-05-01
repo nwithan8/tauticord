@@ -29,6 +29,10 @@ class Config:
                 'mil_time': mil_time}
 
     @property
+    def libraries_to_monitor(self):
+        return self._tautulli_config['LibraryNames'].get()
+
+    @property
     def _discord_config(self):
         return self.config['Discord']
 

@@ -1,4 +1,8 @@
+from typing import List
+
 import discord
+from discord.ext import tasks
+
 import modules.vars as vars
 import asyncio
 from modules.logs import *
@@ -75,16 +79,18 @@ async def send_starter_message(tautulli_connector, discord_channel):
 class DiscordConnector:
     def __init__(self,
                  token: str,
+                 guild_id: int,
                  owner_id: int,
                  refresh_time: int,
-                 tautulli_channel_id: int,
+                 tautulli_channel_name: str,
                  tautulli_connector,
                  analytics,
                  use_embeds: bool):
         self.token = token
+        self.guild_id = guild_id
         self.owner_id = owner_id
         self.refresh_time = refresh_time
-        self.tautulli_channel_id = tautulli_channel_id
+        self.tautulli_channel_name = tautulli_channel_name
         self.tautulli_channel = None
         self.tautulli = tautulli_connector
         self.analytics = analytics
@@ -94,6 +100,7 @@ class DiscordConnector:
 
     async def on_ready(self):
         info('Connected to Discord.')
+        self.update_libraries.start()
         await start_bot(discord_connector=self, analytics=self.analytics)
 
     def connect(self):
@@ -111,7 +118,7 @@ class DiscordConnector:
         """
         new_message, count = self.tautulli.refresh_data()
 
-        # For performance and aesthetics, edit the old message if 1) the old message is the newest message in the channel, or 2) if the only messages that are newer were written by this bot (which would be stream stop messages that have aleady been deleted)
+        # For performance and aesthetics, edit the old message if 1) the old message is the newest message in the channel, or 2) if the only messages that are newer were written by this bot (which would be stream stop messages that have already been deleted)
         use_old_message = False
         async for msg in self.tautulli_channel.history(limit=100):
             if msg.author != self.client.user:
@@ -124,7 +131,7 @@ class DiscordConnector:
         if use_old_message:
             if self.use_embeds:
                 if len(previous_message.embeds) == 0 or new_message.to_dict() != previous_message.embeds[0].to_dict():
-                    debug("Editing old message..")
+                    debug("Editing old message...")
                     await previous_message.edit(embed=new_message,
                                                 content=None)  # reset content to None to remove startup message
                 else:
@@ -190,11 +197,49 @@ class DiscordConnector:
         return new_message
 
     async def get_tautulli_channel(self):
-        info(f"Getting channel ID {self.tautulli_channel_id}")
-        self.tautulli_channel = self.client.get_channel(self.tautulli_channel_id)
+        info(f"Getting {self.tautulli_channel_name} channel")
+        self.tautulli_channel = await self.get_discord_channel_by_name(channel_name=self.tautulli_channel_name)
         if not self.tautulli_channel:
-            raise Exception(f"Could not load channel ID {self.tautulli_channel_id}")
-        info(f"Channel ID {self.tautulli_channel_id} collected.")
+            raise Exception(f"Could not load {self.tautulli_channel_name} channel. Exiting...")
+        info(f"{self.tautulli_channel_name} channel collected.")
+
+    async def get_discord_channel_by_starting_name(self, starting_channel_name: str, channel_type: str = "text"):
+        for channel in self.client.get_all_channels():
+            if channel.name.startswith(starting_channel_name):
+                return channel
+        try:
+            guild = self.client.get_guild(id=self.guild_id)
+            if channel_type == 'voice':
+                return await guild.create_voice_channel(name=starting_channel_name)
+            else:
+                return await guild.create_text_channel(name=starting_channel_name)
+        except:
+            raise Exception(f"Could not create channel {starting_channel_name}")
+
+    async def get_discord_channel_by_name(self, channel_name: str, channel_type: str = "text"):
+        for channel in self.client.get_all_channels():
+            if channel.name == channel_name:
+                return channel
+        error(f"Could not load {channel_name} channel. Attempting to create...")
+        try:
+            guild = self.client.get_guild(id=self.guild_id)
+            if channel_type == 'voice':
+                return await guild.create_voice_channel(name=channel_name)
+            else:
+                return await guild.create_text_channel(name=channel_name)
+        except:
+            raise Exception(f"Could not create channel {channel_name}")
+
+    async def edit_library_voice_channel(self, channel_name: str, count: int):
+        info(f"Updating {channel_name} voice channel with new library size")
+        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:", channel_type="voice")
+        if not channel:
+            error(f"Could not load {channel_name} channel")
+        else:
+            try:
+                await channel.edit(name=f"{channel_name}: {count}")
+            except Exception as e:
+                pass
 
     async def get_old_message_in_tautulli_channel(self):
         """
@@ -213,3 +258,10 @@ class DiscordConnector:
                 info("Couldn't find old message, sending initial message...")
                 await send_starter_message(tautulli_connector=self.tautulli, discord_channel=self.tautulli_channel)
         return await self.tautulli_channel.fetch_message(last_bot_message_id)
+
+    @tasks.loop(hours=1.0)
+    async def update_libraries(self):
+        for library_name in self.tautulli.libraries_to_monitor:
+            size = self.tautulli.get_library_item_count(library_name=library_name)
+            await self.edit_library_voice_channel(channel_name=library_name, count=size)
+

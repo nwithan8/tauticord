@@ -1,3 +1,5 @@
+from typing import List
+
 import discord
 from tautulli.api import RawAPI
 
@@ -184,6 +186,7 @@ class TautulliConnector:
                  analytics,
                  use_embeds: bool,
                  plex_pass: bool,
+                 libraries_to_monitor: List[str],
                  time_settings: dict):
         self.base_url = base_url
         self.api_key = api_key
@@ -192,6 +195,7 @@ class TautulliConnector:
         self.analytics = analytics
         self.use_embeds = use_embeds
         self.plex_pass = plex_pass
+        self.libraries_to_monitor = libraries_to_monitor
         self.time_settings = time_settings
 
     def _error_and_analytics(self, error_message, function_name):
@@ -277,3 +281,23 @@ class TautulliConnector:
         except Exception as e:
             self._error_and_analytics(error_message=e, function_name='stop_stream')
         return "Something went wrong."
+
+    def get_library_id(self, library_name: str):
+        for library in self.api.library_names:
+            if library.get('section_name') == library_name:
+                return library.get('section_id')
+        error(f"Could not get ID for library {library_name}")
+        return None
+
+    def get_library_stats(self, library_name: str):
+        info(f"Collecting stats about library {library_name}")
+        library_id = self.get_library_id(library_name=library_name)
+        if not library_id:
+            return None
+        return self.api.get_library(section_id=library_id)
+
+    def get_library_item_count(self, library_name: str):
+        stats = self.get_library_stats(library_name=library_name)
+        if not stats:
+            return 0
+        return stats.get('count', 0)

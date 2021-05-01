@@ -15,6 +15,7 @@ Tautulli:
     Use24HourTime: false
   LibraryNames:
     # list of names of the libraries you'd like stats about
+    # Voice channels will be made/updated with stats (refreshed every hour)
     - Movies
     - TV Shows
     - Music
@@ -22,10 +23,12 @@ Tautulli:
 Discord:
   Connection:
     BotToken: ""
+    # Right-click on your server's icon -> "Copy ID"
+    ServerID: 472537215457689601
     # Right-click on your profile picture -> "Copy ID"
     OwnerID: 00000000000
-    # Right-click on the channel -> "Copy ID"
-    ChannelID: 00000000000
+    # Where the live stats will be posted
+    ChannelName: "tautulli"
   Customization:
     # if True, use embeds to print information, use regular text message if False
     UseEmbeds: true
