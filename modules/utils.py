@@ -56,7 +56,7 @@ def now_plus_milliseconds(milliseconds: int, timezone_code: str = None):
     if timezone_code:
         now = datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
     else:
-        now = datetime.now(timezone_code)
+        now = datetime.now()
     return now + timedelta(milliseconds=milliseconds)
 
 
