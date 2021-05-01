@@ -192,6 +192,8 @@ class DiscordConnector:
     async def get_tautulli_channel(self):
         info(f"Getting channel ID {self.tautulli_channel_id}")
         self.tautulli_channel = self.client.get_channel(self.tautulli_channel_id)
+        if not self.tautulli_channel:
+            raise Exception(f"Could not load channel ID {self.tautulli_channel_id}")
         info(f"Channel ID {self.tautulli_channel_id} collected.")
 
     async def get_old_message_in_tautulli_channel(self):

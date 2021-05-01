@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pytz import timezone
 
 
 def make_plural(word, count: int, suffix_override: str = 's'):
@@ -51,8 +52,11 @@ def milliseconds_to_minutes_seconds(milliseconds: int):
     return f"{minutes}:{seconds}"
 
 
-def now_plus_milliseconds(milliseconds: int):
-    now = datetime.now()
+def now_plus_milliseconds(milliseconds: int, timezone_code: str = None):
+    if timezone_code:
+        now = datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
+    else:
+        now = datetime.now(timezone_code)
     return now + timedelta(milliseconds=milliseconds)
 
 

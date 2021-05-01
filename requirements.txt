@@ -2,3 +2,5 @@ discord
 requests
 asyncio
 tautulli
+confuse
+pytz

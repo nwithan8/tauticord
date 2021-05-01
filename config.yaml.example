@@ -1,0 +1,35 @@
+appName: Tauticord
+logLevel: WARN
+
+Tautulli:
+  Connection:
+    URL: ""
+    APIKey: ""
+  Customization:
+    TerminateMessage: "Your stream has been terminated. Please contact the admin in the Discord."
+    # how often (seconds) the bot pulls new data. I'd recommend not making the bot ping Tautulli more often than every 5 seconds.
+    RefreshSeconds: 15
+    # can only kill streams if you have a plex pass, so this controls whether you're given the option
+    PlexPass: true
+    ServerTimeZone: "UTC"
+    Use24HourTime: false
+  LibraryNames:
+    # list of names of the libraries you'd like stats about
+    - Movies
+    - TV Shows
+    - Music
+
+Discord:
+  Connection:
+    BotToken: ""
+    # Right-click on your profile picture -> "Copy ID"
+    OwnerID: 00000000000
+    # Right-click on the channel -> "Copy ID"
+    ChannelID: 00000000000
+  Customization:
+    # if True, use embeds to print information, use regular text message if False
+    UseEmbeds: true
+
+Extras:
+  # See README.md for details
+  Analytics: true

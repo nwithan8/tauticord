@@ -9,8 +9,9 @@ session_ids = []
 
 
 class Activity:
-    def __init__(self, activity_data):
+    def __init__(self, activity_data, time_settings: dict):
         self._data = activity_data
+        self._time_settings = time_settings
 
     @property
     def stream_count(self):
@@ -51,12 +52,13 @@ class Activity:
 
     @property
     def sessions(self):
-        return [Session(session_data=session_data) for session_data in self._data.get('sessions', [])]
+        return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in self._data.get('sessions', [])]
 
 
 class Session:
-    def __init__(self, session_data):
+    def __init__(self, session_data, time_settings: dict):
         self._data = session_data
+        self._time_settings = time_settings
 
     @property
     def duration_milliseconds(self):
@@ -85,8 +87,8 @@ class Session:
         if not self.duration_milliseconds or not self.location_milliseconds:
             return ""
         milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
-        eta_datetime = utils.now_plus_milliseconds(milliseconds=milliseconds_remaining)
-        eta_string = utils.datetime_to_string(datetime_object=eta_datetime, template="%H:%M")
+        eta_datetime = utils.now_plus_milliseconds(milliseconds=milliseconds_remaining, timezone_code=self._time_settings['timezone'])
+        eta_string = utils.datetime_to_string(datetime_object=eta_datetime, template=("%H:%M" if self._time_settings['mil_time'] else "%I:%M %p"))
         return eta_string
 
     @property
@@ -181,7 +183,8 @@ class TautulliConnector:
                  terminate_message: str,
                  analytics,
                  use_embeds: bool,
-                 plex_pass: bool):
+                 plex_pass: bool,
+                 time_settings: dict):
         self.base_url = base_url
         self.api_key = api_key
         self.api = RawAPI(base_url=base_url, api_key=api_key)
@@ -189,6 +192,7 @@ class TautulliConnector:
         self.analytics = analytics
         self.use_embeds = use_embeds
         self.plex_pass = plex_pass
+        self.time_settings = time_settings
 
     def _error_and_analytics(self, error_message, function_name):
         error(error_message)
@@ -204,7 +208,7 @@ class TautulliConnector:
         if data:
             debug(f"JSON returned by GET request: {data}")
             try:
-                activity = Activity(activity_data=data)
+                activity = Activity(activity_data=data, time_settings=self.time_settings)
                 overview_message = activity.message
                 sessions = activity.sessions
                 count = 0

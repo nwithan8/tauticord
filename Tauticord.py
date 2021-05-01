@@ -1,36 +1,38 @@
-#!/usr/bin/env python3
-
-# Copyright 2020 by Nathan Harris.
+# Copyright 2021 by Nathan Harris.
 # All rights reserved.
 # Tauticord is released as-is under the "GNU General Public License".
 # Please see the LICENSE file that should have been included as part of this package.
 
-import config as settings
-import logging
+from modules import config_parser
 from modules.logs import *
 import modules.tautulli_connector as tautulli
 import modules.discord_connector as discord
 import modules.analytics as GA
 
+config = config_parser.Config(app_name="Tauticord", config_path="config.yaml")
+
 analytics = GA.GoogleAnalytics(analytics_id='UA-174268200-2',
                                anonymous_ip=True,
-                               do_not_track=not settings.ALLOW_ANALYTICS)
+                               do_not_track=not config.allow_analytics)
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=level_name_to_level(level_name=config.log_level))
 
 if __name__ == '__main__':
     info("Starting application...")
-    t = tautulli.TautulliConnector(base_url=settings.TAUTULLI_URL,
-                                   api_key=settings.TAUTULLI_API_KEY,
-                                   terminate_message=settings.TERMINATE_MESSAGE,
+    t = tautulli.TautulliConnector(base_url=config.tautulli_connection_details['URL'],
+                                   api_key=config.tautulli_connection_details['APIKey'],
+                                   terminate_message=config.tautulli_customization_details.get('TerminateMessage', "Your stream has ended."),
                                    analytics=analytics,
-                                   use_embeds=settings.USE_EMBEDS,
-                                   plex_pass=settings.PLEX_PASS)
-    d = discord.DiscordConnector(token=settings.DISCORD_BOT_TOKEN,
-                                 owner_id=settings.BOT_OWNER_ID,
-                                 refresh_time=settings.REFRESH_TIME,
-                                 tautulli_channel_id=settings.DISCORD_CHANNEL_ID,
+                                   use_embeds=config.discord_customization_details.get('UseEmbeds', True),
+                                   plex_pass=config.tautulli_customization_details.get('PlexPass', False),
+                                   time_settings=config.time_settings
+                                   )
+    d = discord.DiscordConnector(token=config.discord_connection_details['BotToken'],
+                                 owner_id=config.discord_connection_details['OwnerID'],
+                                 refresh_time=config.tautulli_customization_details.get('RefreshSeconds', 15),
+                                 tautulli_channel_id=config.discord_connection_details['ChannelID'],
                                  tautulli_connector=t,
                                  analytics=analytics,
-                                 use_embeds=settings.USE_EMBEDS)
+                                 use_embeds=config.discord_customization_details.get('UseEmbeds', True)
+                                 )
     d.connect()
