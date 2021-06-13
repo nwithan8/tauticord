@@ -4,11 +4,9 @@ LABEL org.opencontainers.image.source https://github.com/cyb3rgh05t/tauticord
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt ./
 
-RUN python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-warn-script-location --upgrade --force-reinstall --no-deps --user -r requirements.txt \
-    && rm -rf /tmp/* && rm -rf requirements.txt /root/.cache /root/.lib  /root/.local
+RUN pip3 install -r requirements.txt
 
 COPY ./ /app
 
