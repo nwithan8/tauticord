@@ -186,7 +186,7 @@ class TautulliConnector:
                  analytics,
                  use_embeds: bool,
                  plex_pass: bool,
-                 libraries_to_monitor: List[str],
+                 voice_channel_settings: dict,
                  time_settings: dict):
         self.base_url = base_url
         self.api_key = api_key
@@ -195,7 +195,7 @@ class TautulliConnector:
         self.analytics = analytics
         self.use_embeds = use_embeds
         self.plex_pass = plex_pass
-        self.libraries_to_monitor = libraries_to_monitor
+        self.voice_channel_settings = voice_channel_settings
         self.time_settings = time_settings
 
     def _error_and_analytics(self, error_message, function_name):
@@ -239,7 +239,7 @@ class TautulliConnector:
                     else:
                         e = discord.Embed(title="No current activity")
                     debug(f"Count: {count}")
-                    return e, count
+                    return e, count, activity
                 else:
                     final_message = f"{overview_message}\n"
                     for session in sessions:
@@ -261,10 +261,10 @@ class TautulliConnector:
                         final_message = "No current activity."
                     debug(f"Count: {count}\n"
                           f"Final message: {final_message}")
-                    return final_message, count
+                    return final_message, count, activity
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
-        return "**Connection lost.**", 0
+        return "**Connection lost.**", 0, None
 
     def stop_stream(self, stream_number):
         """

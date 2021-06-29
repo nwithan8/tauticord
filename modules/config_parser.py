@@ -18,8 +18,8 @@ class Config:
         return self._tautulli_config['Customization'].get()
 
     @property
-    def tautulli_library_names(self):
-        return self._tautulli_config['LibraryNames'].get()
+    def tautulli_voice_channels(self):
+        return self._tautulli_config['Customization']['VoiceChannels'].get()
 
     @property
     def time_settings(self):
@@ -29,8 +29,15 @@ class Config:
                 'mil_time': mil_time}
 
     @property
-    def libraries_to_monitor(self):
-        return self._tautulli_config['LibraryNames'].get()
+    def voice_channels(self):
+        _settings = self.tautulli_voice_channels
+        return {
+            'count': _settings.get('StreamCount', False),
+            'transcodes': _settings.get('TranscodeCount', False),
+            'bandwidth': _settings.get('Bandwidth', False),
+            'stats': _settings.get('LibraryStats', False),
+            'libraries': _settings.get('LibraryNames', [])
+        }
 
     @property
     def _discord_config(self):

@@ -13,12 +13,17 @@ Tautulli:
     PlexPass: true
     ServerTimeZone: "UTC"
     Use24HourTime: false
-  LibraryNames:
-    # list of names of the libraries you'd like stats about
-    # Voice channels will be made/updated with stats (refreshed every hour)
-    - Movies
-    - TV Shows
-    - Music
+    VoiceChannels:
+      StreamCount: false
+      TranscodeCount: false
+      Bandwidth: false
+      LibraryStats: false
+      LibraryNames:
+        # list of names of the libraries you'd like stats about
+        # Voice channels will be made/updated with stats (refreshed every hour)
+        - Movies
+        - TV Shows
+        - Music
 
 Discord:
   Connection:

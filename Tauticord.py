@@ -25,7 +25,7 @@ if __name__ == '__main__':
                                    analytics=analytics,
                                    use_embeds=config.discord_customization_details.get('UseEmbeds', True),
                                    plex_pass=config.tautulli_customization_details.get('PlexPass', False),
-                                   libraries_to_monitor=config.libraries_to_monitor,
+                                   voice_channel_settings=config.voice_channels,
                                    time_settings=config.time_settings
                                    )
     d = discord.DiscordConnector(token=config.discord_connection_details['BotToken'],
