@@ -116,7 +116,9 @@ class DiscordConnector:
         :param previous_message: discord.Message to replace
         :return: new discord.Message
         """
-        new_message, count = self.tautulli.refresh_data()
+        new_message, count, activity = self.tautulli.refresh_data()
+
+        await self.update_voice_channels(activity)
 
         # For performance and aesthetics, edit the old message if 1) the old message is the newest message in the channel, or 2) if the only messages that are newer were written by this bot (which would be stream stop messages that have already been deleted)
         use_old_message = False
@@ -232,7 +234,32 @@ class DiscordConnector:
 
     async def edit_library_voice_channel(self, channel_name: str, count: int):
         info(f"Updating {channel_name} voice channel with new library size")
-        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:", channel_type="voice")
+        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
+                                                                  channel_type="voice")
+        if not channel:
+            error(f"Could not load {channel_name} channel")
+        else:
+            try:
+                await channel.edit(name=f"{channel_name}: {count}")
+            except Exception as e:
+                pass
+
+    async def edit_bandwidth_voice_channel(self, channel_name: str, size: int):
+        info(f"Updating {channel_name} voice channel with new bandwidth")
+        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
+                                                                  channel_type="voice")
+        if not channel:
+            error(f"Could not load {channel_name} channel")
+        else:
+            try:
+                await channel.edit(name=f"{channel_name}: {size}")
+            except Exception as e:
+                pass
+
+    async def edit_stream_count_voice_channel(self, channel_name: str, count: int):
+        info(f"Updating {channel_name} voice channel with new stream count")
+        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
+                                                                  channel_type="voice")
         if not channel:
             error(f"Could not load {channel_name} channel")
         else:
@@ -259,9 +286,18 @@ class DiscordConnector:
                 await send_starter_message(tautulli_connector=self.tautulli, discord_channel=self.tautulli_channel)
         return await self.tautulli_channel.fetch_message(last_bot_message_id)
 
+    async def update_voice_channels(self, activity):
+        if activity:
+            if self.tautulli.voice_channel_settings.get('count', False):
+                await self.edit_stream_count_voice_channel(channel_name="Current Streams", count=activity.stream_count)
+            if self.tautulli.voice_channel_settings.get('transcodes', False):
+                await self.edit_stream_count_voice_channel(channel_name="Current Transcodes", count=activity.transcode_count)
+            if self.tautulli.voice_channel_settings.get('bandwidth', False):
+                await self.edit_bandwidth_voice_channel(channel_name="Bandwidth", size=activity.total_bandwidth)
+
     @tasks.loop(hours=1.0)
     async def update_libraries(self):
-        for library_name in self.tautulli.libraries_to_monitor:
-            size = self.tautulli.get_library_item_count(library_name=library_name)
-            await self.edit_library_voice_channel(channel_name=library_name, count=size)
-
+        if self.tautulli.voice_channel_settings.get('stats', False):
+            for library_name in self.tautulli.voice_channel_settings.get('libraries', []):
+                size = self.tautulli.get_library_item_count(library_name=library_name)
+                await self.edit_library_voice_channel(channel_name=library_name, count=size)
