@@ -32,7 +32,7 @@ class Activity:
 
     @property
     def lan_bandwidth(self):
-        json_bandwidth = int(self._data.get('total_bandwidth', 0))
+        json_bandwidth = int(self._data.get('lan_bandwidth', 0))
         if json_bandwidth:
             return utils.human_bitrate(float(json_bandwidth))
         return None
@@ -44,17 +44,20 @@ class Activity:
             overview_message += vars.sessions_message.format(stream_count=self.stream_count,
                                                              word=utils.make_plural(word='stream',
                                                                                     count=self.stream_count))
-        if self.transcode_count > 0:
-            overview_message += f" ({vars.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
+            if self.transcode_count > 0:
+                overview_message += f" ({vars.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
+
         if self.total_bandwidth:
             overview_message += f" | {vars.bandwidth_message.format(bandwidth=self.total_bandwidth)}"
             if self.lan_bandwidth:
                 overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=self.lan_bandwidth)}"
+
         return overview_message
 
     @property
     def sessions(self):
-        return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in self._data.get('sessions', [])]
+        return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in
+                self._data.get('sessions', [])]
 
 
 class Session:
@@ -89,8 +92,10 @@ class Session:
         if not self.duration_milliseconds or not self.location_milliseconds:
             return ""
         milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
-        eta_datetime = utils.now_plus_milliseconds(milliseconds=milliseconds_remaining, timezone_code=self._time_settings['timezone'])
-        eta_string = utils.datetime_to_string(datetime_object=eta_datetime, template=("%H:%M" if self._time_settings['mil_time'] else "%I:%M %p"))
+        eta_datetime = utils.now_plus_milliseconds(milliseconds=milliseconds_remaining,
+                                                   timezone_code=self._time_settings['timezone'])
+        eta_string = utils.datetime_to_string(datetime_object=eta_datetime,
+                                              template=("%H:%M" if self._time_settings['mil_time'] else "%I:%M %p"))
         return eta_string
 
     @property
@@ -159,23 +164,6 @@ class Session:
                f"{vars.session_player_message.format(product=self.product, player=self.player)}\n" \
                f"{vars.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
                f"{vars.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
-
-
-def build_overview_message(stream_count: int = 0,
-                           transcode_count: int = 0,
-                           total_bandwidth: int = 0,
-                           lan_bandwidth: int = 0):
-    overview_message = ""
-    if int(stream_count) > 0:
-        overview_message += vars.sessions_message.format(stream_count=stream_count,
-                                                         plural=('s' if int(stream_count) > 1 else ''))
-    if transcode_count > 0:
-        overview_message += f" ({vars.transcodes_message.format(transcode_count=transcode_count, plural=('s' if int(transcode_count) > 1 else ''))})"
-    if total_bandwidth > 0:
-        overview_message += f" | {vars.bandwidth_message.format(bandwidth=utils.human_bitrate(float(total_bandwidth)))}"
-        if lan_bandwidth > 0:
-            overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=utils.human_bitrate(float(lan_bandwidth)))}"
-    return overview_message
 
 
 class TautulliConnector:
