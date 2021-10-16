@@ -8,37 +8,39 @@ def make_plural(word, count: int, suffix_override: str = 's'):
     return word
 
 
-def human_bitrate(B, d=1):
-    # 'Return the given kilobytes as a human friendly Kbps, Mbps, Gbps, or Tbps string'
-    # Next line altered so that this takes in kilobytes instead of bytes, as it was originally written
-    B = float(B) * 1024
+def _human_bitrate(number, denominator: int = 1, letter: str = "", d: int = 1):
+    if d <= 0:
+        return f'{int(number / denominator):d} {letter}bps'
+    else:
+        return f'{float(number / denominator):.{d}f} {letter}bps'
+
+
+def human_bitrate(kilobytes, d: int = 1):
+    # Return the given kilobytes as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
+
     KB = float(1024)
     MB = float(KB ** 2)  # 1,048,576
     GB = float(KB ** 3)  # 1,073,741,824
     TB = float(KB ** 4)  # 1,099,511,627,776
 
-    if d <= 0:
-        if B < KB:
-            return f'{B} bps'
-        elif KB <= B < MB:
-            return f'{int(B / KB):d} kbps'
-        elif MB <= B < GB:
-            return f'{int(B / MB):d} Mbps'
-        elif GB <= B < TB:
-            return f'{int(B / GB):d} Gbps'
-        elif TB <= B:
-            return f'{int(B / TB):d} Tbps'
+    denominator = 1
+    letter = ""
+    if kilobytes < KB:
+        pass
+    elif KB <= kilobytes < MB:
+        denominator = KB
+        letter = "k"
+    elif MB <= kilobytes < GB:
+        denominator = MB
+        letter = "M"
+    elif GB <= kilobytes < TB:
+        denominator = GB
+        letter = "G"
     else:
-        if B < KB:
-            return f'{B} bps'
-        elif KB <= B < MB:
-            return f'{int(B / KB):.{d}} kbps'
-        elif MB <= B < GB:
-            return f'{int(B / MB):.{d}f} Mbps'
-        elif GB <= B < TB:
-            return f'{int(B / GB):.{d}f} Gbps'
-        elif TB <= B:
-            return f'{int(B / TB):.{d}f} Tbps'
+        denominator = TB
+        letter = "T"
+
+    return _human_bitrate(kilobytes, denominator=denominator, letter=letter, d=d)
 
 
 def milliseconds_to_minutes_seconds(milliseconds: int):

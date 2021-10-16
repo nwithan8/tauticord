@@ -132,13 +132,16 @@ class DiscordConnector:
 
         if use_old_message:
             if self.use_embeds:
-                if len(previous_message.embeds) == 0 or new_message.to_dict() != previous_message.embeds[0].to_dict():
+                if not activity:  # error when refreshing Tautulli data, new_message is a string (i.e. "Connection lost")
+                    debug("Editing old message with Tautulli error...")
+                    await previous_message.edit(content=new_message, embed=None)
+                elif len(previous_message.embeds) == 0 or new_message.to_dict() != previous_message.embeds[0].to_dict():
                     debug("Editing old message...")
                     await previous_message.edit(embed=new_message,
                                                 content=None)  # reset content to None to remove startup message
                 else:
                     debug("No change needed.")
-            elif not self.use_embeds:
+            else:
                 if previous_message.content != new_message:
                     debug("Editing old message...")
                     await previous_message.edit(content=new_message, embed=None)
@@ -291,7 +294,8 @@ class DiscordConnector:
             if self.tautulli.voice_channel_settings.get('count', False):
                 await self.edit_stream_count_voice_channel(channel_name="Current Streams", count=activity.stream_count)
             if self.tautulli.voice_channel_settings.get('transcodes', False):
-                await self.edit_stream_count_voice_channel(channel_name="Current Transcodes", count=activity.transcode_count)
+                await self.edit_stream_count_voice_channel(channel_name="Current Transcodes",
+                                                           count=activity.transcode_count)
             if self.tautulli.voice_channel_settings.get('bandwidth', False):
                 await self.edit_bandwidth_voice_channel(channel_name="Bandwidth", size=activity.total_bandwidth)
 
