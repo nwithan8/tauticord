@@ -27,14 +27,14 @@ class Activity:
     def total_bandwidth(self):
         json_bandwidth = int(self._data.get('total_bandwidth', 0))
         if json_bandwidth:
-            return utils.human_bitrate(float(json_bandwidth))
+            return utils.human_bitrate(float(json_bandwidth) * 1024)
         return None
 
     @property
     def lan_bandwidth(self):
         json_bandwidth = int(self._data.get('lan_bandwidth', 0))
         if json_bandwidth:
-            return utils.human_bitrate(float(json_bandwidth))
+            return utils.human_bitrate(float(json_bandwidth) * 1024)
         return None
 
     @property
@@ -149,7 +149,7 @@ class Session:
     @property
     def bandwidth(self):
         json_bandwidth = self._data.get('bandwidth', '')
-        return utils.human_bitrate(float(json_bandwidth)) if json_bandwidth != '' else '0'
+        return utils.human_bitrate(float(json_bandwidth) * 1024) if json_bandwidth != '' else '0'
 
     @property
     def transcoding_stub(self):
