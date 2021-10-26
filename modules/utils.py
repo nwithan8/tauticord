@@ -15,8 +15,8 @@ def _human_bitrate(number, denominator: int = 1, letter: str = "", d: int = 1):
         return f'{float(number / denominator):.{d}f} {letter}bps'
 
 
-def human_bitrate(kilobytes, d: int = 1):
-    # Return the given kilobytes as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
+def human_bitrate(_bytes, d: int = 1):
+    # Return the given bitrate as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
 
     KB = float(1024)
     MB = float(KB ** 2)  # 1,048,576
@@ -25,22 +25,22 @@ def human_bitrate(kilobytes, d: int = 1):
 
     denominator = 1
     letter = ""
-    if kilobytes < KB:
+    if _bytes < KB:
         pass
-    elif KB <= kilobytes < MB:
+    elif KB <= _bytes < MB:
         denominator = KB
         letter = "k"
-    elif MB <= kilobytes < GB:
+    elif MB <= _bytes < GB:
         denominator = MB
         letter = "M"
-    elif GB <= kilobytes < TB:
+    elif GB <= _bytes < TB:
         denominator = GB
         letter = "G"
     else:
         denominator = TB
         letter = "T"
 
-    return _human_bitrate(kilobytes, denominator=denominator, letter=letter, d=d)
+    return _human_bitrate(_bytes, denominator=denominator, letter=letter, d=d)
 
 
 def milliseconds_to_minutes_seconds(milliseconds: int):
