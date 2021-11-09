@@ -1,5 +1,5 @@
 import confuse
-
+import os
 
 class Config:
     def __init__(self, app_name: str, config_path: str):
@@ -12,15 +12,36 @@ class Config:
 
     @property
     def tautulli_connection_details(self):
-        return self._tautulli_config['Connection'].get()
+        configfile = self._tautulli_config['Connection'].get()
+        if os.getenv("TAUTULLI_IP"):
+            configfile['URL'] = bool(os.getenv("TAUTULLI_IP"))
+        if os.getenv("TAUTULLI_API_KEY"):
+            configfile['APIKey'] = os.getenv("TAUTULLI_API_KEY")
+        return configfile
 
     @property
     def tautulli_customization_details(self):
-        return self._tautulli_config['Customization'].get()
+        configfile = self._tautulli_config['Customization'].get()
+        if os.getenv("TC_PLEXPASS"):
+            configfile['PlexPass'] = bool(os.getenv("TC_PLEXPASS"))
+        if os.getenv("TC_REFRESH_SEC"):
+            configfile['RefreshSeconds'] = int(os.getenv("TC_REFRESH_SEC"))
+        return configfile
 
     @property
     def tautulli_voice_channels(self):
-        return self._tautulli_config['Customization']['VoiceChannels'].get()
+        configfile = self._tautulli_config['Customization']['VoiceChannels'].get()
+        if os.getenv("TC_CHANNELS"):
+            channels = os.getenv("TC_CHANNELS").split(",")
+            for i in range(len(channels)):
+                channels[i] = channels[i] in ("true","True","1")
+            configfile['StreamCount'] = channels[0]
+            configfile['TranscodeCount'] = channels[1]
+            configfile['Bandwidth'] = channels[2]
+            configfile['LibraryStats'] = channels[3]
+        if os.getenv("TC_LIBRARY"):
+            configfile['LibraryNames'] = os.getenv("TC_LIBRARY").split(",")
+        return configfile
 
     @property
     def time_settings(self):
@@ -46,14 +67,28 @@ class Config:
 
     @property
     def discord_connection_details(self):
-        return self._discord_config['Connection'].get()
+        configfile = self._discord_config['Connection'].get()
+        if os.getenv("TC_DISCORD_BOT_TOKEN"):
+            configfile['BotToken'] = os.getenv("TC_DISCORD_BOT_TOKEN")
+        if os.getenv("TC_DISCORD_SERVER_ID"):
+            configfile['ServerID'] = int(os.getenv("TC_DISCORD_SERVER_ID"))
+        if os.getenv("TC_DISCORD_OWNER_ID"):
+            configfile['OwnerID'] = int(os.getenv("TC_DISCORD_OWNER_ID"))
+        if os.getenv("TC_DISCORD_CHANNELNAME"):
+            configfile['ChannelName'] = os.getenv("TC_DISCORD_CHANNELNAME")
+        return configfile
 
     @property
     def discord_customization_details(self):
-        return self._discord_config['Customization'].get()
+        configfile = self._discord_config['Customization'].get()
+        if os.getenv("TC_DISCORD_USEEMBEDS"):
+            configfile['ChannelName'] = os.getenv("TC_DISCORD_CHANNELNAME")
+        return configfile
 
     @property
     def allow_analytics(self):
+        if os.getenv("TC_ANALYTICS"):
+            return bool(os.getenv("TAUTULLI_IP"))
         return self.config['Extras']['Analytics'].get(bool) == True
 
     @property
