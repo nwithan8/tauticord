@@ -77,7 +77,7 @@ After installing from dockerhub, update the following Environment Variables:
 | TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token |  |
 | TC_DISCORD_SERVER_ID (required) | Discord Server ID |  |
 | TC_DISCORD_OWNER_ID | Your Discord ID for PlexPass Features | |
-| TC_DISCORD_CHANNELNAME (required) | Channel name for updates | |
+| TC_DISCORD_CHANNELNAME (required) | Channel name for updates | tautulli |
 | TC_DISCORD_USEEMBEDS | Use embedded messages rather than regular text chat | true |
 | TC_CHANNELS | Voice Channel Enable: Stream Count, Transcode Count, Bandwidth, Library Stats | false,false,false,false | 
 | TC_ANALYTICS | Allow Anonymous Crash Analytics? | true |

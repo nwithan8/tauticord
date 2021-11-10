@@ -23,7 +23,7 @@ class Config:
     def tautulli_customization_details(self):
         configfile = self._tautulli_config['Customization'].get()
         if os.getenv("TC_PLEXPASS"):
-            configfile['PlexPass'] = bool(os.getenv("TC_PLEXPASS"))
+            configfile['PlexPass'] = os.getenv("TC_PLEXPASS") in ("true","True","1")
         if os.getenv("TC_REFRESH_SEC"):
             configfile['RefreshSeconds'] = int(os.getenv("TC_REFRESH_SEC"))
         return configfile
@@ -82,13 +82,13 @@ class Config:
     def discord_customization_details(self):
         configfile = self._discord_config['Customization'].get()
         if os.getenv("TC_DISCORD_USEEMBEDS"):
-            configfile['ChannelName'] = os.getenv("TC_DISCORD_CHANNELNAME")
+            configfile['UseEmbeds'] = os.getenv("TC_DISCORD_USEEMBEDS") in ("true","True","1")
         return configfile
 
     @property
     def allow_analytics(self):
         if os.getenv("TC_ANALYTICS"):
-            return bool(os.getenv("TAUTULLI_IP"))
+            return os.getenv("TC_ANALYTICS") in ("true","True","1")
         return self.config['Extras']['Analytics'].get(bool) == True
 
     @property
