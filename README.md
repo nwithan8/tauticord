@@ -79,7 +79,7 @@ https://discord.com/api/oauth2/authorize?client_id=<YOUR_APPLICATION_ID_HERE>&pe
 | TC_PLEXPASS | Enable PlexPass Features | true |
 | TC_REFRESH_SEC | Seconds between updates | 15 |
 | TC_LIBRARY | Libraries to monitor | Movies,TV Shows | 
-| TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token | <key from DiscordApplication above> |
+| TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token | < key from DiscordApplication above > |
 | TC_DISCORD_SERVER_ID (required) | Discord Server ID | <ID, right-click server> |
 | TC_DISCORD_OWNER_ID | Your Discord ID for PlexPass Features | <ID, right-click profile> |
 | TC_DISCORD_CHANNELNAME | Channel name for updates | tautulli |
