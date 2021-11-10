@@ -67,7 +67,9 @@ You can also run Tauticord as a docker template on UnRaid
 
 1. Create a new Discord Application [here](https://discordapp.com/developers/applications). Note the Application ID, it will be needed in step 2
 2. Copy this URL, update replace with your ApplicationID, then paste into a browser, and confirm permissions to add bot to your server. 
+
 https://discord.com/api/oauth2/authorize?client_id=<YOUR_APPLICATION_ID_HERE>&permissions=522304&scope=bot%20applications.commands
+
 3. After installing from Unraid Community Applications from DockerHub, update the following Environment Variables:
 
 | Environment Variable  | Value |  Example/Default |
@@ -77,10 +79,10 @@ https://discord.com/api/oauth2/authorize?client_id=<YOUR_APPLICATION_ID_HERE>&pe
 | TC_PLEXPASS | Enable PlexPass Features | true |
 | TC_REFRESH_SEC | Seconds between updates | 15 |
 | TC_LIBRARY | Libraries to monitor | Movies,TV Shows | 
-| TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token |  |
-| TC_DISCORD_SERVER_ID (required) | Discord Server ID |  |
-| TC_DISCORD_OWNER_ID | Your Discord ID for PlexPass Features | |
-| TC_DISCORD_CHANNELNAME (required) | Channel name for updates | tautulli |
+| TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token | <key from DiscordApplication above> |
+| TC_DISCORD_SERVER_ID (required) | Discord Server ID | <ID, right-click server> |
+| TC_DISCORD_OWNER_ID | Your Discord ID for PlexPass Features | <ID, right-click profile> |
+| TC_DISCORD_CHANNELNAME | Channel name for updates | tautulli |
 | TC_DISCORD_USEEMBEDS | Use embedded messages rather than regular text chat | true |
 | TC_CHANNELS | Voice Channel Enable: Stream Count, Transcode Count, Bandwidth, Library Stats | false,false,false,false | 
 | TC_ANALYTICS | Allow Anonymous Crash Analytics? | true |
