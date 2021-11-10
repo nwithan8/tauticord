@@ -65,7 +65,10 @@ Run the container with ``docker run tauticord``
 # UnRaid
 You can also run Tauticord as a docker template on UnRaid
 
-After installing from dockerhub, update the following Environment Variables:
+1. Create a new Discord Application [here](https://discordapp.com/developers/applications). Note the Application ID, it will be needed in step 2
+2. Copy this URL, update replace with your ApplicationID, then paste into a browser, and confirm permissions to add bot to your server. 
+https://discord.com/api/oauth2/authorize?client_id=<YOUR_APPLICATION_ID_HERE>&permissions=522304&scope=bot%20applications.commands
+3. After installing from Unraid Community Applications from DockerHub, update the following Environment Variables:
 
 | Environment Variable  | Value |  Example/Default |
 | ------------- | ------------- | ------------- |
