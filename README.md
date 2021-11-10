@@ -62,6 +62,26 @@ After copying and editing your ``config.py`` file, build the container with:
 	``docker build -t tauticord .``
 Run the container with ``docker run tauticord``
 
+# UnRaid
+You can also run Tauticord as a docker template on UnRaid
+
+After installing from dockerhub, update the following Environment Variables:
+
+| Environment Variable  | Value |  Example/Default |
+| ------------- | ------------- | ------------- |
+| TAUTULLI_IP (required)  | IP of your Tautulli server | http://192.168.1.x:8181 |
+| TAUTULLI_API_KEY (required) | API key for Tautulli server  | abcd1234efgh5678ijkl9012mnop3456qrst  |
+| TC_PLEXPASS | Enable PlexPass Features | true |
+| TC_REFRESH_SEC | Seconds between updates | 15 |
+| TC_LIBRARY | Libraries to monitor | Movies,TV Shows | 
+| TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token |  |
+| TC_DISCORD_SERVER_ID (required) | Discord Server ID |  |
+| TC_DISCORD_OWNER_ID | Your Discord ID for PlexPass Features | |
+| TC_DISCORD_CHANNELNAME (required) | Channel name for updates | |
+| TC_DISCORD_USEEMBEDS | Use embedded messages rather than regular text chat | true |
+| TC_CHANNELS | Voice Channel Enable: Stream Count, Transcode Count, Bandwidth, Library Stats | false,false,false,false | 
+| TC_ANALYTICS | Allow Anonymous Crash Analytics? | true |
+
 # Analytics
 Tauticord uses Google Analytics to collect statistics such as common errors that will help with future development.
 **This data is limited, anonymous, and never sold or redistributed.**
