@@ -14,7 +14,7 @@ class Config:
     def tautulli_connection_details(self):
         configfile = self._tautulli_config['Connection'].get()
         if os.getenv("TAUTULLI_IP"):
-            configfile['URL'] = bool(os.getenv("TAUTULLI_IP"))
+            configfile['URL'] = os.getenv("TAUTULLI_IP")
         if os.getenv("TAUTULLI_API_KEY"):
             configfile['APIKey'] = os.getenv("TAUTULLI_API_KEY")
         return configfile
