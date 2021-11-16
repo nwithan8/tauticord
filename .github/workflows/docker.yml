@@ -101,3 +101,24 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+  addcon:
+    needs: GHRC
+    name: Add all Contributors to ReadME
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: '0'
+
+      - uses: BobAnkh/add-contributors@master
+        with:
+          CONTRIBUTOR: '### Contributors'
+          COLUMN_PER_ROW: '4'
+          ACCESS_TOKEN: ${{secrets.CR_PAT}}
+          IMG_WIDTH: '50'
+          FONT_SIZE: '14'
+          PATH: '/README.md'
+          COMMIT_MESSAGE: 'docs(README): update contributors'
+          AVATAR_SHAPE: 'round
