@@ -1,5 +1,5 @@
 discord
-requests
+objectrest
 asyncio
 tautulli
 confuse

@@ -1,13 +1,11 @@
-from typing import List
-
 import discord
 from tautulli.api import RawAPI
 
-from modules.logs import *
-from modules import utils
 import modules.vars as vars
+from modules import utils
+from modules.logs import *
 
-session_ids = []
+session_ids = {}
 
 
 class Activity:
@@ -17,25 +15,31 @@ class Activity:
 
     @property
     def stream_count(self):
-        return int(self._data.get('stream_count', 0))
+        value = self._data.get('stream_count', 0)
+        if type(value) is not int:
+            value = 0
+        return int(value)
 
     @property
     def transcode_count(self):
-        return int(self._data.get('stream_count_transcode', 0))
+        value = self._data.get('transcode_count', 0)
+        if type(value) is not int:
+            value = 0
+        return int(value)
 
     @property
     def total_bandwidth(self):
-        json_bandwidth = int(self._data.get('total_bandwidth', 0))
-        if json_bandwidth:
-            return utils.human_bitrate(float(json_bandwidth) * 1024)
-        return None
+        value = self._data.get('total_bandwidth', 0)
+        if type(value) is not int:
+            return None
+        return utils.human_bitrate(float(value) * 1024)
 
     @property
     def lan_bandwidth(self):
-        json_bandwidth = int(self._data.get('lan_bandwidth', 0))
-        if json_bandwidth:
-            return utils.human_bitrate(float(json_bandwidth) * 1024)
-        return None
+        value = self._data.get('lan_bandwidth', 0)
+        if type(value) is not int:
+            return None
+        return utils.human_bitrate(float(value) * 1024)
 
     @property
     def message(self):
@@ -67,11 +71,17 @@ class Session:
 
     @property
     def duration_milliseconds(self):
-        return int(self._data.get('duration', 0))
+        value = self._data.get('duration', 0)
+        if type(value) is not int:
+            value = 0
+        return int(value)
 
     @property
     def location_milliseconds(self):
-        return int(self._data.get('view_offset', 0))
+        value = self._data.get('view_offset', 0)
+        if type(value) is not int:
+            value = 0
+        return int(value)
 
     @property
     def progress_percentage(self):
@@ -147,9 +157,11 @@ class Session:
         return self._data['quality_profile']
 
     @property
-    def bandwidth(self):
-        json_bandwidth = self._data.get('bandwidth', '')
-        return utils.human_bitrate(float(json_bandwidth) * 1024) if json_bandwidth != '' else '0'
+    def bandwidth(self) -> str:
+        value = self._data.get('bandwidth', 0)
+        if type(value) is not int:
+            return '0'
+        return utils.human_bitrate(float(value) * 1024)
 
     @property
     def transcoding_stub(self):
@@ -204,30 +216,29 @@ class TautulliConnector:
                 overview_message = activity.message
                 sessions = activity.sessions
                 count = 0
-                session_ids = []
+                session_ids = {}
                 if self.use_embeds:
-                    e = discord.Embed(title=overview_message)
+                    embed = discord.Embed(title=overview_message)
                     for session in sessions:
                         try:
                             count += 1
                             stream_message = session.build_message(count=count).split('\n')
-                            e.add_field(name=stream_message[0],
-                                        value='\n'.join(stream_message[1:]),
-                                        inline=False)
-                            session_ids.append(str(session.id))
-                        except ValueError as error:
-                            self._error_and_analytics(error_message=error, function_name='refresh_data (ValueError)')
-                            session_ids.append("000")
+                            embed.add_field(name=stream_message[0],
+                                            value='\n'.join(stream_message[1:]),
+                                            inline=False)
+                            session_ids[count] = str(session.id)
+                        except ValueError as err:
+                            self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
                             pass
                         if count >= 9:
                             break
                     if int(activity.stream_count) > 0:
                         if self.plex_pass:
-                            e.set_footer(text=f"To terminate a stream, react with the stream number.")
+                            embed.set_footer(text=f"To terminate a stream, react with the stream number.")
                     else:
-                        e = discord.Embed(title="No current activity")
+                        embed = discord.Embed(title="No current activity")
                     debug(f"Count: {count}")
-                    return e, count, activity
+                    return embed, count, activity
                 else:
                     final_message = f"{overview_message}\n"
                     for session in sessions:
@@ -235,10 +246,9 @@ class TautulliConnector:
                             count += 1
                             stream_message = session.build_message(count=count)
                             final_message += f"\n{stream_message}\n"
-                            session_ids.append(str(session.id))
-                        except ValueError as e:
-                            self._error_and_analytics(error_message=e, function_name='refresh_data (ValueError)')
-                            session_ids.append("000")
+                            session_ids[count] = str(session.id)
+                        except ValueError as err:
+                            self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
                             pass
                         if count >= 9:
                             break
@@ -260,6 +270,8 @@ class TautulliConnector:
         :param stream_number: stream number used to react to Discord message (ex. 1, 2, 3)
         :return: Success/failure message
         """
+        if stream_number not in session_ids.keys():
+            return "**Invalid stream number.**"
         info(f"User attempting to stop session {stream_number}, id {session_ids[stream_number]}")
         try:
             if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):

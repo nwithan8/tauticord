@@ -1,6 +1,7 @@
-import requests
-import uuid
 import urllib
+import uuid
+
+import objectrest
 
 
 def _time_uuid():
@@ -42,7 +43,7 @@ class GoogleAnalytics:
             return True
         url = _make_url(params_dict=final_params)
         try:
-            if requests.post(url=url):
+            if objectrest.post(url=url):
                 return True
         except:
             pass

@@ -1,5 +1,6 @@
 import confuse
 
+
 class Config:
     def __init__(self, app_name: str, config_path: str):
         self.config = confuse.Configuration(app_name)

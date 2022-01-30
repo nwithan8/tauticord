@@ -1,12 +1,11 @@
-from typing import List
+import asyncio
+import sys
 
 import discord
 from discord.ext import tasks
 
 import modules.vars as vars
-import asyncio
 from modules.logs import *
-import sys
 
 
 async def start_bot(discord_connector, analytics):
