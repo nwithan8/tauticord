@@ -171,11 +171,14 @@ class Session:
     def stream_container_decision(self):
         return self._data['stream_container_decision']
 
-    def build_message(self, count: int):
-        return f"{vars.session_title_message.format(count=vars.emoji_numbers[count - 1], icon=self.status_icon, username=self.username, media_type_icon=self.type_icon, title=self.title)}\n" \
+    def build_message(self, session_number: int):
+        try:
+            return f"{vars.session_title_message.format(count=vars.emoji_numbers[session_number - 1], icon=self.status_icon, username=self.username, media_type_icon=self.type_icon, title=self.title)}\n" \
                f"{vars.session_player_message.format(product=self.product, player=self.player)}\n" \
                f"{vars.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
                f"{vars.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
+        except Exception as e:
+            return f"Could not display data for session {session_number}"
 
 
 class TautulliConnector:
@@ -222,7 +225,7 @@ class TautulliConnector:
                     for session in sessions:
                         try:
                             count += 1
-                            stream_message = session.build_message(count=count).split('\n')
+                            stream_message = session.build_message(session_number=count).split('\n')
                             embed.add_field(name=stream_message[0],
                                             value='\n'.join(stream_message[1:]),
                                             inline=False)
@@ -244,7 +247,7 @@ class TautulliConnector:
                     for session in sessions:
                         try:
                             count += 1
-                            stream_message = session.build_message(count=count)
+                            stream_message = session.build_message(session_number=count)
                             final_message += f"\n{stream_message}\n"
                             session_ids[count] = str(session.id)
                         except ValueError as err:
