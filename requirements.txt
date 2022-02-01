@@ -1,6 +1,6 @@
 discord
 objectrest
 asyncio
-tautulli
+tautulli~=2.0.0
 confuse
 pytz

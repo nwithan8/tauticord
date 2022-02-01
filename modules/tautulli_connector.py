@@ -1,5 +1,5 @@
 import discord
-from tautulli.api import RawAPI
+from tautulli import RawAPI
 
 import modules.vars as vars
 from modules import utils
