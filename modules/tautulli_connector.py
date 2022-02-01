@@ -211,7 +211,7 @@ class TautulliConnector:
         :return: formatted summary message & number of active streams
         """
         global session_ids
-        data = self.api.activity
+        data = self.api.activity()
         if data:
             debug(f"JSON returned by GET request: {data}")
             try:
