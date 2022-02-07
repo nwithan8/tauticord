@@ -16,16 +16,18 @@ class Activity:
     @property
     def stream_count(self):
         value = self._data.get('stream_count', 0)
-        if type(value) is not int:
-            value = 0
-        return int(value)
+        try:
+            return int(value)
+        except:
+            return 0
 
     @property
     def transcode_count(self):
         value = self._data.get('transcode_count', 0)
-        if type(value) is not int:
-            value = 0
-        return int(value)
+        try:
+            return int(value)
+        except:
+            return 0
 
     @property
     def total_bandwidth(self):
