@@ -74,14 +74,18 @@ class Session:
     @property
     def duration_milliseconds(self):
         value = self._data.get('duration', 0)
-        if type(value) is not int:
+        try:
+            value = int(value)
+        except:
             value = 0
         return int(value)
 
     @property
     def location_milliseconds(self):
         value = self._data.get('view_offset', 0)
-        if type(value) is not int:
+        try:
+            value = int(value)
+        except:
             value = 0
         return int(value)
 
@@ -93,8 +97,6 @@ class Session:
 
     @property
     def progress_marker(self):
-        if not self.location_milliseconds or not self.duration_milliseconds:
-            return ""
         current_progress_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.location_milliseconds)
         total_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.duration_milliseconds)
         return f"{current_progress_min_sec}/{total_min_sec}"
@@ -102,7 +104,7 @@ class Session:
     @property
     def eta(self):
         if not self.duration_milliseconds or not self.location_milliseconds:
-            return ""
+            return "Unknown"
         milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
         eta_datetime = utils.now_plus_milliseconds(milliseconds=milliseconds_remaining,
                                                    timezone_code=self._time_settings['timezone'])
@@ -161,8 +163,10 @@ class Session:
     @property
     def bandwidth(self) -> str:
         value = self._data.get('bandwidth', 0)
-        if type(value) is not int:
-            return '0'
+        try:
+            value = int(value)
+        except:
+            value = 0
         return utils.human_bitrate(float(value) * 1024)
 
     @property
