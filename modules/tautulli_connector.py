@@ -23,7 +23,7 @@ class Activity:
 
     @property
     def transcode_count(self):
-        value = self._data.get('transcode_count', 0)
+        value = self._data.get('stream_count_transcode', 0)
         try:
             return int(value)
         except:
@@ -32,16 +32,18 @@ class Activity:
     @property
     def total_bandwidth(self):
         value = self._data.get('total_bandwidth', 0)
-        if type(value) is not int:
+        try:
+            return utils.human_bitrate(float(value) * 1024)
+        except:
             return None
-        return utils.human_bitrate(float(value) * 1024)
 
     @property
     def lan_bandwidth(self):
         value = self._data.get('lan_bandwidth', 0)
-        if type(value) is not int:
+        try:
+            return utils.human_bitrate(float(value) * 1024)
+        except:
             return None
-        return utils.human_bitrate(float(value) * 1024)
 
     @property
     def message(self):
