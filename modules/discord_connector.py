@@ -258,6 +258,30 @@ class DiscordConnector:
             except Exception as e:
                 pass
 
+    async def edit_lan_bandwidth_voice_channel(self, channel_name: str, size: int):
+        info(f"Updating {channel_name} voice channel with new bandwidth")
+        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
+                                                                  channel_type="voice")
+        if not channel:
+            error(f"Could not load {channel_name} channel")
+        else:
+            try:
+                await channel.edit(name=f"{channel_name}: {size}")
+            except Exception as e:
+                pass
+
+    async def edit_wan_bandwidth_voice_channel(self, channel_name: str, size: int):
+        info(f"Updating {channel_name} voice channel with new bandwidth")
+        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
+                                                                  channel_type="voice")
+        if not channel:
+            error(f"Could not load {channel_name} channel")
+        else:
+            try:
+                await channel.edit(name=f"{channel_name}: {size}")
+            except Exception as e:
+                pass
+
     async def edit_stream_count_voice_channel(self, channel_name: str, count: int):
         info(f"Updating {channel_name} voice channel with new stream count")
         channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
@@ -296,7 +320,11 @@ class DiscordConnector:
                 await self.edit_stream_count_voice_channel(channel_name="Current Transcodes",
                                                            count=activity.transcode_count)
             if self.tautulli.voice_channel_settings.get('bandwidth', False):
-                await self.edit_bandwidth_voice_channel(channel_name="Bandwidth", size=activity.total_bandwidth)
+                await self.edit_bandwidth_voice_channel(channel_name="Total Tx", size=activity.total_bandwidth)
+            if self.tautulli.voice_channel_settings.get('lanbandwidth', False):
+                await self.edit_lan_bandwidth_voice_channel(channel_name="LAN Tx", size=activity.lan_bandwidth)
+            if self.tautulli.voice_channel_settings.get('wanbandwidth', False):
+                await self.edit_wan_bandwidth_voice_channel(channel_name="WAN Tx", size=activity.wan_bandwidth)
 
     @tasks.loop(hours=1.0)
     async def update_libraries(self):

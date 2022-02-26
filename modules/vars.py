@@ -15,6 +15,7 @@ sessions_message = """{stream_count} {word}"""
 transcodes_message = """{transcode_count} {word}"""
 bandwidth_message = """🌐 {bandwidth}"""
 lan_bandwidth_message = """(🏠 {bandwidth})"""
+wan_bandwidth_message = """(🏝️ {bandwidth})"""
 
 session_title_message = """{count} | {icon} {media_type_icon} {username}: *{title}*"""
 session_player_message = """__Player__: {product} ({player})"""

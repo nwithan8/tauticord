@@ -36,6 +36,8 @@ class Config:
             'count': _settings.get('StreamCount', False),
             'transcodes': _settings.get('TranscodeCount', False),
             'bandwidth': _settings.get('Bandwidth', False),
+            'lanbandwidth': _settings.get('WANBandwidth', False),
+            'wanbandwidth': _settings.get('LANBandwidth', False),
             'stats': _settings.get('LibraryStats', False),
             'libraries': _settings.get('LibraryNames', [])
         }

@@ -46,6 +46,14 @@ class Activity:
             return None
 
     @property
+    def wan_bandwidth(self):
+        value = self._data.get('wan_bandwidth', 0)
+        try:
+            return utils.human_bitrate(float(value) * 1024)
+        except:
+            return None
+
+    @property
     def message(self):
         overview_message = ""
         if self.stream_count > 0:
@@ -59,7 +67,8 @@ class Activity:
             overview_message += f" | {vars.bandwidth_message.format(bandwidth=self.total_bandwidth)}"
             if self.lan_bandwidth:
                 overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=self.lan_bandwidth)}"
-
+            if self.wan_bandwidth:
+                overview_message += f" {vars.wan_bandwidth_message.format(bandwidth=self.wan_bandwidth)}"
         return overview_message
 
     @property
