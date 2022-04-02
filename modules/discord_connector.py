@@ -4,7 +4,7 @@ import sys
 import discord
 from discord.ext import tasks
 
-import modules.vars as vars
+import modules.statics as statics
 from modules.logs import *
 
 
@@ -47,7 +47,7 @@ async def add_emoji_number_reactions(message, count):
     emoji_to_remove = []
 
     for i, e in enumerate(msg_emoji):
-        if i >= count or i != vars.emoji_numbers.index(e):
+        if i >= count or i != statics.emoji_numbers.index(e):
             emoji_to_remove.append(e)
 
     # if all reactions need to be removed, do it all at once
@@ -60,8 +60,8 @@ async def add_emoji_number_reactions(message, count):
             del (msg_emoji[msg_emoji.index(e)])
 
     for i in range(0, count):
-        if vars.emoji_numbers[i] not in msg_emoji:
-            await message.add_reaction(vars.emoji_numbers[i])
+        if statics.emoji_numbers[i] not in msg_emoji:
+            await message.add_reaction(statics.emoji_numbers[i])
 
 
 async def send_starter_message(tautulli_connector, discord_channel):
@@ -168,7 +168,7 @@ class DiscordConnector:
                 if reaction.count > 1:
                     async for user in reaction.users():
                         if user.id == self.owner_id:
-                            loc = vars.emoji_numbers.index(str(reaction.emoji))
+                            loc = statics.emoji_numbers.index(str(reaction.emoji))
                             debug(f"Stopping stream {loc}...")
                             stopped_message = self.tautulli.stop_stream(stream_number=loc)
                             info(stopped_message)
@@ -180,7 +180,7 @@ class DiscordConnector:
 
             def check(reaction, user):
                 return user.id == self.owner_id and reaction.message.id == new_message.id and str(
-                    reaction.emoji) in vars.emoji_numbers
+                    reaction.emoji) in statics.emoji_numbers
 
             try:
                 reaction, user = await self.client.wait_for('reaction_add', timeout=float(self.refresh_time),
@@ -188,7 +188,7 @@ class DiscordConnector:
             except asyncio.TimeoutError as e:
                 pass
             else:
-                loc = vars.emoji_numbers.index(str(reaction.emoji))
+                loc = statics.emoji_numbers.index(str(reaction.emoji))
                 debug(f"Stopping stream {loc}...")
                 stopped_message = self.tautulli.stop_stream(stream_number=loc)
                 info(stopped_message)

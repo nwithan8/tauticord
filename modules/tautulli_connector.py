@@ -1,7 +1,7 @@
 import discord
 from tautulli import RawAPI
 
-import modules.vars as vars
+import modules.statics as statics
 from modules import utils
 from modules.logs import *
 
@@ -49,16 +49,16 @@ class Activity:
     def message(self):
         overview_message = ""
         if self.stream_count > 0:
-            overview_message += vars.sessions_message.format(stream_count=self.stream_count,
+            overview_message += statics.sessions_message.format(stream_count=self.stream_count,
                                                              word=utils.make_plural(word='stream',
                                                                                     count=self.stream_count))
             if self.transcode_count > 0:
-                overview_message += f" ({vars.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
+                overview_message += f" ({statics.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
 
         if self.total_bandwidth:
-            overview_message += f" | {vars.bandwidth_message.format(bandwidth=self.total_bandwidth)}"
+            overview_message += f" | {statics.bandwidth_message.format(bandwidth=self.total_bandwidth)}"
             if self.lan_bandwidth:
-                overview_message += f" {vars.lan_bandwidth_message.format(bandwidth=self.lan_bandwidth)}"
+                overview_message += f" {statics.lan_bandwidth_message.format(bandwidth=self.lan_bandwidth)}"
 
         return overview_message
 
@@ -129,15 +129,15 @@ class Session:
         Get icon for a stream state
         :return: emoji icon
         """
-        return vars.switcher.get(self._data['state'], "")
+        return statics.switcher.get(self._data['state'], "")
 
     @property
     def type_icon(self):
-        if self._data['media_type'] in vars.media_type_icons:
-            return vars.media_type_icons[self._data['media_type']]
+        if self._data['media_type'] in statics.media_type_icons:
+            return statics.media_type_icons[self._data['media_type']]
         # thanks twilsonco
         elif self._data.get('live'):
-            return vars.media_type_icons['live']
+            return statics.media_type_icons['live']
         else:
             info("New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
             return '🎁'
@@ -181,10 +181,10 @@ class Session:
 
     def build_message(self, session_number: int):
         try:
-            return f"{vars.session_title_message.format(count=vars.emoji_numbers[session_number - 1], icon=self.status_icon, username=self.username, media_type_icon=self.type_icon, title=self.title)}\n" \
-               f"{vars.session_player_message.format(product=self.product, player=self.player)}\n" \
-               f"{vars.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
-               f"{vars.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
+            return f"{statics.session_title_message.format(count=statics.emoji_numbers[session_number - 1], icon=self.status_icon, username=self.username, media_type_icon=self.type_icon, title=self.title)}\n" \
+               f"{statics.session_player_message.format(product=self.product, player=self.player)}\n" \
+               f"{statics.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
+               f"{statics.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
         except Exception as e:
             return f"Could not display data for session {session_number}"
 

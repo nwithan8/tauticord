@@ -1,6 +1,6 @@
-discord
-objectrest
-asyncio
-tautulli~=2.0.0
-confuse
-pytz
+py-cord
+objectrest==1.2.0
+asyncio~=3.4.3
+tautulli==2.1.0.294
+confuse~=1.7.0
+pytz==2022.1
