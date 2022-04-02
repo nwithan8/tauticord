@@ -1,13 +1,13 @@
-# Copyright 2021 by Nathan Harris.
+# Copyright 2022, Nathan Harris.
 # All rights reserved.
 # Tauticord is released as-is under the "GNU General Public License".
 # Please see the LICENSE file that should have been included as part of this package.
 
+import modules.analytics as GA
+import modules.discord_connector as discord
+import modules.tautulli_connector as tautulli
 from modules import config_parser
 from modules.logs import *
-import modules.tautulli_connector as tautulli
-import modules.discord_connector as discord
-import modules.analytics as GA
 
 config = config_parser.Config(app_name="Tauticord", config_path="config.yaml")
 
@@ -21,7 +21,9 @@ if __name__ == '__main__':
     info("Starting application...")
     t = tautulli.TautulliConnector(base_url=config.tautulli_connection_details['URL'],
                                    api_key=config.tautulli_connection_details['APIKey'],
-                                   terminate_message=config.tautulli_customization_details.get('TerminateMessage', "Your stream has ended."),
+                                   terminate_message=config.tautulli_customization_details.get(
+                                       'TerminateMessage', "Your stream has ended."
+                                   ),
                                    analytics=analytics,
                                    use_embeds=config.discord_customization_details.get('UseEmbeds', True),
                                    plex_pass=config.tautulli_customization_details.get('PlexPass', False),

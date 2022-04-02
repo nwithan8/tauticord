@@ -50,8 +50,8 @@ class Activity:
         overview_message = ""
         if self.stream_count > 0:
             overview_message += statics.sessions_message.format(stream_count=self.stream_count,
-                                                             word=utils.make_plural(word='stream',
-                                                                                    count=self.stream_count))
+                                                                word=utils.make_plural(word='stream',
+                                                                                       count=self.stream_count))
             if self.transcode_count > 0:
                 overview_message += f" ({statics.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
 
@@ -182,9 +182,9 @@ class Session:
     def build_message(self, session_number: int):
         try:
             return f"{statics.session_title_message.format(count=statics.emoji_numbers[session_number - 1], icon=self.status_icon, username=self.username, media_type_icon=self.type_icon, title=self.title)}\n" \
-               f"{statics.session_player_message.format(product=self.product, player=self.player)}\n" \
-               f"{statics.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
-               f"{statics.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
+                   f"{statics.session_player_message.format(product=self.product, player=self.player)}\n" \
+                   f"{statics.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
+                   f"{statics.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
         except Exception as e:
             return f"Could not display data for session {session_number}"
 

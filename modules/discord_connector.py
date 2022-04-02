@@ -119,7 +119,10 @@ class DiscordConnector:
 
         await self.update_voice_channels(activity)
 
-        # For performance and aesthetics, edit the old message if 1) the old message is the newest message in the channel, or 2) if the only messages that are newer were written by this bot (which would be stream stop messages that have already been deleted)
+        # For performance and aesthetics, edit the old message if
+        # 1) the old message is the newest message in the channel, or
+        # 2) if the only messages that are newer were written by this bot
+        # (which would be stream stop messages that have already been deleted)
         use_old_message = False
         async for msg in self.tautulli_channel.history(limit=100):
             if msg.author != self.client.user:
@@ -131,7 +134,7 @@ class DiscordConnector:
 
         if use_old_message:
             if self.use_embeds:
-                if not activity:  # error when refreshing Tautulli data, new_message is a string (i.e. "Connection lost")
+                if not activity:  # error when refreshing Tautulli data, new_message is string (i.e. "Connection lost")
                     debug("Editing old message with Tautulli error...")
                     await previous_message.edit(content=new_message, embed=None)
                 elif len(previous_message.embeds) == 0 or new_message.to_dict() != previous_message.embeds[0].to_dict():
