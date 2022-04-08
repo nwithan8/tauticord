@@ -23,7 +23,7 @@ async def start_bot(discord_connector, analytics):
         message = await discord_connector.edit_message(previous_message=message)
 
 
-async def add_emoji_number_reactions(message, count):
+async def add_emoji_number_reactions(message: discord.Message, count: int):
     """
     Add number reactions to a message for user interaction
     :param message: message to add emojis to
@@ -75,6 +75,26 @@ async def send_starter_message(tautulli_connector, discord_channel):
         await discord_channel.send(content="Welcome to Tauticord!")
 
 
+async def send_message(content=None, embed: discord.Embed = None, message: discord.Message = None,
+                       channel: discord.TextChannel = None):
+    """
+    Send or edit a message.
+    :param content: Contents of the message to send
+    :param embed: Embed to send
+    :param message: Message to edit
+    :param channel: Channel to send the message to
+    :return: Message sent
+    """
+    # if neither channel nor message is specified, throw an error
+    if not channel and not message:
+        raise ValueError("Must specify either a channel or a message")
+    if message:  # if message exists, use it to edit the message
+        await message.edit(content=content, embed=embed)
+        return message
+    else:  # otherwise, send a new message in the channel
+        return await channel.send(content=content, embed=embed)
+
+
 class DiscordConnector:
     def __init__(self,
                  token: str,
@@ -119,10 +139,12 @@ class DiscordConnector:
 
         await self.update_voice_channels(activity)
 
-        # For performance and aesthetics, edit the old message if
-        # 1) the old message is the newest message in the channel, or
-        # 2) if the only messages that are newer were written by this bot
-        # (which would be stream stop messages that have already been deleted)
+        """
+        For performance and aesthetics, edit the old message if:
+        1) the old message is the newest message in the channel, or
+        2) if the only messages that are newer were written by this bot 
+        (which would be stream stop messages that have already been deleted)
+        """
         use_old_message = False
         async for msg in self.tautulli_channel.history(limit=100):
             if msg.author != self.client.user:
@@ -133,34 +155,40 @@ class DiscordConnector:
                 break
 
         if use_old_message:
-            if self.use_embeds:
-                if not activity:  # error when refreshing Tautulli data, new_message is string (i.e. "Connection lost")
-                    debug("Editing old message with Tautulli error...")
-                    await previous_message.edit(content=new_message, embed=None)
-                elif len(previous_message.embeds) == 0 or new_message.to_dict() != previous_message.embeds[0].to_dict():
-                    debug("Editing old message...")
-                    await previous_message.edit(embed=new_message,
-                                                content=None)  # reset content to None to remove startup message
-                else:
-                    debug("No change needed.")
+            # reuse the old message to avoid spamming the channel
+            debug('Using old message...')
+            if not activity:
+                # error when refreshing Tautulli data, new_message is string (i.e. "Connection lost")
+                debug("Editing old message with Tautulli error...")
+                new_message = await send_message(content=new_message, message=previous_message)
+                # edit the previous message, regardless of whether the content has changed
             else:
-                if previous_message.content != new_message:
-                    debug("Editing old message...")
-                    await previous_message.edit(content=new_message, embed=None)
-                else:
-                    debug("No change needed.")
-            new_message = previous_message
+                # update the message regardless of whether the content has changed
+                debug('Editing old message...')
+                new_message = await send_message(content=None if self.use_embeds else new_message,
+                                                 embed=new_message if self.use_embeds else None,
+                                                 message=previous_message)
         else:
-            debug("Sending new message...")
+            # send a new message each time
+            # first, attempt to delete the start-up message if it exists
             try:
                 await previous_message.delete()
-            except Exception as e:
-                debug(f"Failed to delete old (specified) message: {e}")
+            except Exception as delete_exception:
+                debug(f"Failed to delete old (specified) message: {delete_exception}")
                 await self.tautulli_channel.purge(check=self.is_me)
-            if self.use_embeds:
-                new_message = await self.tautulli_channel.send(embed=new_message)
+            # send new message
+            debug("Using new message...")
+            if not activity:
+                # error when refreshing Tautulli data, new_message is string (i.e. "Connection lost")
+                debug("Sending new message with Tautulli error...")
+                new_message = await send_message(content=new_message, channel=self.tautulli_channel)
+                # send a new message, regardless of whether the content has changed
             else:
-                new_message = await self.tautulli_channel.send(content=new_message)
+                # send a new message, regardless of whether the content has changed
+                debug('Sending new message...')
+                new_message = await send_message(content=None if self.use_embeds else new_message,
+                                                 embed=new_message if self.use_embeds else None,
+                                                 channel=self.tautulli_channel)
 
         if self.tautulli.plex_pass:
             await add_emoji_number_reactions(message=new_message, count=count)
@@ -246,7 +274,7 @@ class DiscordConnector:
         else:
             try:
                 await channel.edit(name=f"{channel_name}: {count}")
-            except Exception as e:
+            except Exception as voice_channel_edit_error:
                 pass
 
     async def edit_bandwidth_voice_channel(self, channel_name: str, size: int):
@@ -258,7 +286,7 @@ class DiscordConnector:
         else:
             try:
                 await channel.edit(name=f"{channel_name}: {size}")
-            except Exception as e:
+            except Exception as voice_channel_edit_error:
                 pass
 
     async def edit_stream_count_voice_channel(self, channel_name: str, count: int):
@@ -270,7 +298,7 @@ class DiscordConnector:
         else:
             try:
                 await channel.edit(name=f"{channel_name}: {count}")
-            except Exception as e:
+            except Exception as voice_channel_edit_error:
                 pass
 
     async def get_old_message_in_tautulli_channel(self):

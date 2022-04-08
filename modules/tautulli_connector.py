@@ -216,7 +216,7 @@ class TautulliConnector:
     def refresh_data(self):
         """
         Parse activity JSON from Tautulli, prepare summary message for Discord
-        :return: formatted summary message & number of active streams
+        :return: formatted summary message or embed, number of active streams and activity data
         """
         global session_ids
         data = self.api.activity()
