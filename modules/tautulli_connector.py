@@ -226,6 +226,7 @@ class TautulliStreamInfo:
         try:
             return f"{self.player}\n{self.details}\n{self.progress}"
         except Exception as body_exception:
+            error(body_exception)
             return f"Could not display data for session {self._session_number}"
 
 
