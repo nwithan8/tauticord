@@ -1,3 +1,5 @@
+from typing import List, Tuple, Union
+
 import discord
 from tautulli import RawAPI
 
@@ -179,14 +181,81 @@ class Session:
     def stream_container_decision(self):
         return self._data['stream_container_decision']
 
-    def build_message(self, session_number: int):
+    def _session_title(self, session_number: int):
+        return statics.session_title_message.format(count=statics.emoji_numbers[session_number - 1],
+                                                    icon=self.status_icon, username=self.username,
+                                                    media_type_icon=self.type_icon, title=self.title)
+
+    def _session_player(self):
+        return statics.session_player_message.format(product=self.product, player=self.player)
+
+    def _session_details(self):
+        return statics.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth,
+                                                      transcoding=self.transcoding_stub)
+
+    def _session_progress(self):
+        return statics.session_progress_message.format(progress=self.progress_marker, eta=self.eta)
+
+
+class TautulliStreamInfo:
+    def __init__(self, session: Session, session_number: int):
+        self._session = session
+        self._session_number = session_number
+
+    @property
+    def title(self):
         try:
-            return f"{statics.session_title_message.format(count=statics.emoji_numbers[session_number - 1], icon=self.status_icon, username=self.username, media_type_icon=self.type_icon, title=self.title)}\n" \
-                   f"{statics.session_player_message.format(product=self.product, player=self.player)}\n" \
-                   f"{statics.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth, transcoding=self.transcoding_stub)}\n" \
-                   f"{statics.session_progress_message.format(progress=self.progress_marker, eta=self.eta)}"
-        except Exception as e:
-            return f"Could not display data for session {session_number}"
+            return self._session._session_title(session_number=self._session_number)
+        except Exception as title_exception:
+            return "Unknown"
+
+    @property
+    def player(self):
+        return self._session._session_player()
+
+    @property
+    def details(self):
+        return self._session._session_details()
+
+    @property
+    def progress(self):
+        return self._session._session_progress()
+
+    @property
+    def body(self):
+        try:
+            return f"{self.player}\n{self.details}\n{self.progress}"
+        except Exception as body_exception:
+            return f"Could not display data for session {self._session_number}"
+
+
+class TautulliDataResponse:
+    def __init__(self, overview_message: str, streams_info: List[TautulliStreamInfo] = None, plex_pass: bool = False,
+                 error_occurred: bool = False):
+        self._overview_message = overview_message
+        self._streams = streams_info or []
+        self.plex_pass = plex_pass
+        self.error = error_occurred
+
+    @property
+    def embed(self):
+        if len(self._streams) <= 0:
+            return discord.Embed(title="No current activity")
+        embed = discord.Embed(title=self._overview_message)
+        for stream in self._streams:
+            embed.add_field(name=stream.title, value=stream.body, inline=False)
+        if self.plex_pass:
+            embed.set_footer(text=f"To terminate a stream, react with the stream number.")
+        return embed
+
+    @property
+    def message(self):
+        if len(self._streams) <= 0:
+            return "No current activity."
+        final_message = f"{self._overview_message}\n"
+        for stream in self._streams:
+            final_message += f"{stream.title}\n{stream.body}\n"
+        final_message += f"\nTo terminate a stream, react with the stream number."
 
 
 class TautulliConnector:
@@ -213,10 +282,10 @@ class TautulliConnector:
         error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
-    def refresh_data(self):
+    def refresh_data(self) -> Tuple[TautulliDataResponse, int, Union[Activity, None]]:
         """
         Parse activity JSON from Tautulli, prepare summary message for Discord
-        :return: formatted summary message or embed, number of active streams and activity data
+        :return: data wrapper, number of active streams and activity data
         """
         global session_ids
         data = self.api.activity()
@@ -224,56 +293,26 @@ class TautulliConnector:
             debug(f"JSON returned by GET request: {data}")
             try:
                 activity = Activity(activity_data=data, time_settings=self.time_settings)
-                overview_message = activity.message
                 sessions = activity.sessions
                 count = 0
                 session_ids = {}
-                if self.use_embeds:
-                    embed = discord.Embed(title=overview_message)
-                    for session in sessions:
-                        try:
-                            count += 1
-                            stream_message = session.build_message(session_number=count).split('\n')
-                            embed.add_field(name=stream_message[0],
-                                            value='\n'.join(stream_message[1:]),
-                                            inline=False)
-                            session_ids[count] = str(session.id)
-                        except ValueError as err:
-                            self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
-                            pass
-                        if count >= 9:
-                            break
-                    if int(activity.stream_count) > 0:
-                        if self.plex_pass:
-                            embed.set_footer(text=f"To terminate a stream, react with the stream number.")
-                    else:
-                        embed = discord.Embed(title="No current activity")
-                    debug(f"Count: {count}")
-                    return embed, count, activity
-                else:
-                    final_message = f"{overview_message}\n"
-                    for session in sessions:
-                        try:
-                            count += 1
-                            stream_message = session.build_message(session_number=count)
-                            final_message += f"\n{stream_message}\n"
-                            session_ids[count] = str(session.id)
-                        except ValueError as err:
-                            self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
-                            pass
-                        if count >= 9:
-                            break
-                    if int(activity.stream_count) > 0:
-                        if self.plex_pass:
-                            final_message += f"\nTo terminate a stream, react with the stream number."
-                    else:
-                        final_message = "No current activity."
-                    debug(f"Count: {count}\n"
-                          f"Final message: {final_message}")
-                    return final_message, count, activity
+                session_details = []
+                for session in sessions:
+                    try:
+                        count += 1
+                        session_details.append(TautulliStreamInfo(session=session, session_number=count))
+                        session_ids[count] = str(session.id)
+                    except ValueError as err:
+                        self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
+                        pass
+                    if count >= 9:
+                        break
+                debug(f"Count: {count}")
+                return TautulliDataResponse(overview_message=activity.message, streams_info=session_details,
+                                            plex_pass=self.plex_pass), count, activity
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
-        return "**Connection lost.**", 0, None
+        return TautulliDataResponse(overview_message="**Connection lost.**", error_occurred=True), 0, None
 
     def stop_stream(self, stream_number):
         """

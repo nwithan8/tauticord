@@ -6,6 +6,7 @@ from discord.ext import tasks
 
 import modules.statics as statics
 from modules.logs import *
+from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 
 
 async def start_bot(discord_connector, analytics):
@@ -75,12 +76,12 @@ async def send_starter_message(tautulli_connector, discord_channel):
         await discord_channel.send(content="Welcome to Tauticord!")
 
 
-async def send_message(content=None, embed: discord.Embed = None, message: discord.Message = None,
+async def send_message(content: TautulliDataResponse, embed: bool = False, message: discord.Message = None,
                        channel: discord.TextChannel = None):
     """
     Send or edit a message.
     :param content: Contents of the message to send
-    :param embed: Embed to send
+    :param embed: Whether to use embeds
     :param message: Message to edit
     :param channel: Channel to send the message to
     :return: Message sent
@@ -89,10 +90,16 @@ async def send_message(content=None, embed: discord.Embed = None, message: disco
     if not channel and not message:
         raise ValueError("Must specify either a channel or a message")
     if message:  # if message exists, use it to edit the message
-        await message.edit(content=content, embed=embed)
+        if embed:
+            await message.edit(embed=content.embed)
+        else:
+            await message.edit(content=content.message)
         return message
     else:  # otherwise, send a new message in the channel
-        return await channel.send(content=content, embed=embed)
+        if embed:
+            return await channel.send(embed=content.embed)
+        else:
+            return await channel.send(content=content.message)
 
 
 class DiscordConnector:
@@ -102,7 +109,7 @@ class DiscordConnector:
                  owner_id: int,
                  refresh_time: int,
                  tautulli_channel_name: str,
-                 tautulli_connector,
+                 tautulli_connector: TautulliConnector,
                  analytics,
                  use_embeds: bool):
         self.token = token
@@ -135,7 +142,7 @@ class DiscordConnector:
         :param previous_message: discord.Message to replace
         :return: new discord.Message
         """
-        new_message, count, activity = self.tautulli.refresh_data()
+        data_wrapper, count, activity = self.tautulli.refresh_data()
 
         await self.update_voice_channels(activity)
 
@@ -157,17 +164,15 @@ class DiscordConnector:
         if use_old_message:
             # reuse the old message to avoid spamming the channel
             debug('Using old message...')
-            if not activity:
+            if not activity or data_wrapper.error:
                 # error when refreshing Tautulli data, new_message is string (i.e. "Connection lost")
                 debug("Editing old message with Tautulli error...")
-                new_message = await send_message(content=new_message, message=previous_message)
-                # edit the previous message, regardless of whether the content has changed
             else:
-                # update the message regardless of whether the content has changed
                 debug('Editing old message...')
-                new_message = await send_message(content=None if self.use_embeds else new_message,
-                                                 embed=new_message if self.use_embeds else None,
-                                                 message=previous_message)
+            # update the message regardless of whether the content has changed
+            new_message = await send_message(content=data_wrapper,
+                                             embed=self.use_embeds,
+                                             message=previous_message)
         else:
             # send a new message each time
             # first, attempt to delete the start-up message if it exists
@@ -178,19 +183,16 @@ class DiscordConnector:
                 await self.tautulli_channel.purge(check=self.is_me)
             # send new message
             debug("Using new message...")
-            if not activity:
+            if not activity or data_wrapper.error:
                 # error when refreshing Tautulli data, new_message is string (i.e. "Connection lost")
                 debug("Sending new message with Tautulli error...")
-                new_message = await send_message(content=new_message, channel=self.tautulli_channel)
-                # send a new message, regardless of whether the content has changed
             else:
-                # send a new message, regardless of whether the content has changed
                 debug('Sending new message...')
-                new_message = await send_message(content=None if self.use_embeds else new_message,
-                                                 embed=new_message if self.use_embeds else None,
-                                                 channel=self.tautulli_channel)
+            # send a new message, regardless of whether the content has changed
+            new_message = await send_message(content=data_wrapper, channel=self.tautulli_channel,
+                                             embed=self.use_embeds)
 
-        if self.tautulli.plex_pass:
+        if data_wrapper.plex_pass:
             await add_emoji_number_reactions(message=new_message, count=count)
 
             # check to see if the user clicked a reaction *while* they were being added
