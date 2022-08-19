@@ -340,15 +340,17 @@ class TautulliConnector:
         error(f"Could not get ID for library {library_name}")
         return None
 
-    def get_library_stats(self, library_name: str):
+    def get_library_info(self, library_name: str):
         info(f"Collecting stats about library {library_name}")
         library_id = self.get_library_id(library_name=library_name)
         if not library_id:
             return None
-        return self.api.get_library(section_id=library_id)
+        return self.api.get_library_media_info(section_id=library_id)
 
     def get_library_item_count(self, library_name: str):
-        stats = self.get_library_stats(library_name=library_name)
-        if not stats:
+        library_info = self.get_library_info(library_name=library_name)
+        if not library_info:
             return 0
-        return stats.get('count', 0)
+        if library_info.get('section_type') == 'artist':
+            return library_info.get('child_count')  # child_count is the number of tracks
+        return library_info.get('count', 0)

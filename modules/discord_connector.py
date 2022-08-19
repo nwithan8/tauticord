@@ -245,7 +245,7 @@ class DiscordConnector:
             if channel.name.startswith(starting_channel_name):
                 return channel
         try:
-            guild = self.client.get_guild(self.guild_id)
+            guild = self.client.get_guild(self.guild_id)  # stupid positional-only parameters
             if channel_type == 'voice':
                 return await guild.create_voice_channel(name=starting_channel_name)
             else:
@@ -259,7 +259,7 @@ class DiscordConnector:
                 return channel
         error(f"Could not load {channel_name} channel. Attempting to create...")
         try:
-            guild = self.client.get_guild(self.guild_id)
+            guild = self.client.get_guild(self.guild_id)  # stupid positional-only parameters
             if channel_type == 'voice':
                 return await guild.create_voice_channel(name=channel_name)
             else:
