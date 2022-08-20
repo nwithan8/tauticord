@@ -121,7 +121,7 @@ class DiscordConnector:
         self.tautulli = tautulli_connector
         self.analytics = analytics
         self.use_embeds = use_embeds
-        self.client = discord.Client()
+        self.client = discord.Client(intents=discord.Intents.default())
         self.on_ready = self.client.event(self.on_ready)
 
     async def on_ready(self):

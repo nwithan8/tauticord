@@ -3,4 +3,4 @@ objectrest~=1.2
 asyncio~=3.4
 tautulli~=2.1
 confuse~=1.7
-pytz~=2022.2
+pytz~=2022.1
