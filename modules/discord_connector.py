@@ -330,6 +330,12 @@ class DiscordConnector:
                                                            count=activity.transcode_count)
             if self.tautulli.voice_channel_settings.get('bandwidth', False):
                 await self.edit_bandwidth_voice_channel(channel_name="Bandwidth", size=activity.total_bandwidth)
+            if self.tautulli.voice_channel_settings.get('localBandwidth', False):
+                await self.edit_bandwidth_voice_channel(channel_name="Local Bandwidth",
+                                                        size=activity.lan_bandwidth)
+            if self.tautulli.voice_channel_settings.get('remoteBandwidth', False):
+                await self.edit_bandwidth_voice_channel(channel_name="Remote Bandwidth",
+                                                        size=activity.wan_bandwidth)
 
     @tasks.loop(hours=1.0)
     async def update_libraries(self):

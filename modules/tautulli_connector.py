@@ -48,6 +48,18 @@ class Activity:
             return None
 
     @property
+    def wan_bandwidth(self):
+        total = self._data.get('total_bandwidth', 0)
+        lan = self._data.get('lan_bandwidth', 0)
+        value = total - lan
+        try:
+            return utils.human_bitrate(float(value) * 1024)
+        except:
+            return None
+
+
+
+    @property
     def message(self):
         overview_message = ""
         if self.stream_count > 0:

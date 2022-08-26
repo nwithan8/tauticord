@@ -17,6 +17,8 @@ Tautulli:
       StreamCount: false
       TranscodeCount: false
       Bandwidth: false
+      LanBandwidth: false
+      RemoteBandwidth: false
       LibraryStats: false
       LibraryNames:
         # list of names of the libraries you'd like stats about
