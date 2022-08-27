@@ -357,7 +357,7 @@ class TautulliConnector:
         library_id = self.get_library_id(library_name=library_name)
         if not library_id:
             return None
-        return self.api.get_library_media_info(section_id=library_id)
+        return self.api.get_library(section_id=library_id)
 
     def get_library_item_count(self, library_name: str):
         library_info = self.get_library_info(library_name=library_name)
