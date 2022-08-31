@@ -1,7 +1,7 @@
 from typing import List, Tuple, Union
 
 import discord
-from tautulli import RawAPI
+import tautulli
 
 import modules.statics as statics
 from modules import utils
@@ -283,7 +283,7 @@ class TautulliConnector:
                  time_settings: dict):
         self.base_url = base_url
         self.api_key = api_key
-        self.api = RawAPI(base_url=base_url, api_key=api_key)
+        self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key)
         self.terminate_message = terminate_message
         self.analytics = analytics
         self.use_embeds = use_embeds
