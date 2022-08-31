@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-  pull_request: ~
 jobs:
   update_contributors:
     name: Add all Contributors to README
