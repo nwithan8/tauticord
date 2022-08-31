@@ -202,9 +202,10 @@ class Config:
     def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True):
         self.config = confuse.Configuration(app_name)
         self.pull_from_env = False
+        # noinspection PyBroadException
         try:
             self.config.set_file(filename=config_path)
-        except FileNotFoundError:
+        except Exception:  # pylint: disable=broad-except # not sure what confuse will throw
             if not fallback_to_env:
                 raise FileNotFoundError(f"Config file not found: {config_path}")
             self.pull_from_env = True
