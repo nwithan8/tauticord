@@ -1,6 +1,12 @@
 FROM python:latest
 WORKDIR /app
-COPY requirements.txt ./
+
+# Install dependencies
+COPY ../requirements.txt ./
 RUN pip3 install -r requirements.txt
-COPY ./ /app
+
+# Copy source code
+COPY .. /app
+
+# Run the app
 CMD [ "python", "./Tauticord.py" ]

@@ -1,0 +1,40 @@
+name: Build & Publish to Docker Hub
+on:
+  release:
+    types: [ created ]
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+jobs:
+  build_and_push:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[no build]') == false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        id: docker-buildx
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          builder: ${{ steps.docker-buildx.outputs.name }}
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: |
+            nwithan8/tauticord:latest
+            nwithan8/tauticord:${{ github.ref_name }}
