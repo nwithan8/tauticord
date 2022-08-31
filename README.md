@@ -81,3 +81,18 @@ Tauticord uses Google Analytics to collect statistics such as common errors that
 
 # To come
 This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request.
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+### Contributors
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
