@@ -215,4 +215,4 @@ class Config:
         try:
             self.log_level = self.config['logLevel'].get() or "INFO"
         except confuse.NotFoundError:
-            self.log_level = "WARN"
+            self.log_level = "WARN"  # will only be WARN when pulling config from env (i.e. Docker)
