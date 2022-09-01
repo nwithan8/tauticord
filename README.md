@@ -56,7 +56,7 @@ Run the script with the following command:
 	python3 Tauticord.py
 	
 # Docker
-You can also run Tauticord as a Docker container. The Dockerfile is included in this repository, or can be pulled from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord).
+You can also run Tauticord as a Docker container. The Dockerfile is included in this repository, or can be pulled from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord) or [GitHub Packages](https://github.com/nwithan8?tab=packages&repo_name=tauticord).
 
 You will need to set the following environment variables:
 
