@@ -31,6 +31,9 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=today::$(date +'%Y-%m-%d')
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         id: docker-buildx
@@ -55,6 +58,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
+          platforms: linux/amd64,linux/armhf,linux/arm64
           tags: |
             nwithan8/tauticord:latest
             nwithan8/tauticord:${{ steps.vars.outputs.version }}
