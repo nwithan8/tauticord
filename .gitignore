@@ -139,3 +139,4 @@ cython_debug/
 
 # Custom
 config.yaml
+/docker-compose_test.yml

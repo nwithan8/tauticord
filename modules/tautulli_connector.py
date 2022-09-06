@@ -5,7 +5,7 @@ import tautulli
 
 import modules.statics as statics
 from modules import utils
-from modules.logs import *
+from modules.logs import info, debug, error
 
 session_ids = {}
 

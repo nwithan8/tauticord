@@ -5,7 +5,7 @@ import discord
 from discord.ext import tasks
 
 import modules.statics as statics
-from modules.logs import *
+from modules.logs import info, debug, error
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 
 

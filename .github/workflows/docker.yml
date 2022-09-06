@@ -56,7 +56,7 @@ jobs:
         with:
           builder: ${{ steps.docker-buildx.outputs.name }}
           context: .
-          file: ./docker/Dockerfile
+          file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/armhf,linux/arm64
           tags: |
