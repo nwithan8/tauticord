@@ -77,8 +77,9 @@ class TautulliConfig(ConfigSection):
 
     @property
     def refresh_interval(self) -> int:
-        return self._customization._get_value(key='RefreshSeconds', default=15,
-                                              env_name_override="TC_REFRESH_SECONDS")
+        value = self._customization._get_value(key='RefreshSeconds', default=15,
+                                               env_name_override="TC_REFRESH_SECONDS")
+        return int(value)
 
     @property
     def terminate_message(self) -> str:
