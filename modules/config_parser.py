@@ -167,12 +167,14 @@ class DiscordConfig(ConfigSection):
         return self._connection._get_value(key="BotToken", env_name_override="TC_DISCORD_BOT_TOKEN")
 
     @property
-    def server_id(self) -> str:
-        return self._connection._get_value(key="ServerID", env_name_override="TC_DISCORD_SERVER_ID")
+    def server_id(self) -> int:
+        value = self._connection._get_value(key="ServerID", env_name_override="TC_DISCORD_SERVER_ID")
+        return int(value)
 
     @property
-    def owner_id(self) -> str:
-        return self._connection._get_value(key="OwnerID", env_name_override="TC_DISCORD_OWNER_ID")
+    def owner_id(self) -> int:
+        value = self._connection._get_value(key="OwnerID", env_name_override="TC_DISCORD_OWNER_ID")
+        return int(value)
 
     @property
     def channel_name(self) -> str:
