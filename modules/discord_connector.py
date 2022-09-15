@@ -90,16 +90,28 @@ async def send_message(content: TautulliDataResponse, embed: bool = False, messa
     if not channel and not message:
         raise ValueError("Must specify either a channel or a message")
     if message:  # if message exists, use it to edit the message
-        if embed:
-            await message.edit(embed=content.embed)
-        else:
-            await message.edit(content=content.message)
+        if embed:  # let's send an embed
+            if not content.embed:  # oops, no embed to send
+                await message.edit(content="Placeholder", embed=None)  # erase any existing content and embeds
+            else:
+                await message.edit(content=None, embed=content.embed)  # erase any existing content and embeds
+        else:  # let's send a normal message
+            if not content.message:  # oops, no message to send
+                await message.edit(content="Placeholder", embed=None)  # erase any existing content and embeds
+            else:
+                await message.edit(content=content.message, embed=None)  # erase any existing content and embeds
         return message
     else:  # otherwise, send a new message in the channel
-        if embed:
-            return await channel.send(embed=content.embed)
-        else:
-            return await channel.send(content=content.message)
+        if embed:  # let's send an embed
+            if not content.embed:  # oops, no embed to send
+                return await channel.send(content="Placeholder")
+            else:
+                return await channel.send(content=None, embed=content.embed)
+        else:  # let's send a normal message
+            if not content.message:  # oops, no message to send
+                return await channel.send(content="Placeholder")
+            else:
+                return await channel.send(content=content.message)
 
 
 class DiscordConnector:
@@ -115,7 +127,7 @@ class DiscordConnector:
         self.token = token
         self.guild_id = guild_id
         self.owner_id = owner_id
-        self.refresh_time = refresh_time
+        self._refresh_time = refresh_time
         self.tautulli_channel_name = tautulli_channel_name
         self.tautulli_channel = None
         self.tautulli = tautulli_connector
@@ -123,6 +135,10 @@ class DiscordConnector:
         self.use_embeds = use_embeds
         self.client = discord.Client(intents=discord.Intents.default())
         self.on_ready = self.client.event(self.on_ready)
+
+    @property
+    def refresh_time(self) -> int:
+        return max([5, self._refresh_time])  # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
 
     async def on_ready(self):
         info('Connected to Discord.')
@@ -206,7 +222,7 @@ class DiscordConnector:
                             stopped_message = self.tautulli.stop_stream(stream_number=loc)
                             info(stopped_message)
                             end_notification = await self.tautulli_channel.send(content=stopped_message)
-                            await asyncio.sleep(min([5, self.refresh_time]))
+                            await asyncio.sleep(self.refresh_time)
                             await end_notification.delete()
                             await new_message.clear_reaction(str(reaction.emoji))
                             return new_message
@@ -226,7 +242,7 @@ class DiscordConnector:
                 stopped_message = self.tautulli.stop_stream(stream_number=loc)
                 info(stopped_message)
                 end_notification = await self.tautulli_channel.send(content=stopped_message)
-                await asyncio.sleep(min([5, self.refresh_time]))
+                await asyncio.sleep(self.refresh_time)
                 await end_notification.delete()
                 await new_message.clear_reaction(str(reaction.emoji))
         else:
@@ -319,7 +335,7 @@ class DiscordConnector:
             if last_bot_message_id == "":
                 info("Couldn't find old message, sending initial message...")
                 await send_starter_message(tautulli_connector=self.tautulli, discord_channel=self.tautulli_channel)
-        return await self.tautulli_channel.fetch_message(last_bot_message_id)
+        return await self.tautulli_channel.fetch_message(id=last_bot_message_id)
 
     async def update_voice_channels(self, activity):
         if activity:

@@ -65,7 +65,7 @@ You will need to set the following environment variables:
 | TC_TAUTULLI_URL (required)      | IP of your Tautulli server                                     | http://192.168.1.x:8181              |
 | TC_TAUTULLI_KEY (required)      | API key for Tautulli server                                    | abcd1234efgh5678ijkl9012mnop3456qrst |
 | TC_PLEX_PASS                    | Enable PlexPass Features                                       | "False"                              |
-| TC_REFRESH_SECONDS              | Seconds between updates                                        | 15                                   |
+| TC_REFRESH_SECONDS              | Seconds between updates (5-second minimum built-in)            | 15                                   |
 | TC_TERMINATE_MESSAGE            | Message sent to users when a stream is killed                  | "Your stream has ended."             |
 | TC_USE_24_HOUR_TIME             | Whether to display times in 24-hour time                       | "False"                              |
 | TC_VC_STREAM_COUNT              | Whether to display current stream count in a voice channel     | "False"                              |

@@ -7,7 +7,7 @@ Tautulli:
     APIKey: ""
   Customization:
     TerminateMessage: "Your stream has been terminated. Please contact the admin in the Discord."
-    # how often (seconds) the bot pulls new data. I'd recommend not making the bot ping Tautulli more often than every 5 seconds.
+    # how often (seconds) the bot pulls new data. 5-second minimum built-in, it's for your own good
     RefreshSeconds: 15
     # can only kill streams if you have a Plex Pass, so this controls whether you're given the option
     PlexPass: true
