@@ -335,7 +335,7 @@ class DiscordConnector:
             if last_bot_message_id == "":
                 info("Couldn't find old message, sending initial message...")
                 await send_starter_message(tautulli_connector=self.tautulli, discord_channel=self.tautulli_channel)
-        return await self.tautulli_channel.fetch_message(id=last_bot_message_id)
+        return await self.tautulli_channel.fetch_message(last_bot_message_id)
 
     async def update_voice_channels(self, activity):
         if activity:
