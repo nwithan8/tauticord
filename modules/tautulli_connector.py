@@ -2,6 +2,7 @@ from typing import List, Tuple, Union
 
 import discord
 import tautulli
+from tautulli.models.activity import Session
 
 import modules.statics as statics
 from modules import utils
@@ -16,7 +17,7 @@ class Activity:
         self._time_settings = time_settings
 
     @property
-    def stream_count(self):
+    def stream_count(self) -> int:
         value = self._data.get('stream_count', 0)
         try:
             return int(value)
@@ -24,7 +25,7 @@ class Activity:
             return 0
 
     @property
-    def transcode_count(self):
+    def transcode_count(self) -> int:
         value = self._data.get('stream_count_transcode', 0)
         try:
             return int(value)
@@ -32,7 +33,7 @@ class Activity:
             return 0
 
     @property
-    def total_bandwidth(self):
+    def total_bandwidth(self) -> Union[str, None]:
         value = self._data.get('total_bandwidth', 0)
         try:
             return utils.human_bitrate(float(value) * 1024)
@@ -40,7 +41,7 @@ class Activity:
             return None
 
     @property
-    def lan_bandwidth(self):
+    def lan_bandwidth(self) -> Union[str, None]:
         value = self._data.get('lan_bandwidth', 0)
         try:
             return utils.human_bitrate(float(value) * 1024)
@@ -48,7 +49,7 @@ class Activity:
             return None
 
     @property
-    def wan_bandwidth(self):
+    def wan_bandwidth(self) -> Union[str, None]:
         total = self._data.get('total_bandwidth', 0)
         lan = self._data.get('lan_bandwidth', 0)
         value = total - lan
@@ -57,10 +58,8 @@ class Activity:
         except:
             return None
 
-
-
     @property
-    def message(self):
+    def message(self) -> str:
         overview_message = ""
         if self.stream_count > 0:
             overview_message += statics.sessions_message.format(stream_count=self.stream_count,
@@ -77,7 +76,7 @@ class Activity:
         return overview_message
 
     @property
-    def sessions(self):
+    def sessions(self) -> List[Session]:
         return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in
                 self._data.get('sessions', [])]
 
@@ -88,7 +87,7 @@ class Session:
         self._time_settings = time_settings
 
     @property
-    def duration_milliseconds(self):
+    def duration_milliseconds(self) -> int:
         value = self._data.get('duration', 0)
         try:
             value = int(value)
@@ -97,7 +96,7 @@ class Session:
         return int(value)
 
     @property
-    def location_milliseconds(self):
+    def location_milliseconds(self) -> int:
         value = self._data.get('view_offset', 0)
         try:
             value = int(value)
@@ -106,19 +105,19 @@ class Session:
         return int(value)
 
     @property
-    def progress_percentage(self):
+    def progress_percentage(self) -> int:
         if not self.duration_milliseconds:
             return 0
         return int(self.location_milliseconds / self.duration_milliseconds)
 
     @property
-    def progress_marker(self):
+    def progress_marker(self) -> str:
         current_progress_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.location_milliseconds)
         total_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.duration_milliseconds)
         return f"{current_progress_min_sec}/{total_min_sec}"
 
     @property
-    def eta(self):
+    def eta(self) -> str:
         if not self.duration_milliseconds or not self.location_milliseconds:
             return "Unknown"
         milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
@@ -129,7 +128,7 @@ class Session:
         return eta_string
 
     @property
-    def title(self):
+    def title(self) -> str:
         if self._data.get('live'):
             return f"{self._data.get('grandparent_title', '')} - {self._data['title']}"
         elif self._data['media_type'] == 'episode':
@@ -138,7 +137,7 @@ class Session:
             return self._data.get('full_title')
 
     @property
-    def status_icon(self):
+    def status_icon(self) -> str:
         """
         Get icon for a stream state
         :return: emoji icon
@@ -146,7 +145,7 @@ class Session:
         return statics.switcher.get(self._data['state'], "")
 
     @property
-    def type_icon(self):
+    def type_icon(self) -> str:
         if self._data['media_type'] in statics.media_type_icons:
             return statics.media_type_icons[self._data['media_type']]
         # thanks twilsonco
@@ -157,23 +156,23 @@ class Session:
             return '🎁'
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._data['session_id']
 
     @property
-    def username(self):
+    def username(self) -> str:
         return self._data['username']
 
     @property
-    def product(self):
+    def product(self) -> str:
         return self._data['product']
 
     @property
-    def player(self):
+    def player(self) -> str:
         return self._data['player']
 
     @property
-    def quality_profile(self):
+    def quality_profile(self) -> str:
         return self._data['quality_profile']
 
     @property
@@ -186,26 +185,26 @@ class Session:
         return utils.human_bitrate(float(value) * 1024)
 
     @property
-    def transcoding_stub(self):
+    def transcoding_stub(self) -> str:
         return ' (Transcode)' if self.stream_container_decision == 'transcode' else ''
 
     @property
-    def stream_container_decision(self):
+    def stream_container_decision(self) -> str:
         return self._data['stream_container_decision']
 
-    def _session_title(self, session_number: int):
+    def _session_title(self, session_number: int) -> str:
         return statics.session_title_message.format(count=statics.emoji_numbers[session_number - 1],
                                                     icon=self.status_icon, username=self.username,
                                                     media_type_icon=self.type_icon, title=self.title)
 
-    def _session_player(self):
+    def _session_player(self) -> str:
         return statics.session_player_message.format(product=self.product, player=self.player)
 
-    def _session_details(self):
+    def _session_details(self) -> str:
         return statics.session_details_message.format(quality_profile=self.quality_profile, bandwidth=self.bandwidth,
                                                       transcoding=self.transcoding_stub)
 
-    def _session_progress(self):
+    def _session_progress(self) -> str:
         return statics.session_progress_message.format(progress=self.progress_marker, eta=self.eta)
 
 
@@ -215,26 +214,26 @@ class TautulliStreamInfo:
         self._session_number = session_number
 
     @property
-    def title(self):
+    def title(self) -> str:
         try:
             return self._session._session_title(session_number=self._session_number)
         except Exception as title_exception:
             return "Unknown"
 
     @property
-    def player(self):
+    def player(self) -> str:
         return self._session._session_player()
 
     @property
-    def details(self):
+    def details(self) -> str:
         return self._session._session_details()
 
     @property
-    def progress(self):
+    def progress(self) -> str:
         return self._session._session_progress()
 
     @property
-    def body(self):
+    def body(self) -> str:
         try:
             return f"{self.player}\n{self.details}\n{self.progress}"
         except Exception as body_exception:
@@ -251,7 +250,7 @@ class TautulliDataResponse:
         self.error = error_occurred
 
     @property
-    def embed(self):
+    def embed(self) -> discord.Embed:
         if len(self._streams) <= 0:
             return discord.Embed(title="No current activity")
         embed = discord.Embed(title=self._overview_message)
@@ -262,13 +261,14 @@ class TautulliDataResponse:
         return embed
 
     @property
-    def message(self):
+    def message(self) -> str:
         if len(self._streams) <= 0:
             return "No current activity."
         final_message = f"{self._overview_message}\n"
         for stream in self._streams:
             final_message += f"{stream.title}\n{stream.body}\n"
         final_message += f"\nTo terminate a stream, react with the stream number."
+        return final_message
 
 
 class TautulliConnector:
@@ -291,7 +291,7 @@ class TautulliConnector:
         self.voice_channel_settings = voice_channel_settings
         self.time_settings = time_settings
 
-    def _error_and_analytics(self, error_message, function_name):
+    def _error_and_analytics(self, error_message, function_name) -> None:
         error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
@@ -327,7 +327,7 @@ class TautulliConnector:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
         return TautulliDataResponse(overview_message="**Connection lost.**", error_occurred=True), 0, None
 
-    def stop_stream(self, stream_number):
+    def stop_stream(self, stream_number) -> str:
         """
         Stop a Plex stream
         :param stream_number: stream number used to react to Discord message (ex. 1, 2, 3)
@@ -345,21 +345,21 @@ class TautulliConnector:
             self._error_and_analytics(error_message=e, function_name='stop_stream')
         return "Something went wrong."
 
-    def get_library_id(self, library_name: str):
+    def get_library_id(self, library_name: str) -> Union[str, None]:
         for library in self.api.library_names:
             if library.get('section_name') == library_name:
                 return library.get('section_id')
         error(f"Could not get ID for library {library_name}")
         return None
 
-    def get_library_info(self, library_name: str):
+    def get_library_info(self, library_name: str) -> Union[dict, None]:
         info(f"Collecting stats about library {library_name}")
         library_id = self.get_library_id(library_name=library_name)
         if not library_id:
             return None
         return self.api.get_library(section_id=library_id)
 
-    def get_library_item_count(self, library_name: str):
+    def get_library_item_count(self, library_name: str) -> int:
         library_info = self.get_library_info(library_name=library_name)
         if not library_info:
             return 0

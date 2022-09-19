@@ -1,5 +1,6 @@
 import asyncio
 import sys
+from typing import Union
 
 import discord
 from discord.ext import tasks
@@ -65,15 +66,15 @@ async def add_emoji_number_reactions(message: discord.Message, count: int):
             await message.add_reaction(statics.emoji_numbers[i])
 
 
-async def send_starter_message(tautulli_connector, discord_channel):
+async def send_starter_message(tautulli_connector, discord_channel: discord.TextChannel) -> discord.Message:
     if tautulli_connector.use_embeds:
         embed = discord.Embed(title="Welcome to Tauticord!")
         embed.add_field(name="Starting up...",
                         value='This will be replaced once we get data.',
                         inline=False)
-        await discord_channel.send(embed=embed)
+        return await discord_channel.send(content=None, embed=embed)
     else:
-        await discord_channel.send(content="Welcome to Tauticord!")
+        return await discord_channel.send(content="Welcome to Tauticord!")
 
 
 async def send_message(content: TautulliDataResponse, embed: bool = False, message: discord.Message = None,
@@ -92,24 +93,24 @@ async def send_message(content: TautulliDataResponse, embed: bool = False, messa
     if message:  # if message exists, use it to edit the message
         if embed:  # let's send an embed
             if not content.embed:  # oops, no embed to send
-                await message.edit(content="Placeholder", embed=None)  # erase any existing content and embeds
+                await message.edit(content="Something went wrong.", embed=None)  # erase any existing content and embeds
             else:
                 await message.edit(content=None, embed=content.embed)  # erase any existing content and embeds
         else:  # let's send a normal message
             if not content.message:  # oops, no message to send
-                await message.edit(content="Placeholder", embed=None)  # erase any existing content and embeds
+                await message.edit(content="Something went wrong.", embed=None)  # erase any existing content and embeds
             else:
                 await message.edit(content=content.message, embed=None)  # erase any existing content and embeds
         return message
     else:  # otherwise, send a new message in the channel
         if embed:  # let's send an embed
             if not content.embed:  # oops, no embed to send
-                return await channel.send(content="Placeholder")
+                return await channel.send(content="Something went wrong.")
             else:
                 return await channel.send(content=None, embed=content.embed)
         else:  # let's send a normal message
             if not content.message:  # oops, no message to send
-                return await channel.send(content="Placeholder")
+                return await channel.send(content="Something went wrong.")
             else:
                 return await channel.send(content=content.message)
 
@@ -129,7 +130,7 @@ class DiscordConnector:
         self.owner_id = owner_id
         self._refresh_time = refresh_time
         self.tautulli_channel_name = tautulli_channel_name
-        self.tautulli_channel = None
+        self.tautulli_channel: discord.TextChannel = None
         self.tautulli = tautulli_connector
         self.analytics = analytics
         self.use_embeds = use_embeds
@@ -140,19 +141,19 @@ class DiscordConnector:
     def refresh_time(self) -> int:
         return max([5, self._refresh_time])  # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         info('Connected to Discord.')
         self.update_libraries.start()
         await start_bot(discord_connector=self, analytics=self.analytics)
 
-    def connect(self):
+    def connect(self) -> None:
         info('Connecting to Discord...')
         self.client.run(self.token)
 
-    def is_me(self, message):
+    def is_me(self, message) -> bool:
         return message.author == self.client.user
 
-    async def edit_message(self, previous_message):
+    async def edit_message(self, previous_message) -> discord.Message:
         """
         Collect new summary info, replace old message with new one
         :param previous_message: discord.Message to replace
@@ -249,14 +250,16 @@ class DiscordConnector:
             await asyncio.sleep(self.refresh_time)
         return new_message
 
-    async def get_tautulli_channel(self):
+    async def get_tautulli_channel(self) -> None:
         info(f"Getting {self.tautulli_channel_name} channel")
-        self.tautulli_channel = await self.get_discord_channel_by_name(channel_name=self.tautulli_channel_name)
+        self.tautulli_channel: discord.TextChannel = \
+            await self.get_discord_channel_by_name(channel_name=self.tautulli_channel_name)
         if not self.tautulli_channel:
             raise Exception(f"Could not load {self.tautulli_channel_name} channel. Exiting...")
         info(f"{self.tautulli_channel_name} channel collected.")
 
-    async def get_discord_channel_by_starting_name(self, starting_channel_name: str, channel_type: str = "text"):
+    async def get_discord_channel_by_starting_name(self, starting_channel_name: str, channel_type: str = "text") -> \
+            Union[discord.VoiceChannel, discord.TextChannel]:
         for channel in self.client.get_all_channels():
             if channel.name.startswith(starting_channel_name):
                 return channel
@@ -269,7 +272,8 @@ class DiscordConnector:
         except:
             raise Exception(f"Could not create channel {starting_channel_name}")
 
-    async def get_discord_channel_by_name(self, channel_name: str, channel_type: str = "text"):
+    async def get_discord_channel_by_name(self, channel_name: str, channel_type: str = "text") -> \
+            Union[discord.VoiceChannel, discord.TextChannel]:
         for channel in self.client.get_all_channels():
             if channel.name == channel_name:
                 return channel
@@ -283,7 +287,7 @@ class DiscordConnector:
         except:
             raise Exception(f"Could not create channel {channel_name}")
 
-    async def edit_library_voice_channel(self, channel_name: str, count: int):
+    async def edit_library_voice_channel(self, channel_name: str, count: int) -> None:
         info(f"Updating {channel_name} voice channel with new library size")
         channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
                                                                   channel_type="voice")
@@ -295,7 +299,7 @@ class DiscordConnector:
             except Exception as voice_channel_edit_error:
                 pass
 
-    async def edit_bandwidth_voice_channel(self, channel_name: str, size: int):
+    async def edit_bandwidth_voice_channel(self, channel_name: str, size: int) -> None:
         info(f"Updating {channel_name} voice channel with new bandwidth")
         channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
                                                                   channel_type="voice")
@@ -307,7 +311,7 @@ class DiscordConnector:
             except Exception as voice_channel_edit_error:
                 pass
 
-    async def edit_stream_count_voice_channel(self, channel_name: str, count: int):
+    async def edit_stream_count_voice_channel(self, channel_name: str, count: int) -> None:
         info(f"Updating {channel_name} voice channel with new stream count")
         channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
                                                                   channel_type="voice")
@@ -319,25 +323,21 @@ class DiscordConnector:
             except Exception as voice_channel_edit_error:
                 pass
 
-    async def get_old_message_in_tautulli_channel(self):
+    async def get_old_message_in_tautulli_channel(self) -> discord.Message:
         """
         Get the last message sent in the Tautulli channel, used to start the bot loop
         :return: discord.Message
         """
-        last_bot_message_id = ""
-        while last_bot_message_id == "":
-            async for msg in self.tautulli_channel.history(limit=1):
-                print(msg)
-                if msg.author == self.client.user:
-                    last_bot_message_id = msg.id
-                    await msg.clear_reactions()
-                    break
-            if last_bot_message_id == "":
-                info("Couldn't find old message, sending initial message...")
-                await send_starter_message(tautulli_connector=self.tautulli, discord_channel=self.tautulli_channel)
-        return await self.tautulli_channel.fetch_message(last_bot_message_id)
+        # If the very last message in the channel is from Tauticord, use it
+        async for msg in self.tautulli_channel.history(limit=1):
+            if msg.author == self.client.user:
+                await msg.clear_reactions()
+                return msg
+        # If the very last message in the channel is not from Tauticord, make a new one.
+        info("Couldn't find old message, sending initial message...")
+        return await send_starter_message(tautulli_connector=self.tautulli, discord_channel=self.tautulli_channel)
 
-    async def update_voice_channels(self, activity):
+    async def update_voice_channels(self, activity) -> None:
         if activity:
             if self.tautulli.voice_channel_settings.get('count', False):
                 await self.edit_stream_count_voice_channel(channel_name="Current Streams", count=activity.stream_count)
@@ -354,7 +354,7 @@ class DiscordConnector:
                                                         size=activity.wan_bandwidth)
 
     @tasks.loop(hours=1.0)
-    async def update_libraries(self):
+    async def update_libraries(self) -> None:
         if self.tautulli.voice_channel_settings.get('stats', False):
             for library_name in self.tautulli.voice_channel_settings.get('libraries', []):
                 size = self.tautulli.get_library_item_count(library_name=library_name)

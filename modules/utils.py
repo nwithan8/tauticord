@@ -3,20 +3,20 @@ from datetime import datetime, timedelta
 from pytz import timezone
 
 
-def make_plural(word, count: int, suffix_override: str = 's'):
+def make_plural(word, count: int, suffix_override: str = 's') -> str:
     if count > 1:
         return f"{word}{suffix_override}"
     return word
 
 
-def _human_bitrate(number, denominator: int = 1, letter: str = "", d: int = 1):
+def _human_bitrate(number, denominator: int = 1, letter: str = "", d: int = 1) -> str:
     if d <= 0:
         return f'{int(number / denominator):d} {letter}bps'
     else:
         return f'{float(number / denominator):.{d}f} {letter}bps'
 
 
-def human_bitrate(_bytes, d: int = 1):
+def human_bitrate(_bytes, d: int = 1) -> str:
     # Return the given bitrate as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
 
     KB = float(1024)
@@ -44,7 +44,7 @@ def human_bitrate(_bytes, d: int = 1):
     return _human_bitrate(_bytes, denominator=denominator, letter=letter, d=d)
 
 
-def milliseconds_to_minutes_seconds(milliseconds: int):
+def milliseconds_to_minutes_seconds(milliseconds: int) -> str:
     seconds = int(milliseconds / 1000)
     minutes = int(seconds / 60)
     if minutes < 10:
@@ -55,7 +55,7 @@ def milliseconds_to_minutes_seconds(milliseconds: int):
     return f"{minutes}:{seconds}"
 
 
-def now_plus_milliseconds(milliseconds: int, timezone_code: str = None):
+def now_plus_milliseconds(milliseconds: int, timezone_code: str = None) -> datetime:
     if timezone_code:
         now = datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
     else:

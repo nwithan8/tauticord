@@ -186,7 +186,7 @@ class DiscordConfig(ConfigSection):
 
     @property
     def use_embeds(self) -> bool:
-        value = self._get_value(key="UseEmbeds", default=False, env_name_override="TC_USE_EMBEDS")
+        value = self._customization._get_value(key="UseEmbeds", default=False, env_name_override="TC_USE_EMBEDS")
         return _extract_bool(value)
 
 
