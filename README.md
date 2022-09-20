@@ -78,7 +78,7 @@ You will need to set the following environment variables:
 | TC_VC_LIBRARY_NAMES             | Comma-separated list of libraries to display statistics of     | "Movies,TV Shows,Music"              |       
 | TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token                                              | <key from DiscordApplication above > |
 | TC_DISCORD_SERVER_ID (required) | Discord Server ID                                              | <ID, right-click server>             |
-| TC_DISCORD_OWNER_ID             | Your Discord ID for PlexPass Features                          | <ID, right-click profile>            |
+| TC_DISCORD_ADMIN_IDS            | List of Discord IDs with admin privileges                      | <ID, right-click profile>            |
 | TC_DISCORD_CHANNEL_NAME         | Channel name for updates                                       | "Tautulli Status"                    |
 | TC_USE_EMBEDS                   | Use embedded messages rather than regular text chat            | "True"                               |
 | TC_ALLOW_ANALYTICS              | Allow Anonymous Crash Analytics?                               | "True"                               |                          |                                                                               |                                       

@@ -20,3 +20,11 @@ session_title_message = """{count} | {icon} {media_type_icon} {username}: *{titl
 session_player_message = """__Player__: {product} ({player})"""
 session_details_message = """__Quality__: {quality_profile} ({bandwidth}){transcoding}"""
 session_progress_message = """__Progress__: {progress} (ETA: {eta})"""
+
+voice_channel_order = {
+    'count': 1,
+    'transcodes': 2,
+    'bandwidth': 3,
+    'localBandwidth': 4,
+    'remoteBandwidth': 5
+}

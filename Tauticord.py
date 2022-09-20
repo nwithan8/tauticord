@@ -30,7 +30,7 @@ if __name__ == '__main__':
                                    )
     d = discord.DiscordConnector(token=config.discord.bot_token,
                                  guild_id=config.discord.server_id,
-                                 owner_id=config.discord.owner_id,
+                                 admin_ids=config.discord.admin_ids,
                                  refresh_time=config.tautulli.refresh_interval,
                                  tautulli_channel_name=config.discord.channel_name,
                                  tautulli_connector=t,

@@ -1,6 +1,6 @@
 import asyncio
 import sys
-from typing import Union
+from typing import Union, List
 
 import discord
 from discord.ext import tasks
@@ -157,11 +157,32 @@ async def get_discord_channel_by_name(client: discord.Client, guild_id: int,
                                         channel_type=channel_type)
 
 
+def valid_reaction(reaction: discord.Reaction,
+                   user: Union[discord.Member, discord.User],
+                   on_message: discord.Message = None,
+                   valid_emojis: List[str] = None,
+                   valid_user_ids: List[int] = None,
+                   ignore_bots: bool = True) -> bool:
+    if ignore_bots and user.bot:
+        return False
+    if on_message and reaction.message.id != on_message.id:
+        return False
+    if valid_user_ids and user.id not in valid_user_ids:
+        return False
+    if valid_emojis and str(reaction.emoji) not in valid_emojis:
+        return False
+    return True
+
+
+def get_voice_channel_position(stat_type: str) -> int:
+    return statics.voice_channel_order.get(stat_type, None)
+
+
 class DiscordConnector:
     def __init__(self,
                  token: str,
                  guild_id: int,
-                 owner_id: int,
+                 admin_ids: List[int],
                  refresh_time: int,
                  tautulli_channel_name: str,
                  tautulli_connector: TautulliConnector,
@@ -169,7 +190,7 @@ class DiscordConnector:
                  use_embeds: bool):
         self.token = token
         self.guild_id = guild_id
-        self.owner_id = owner_id
+        self.admin_ids = admin_ids
         self._refresh_time = refresh_time
         self.tautulli_channel_name = tautulli_channel_name
         self.tautulli_channel: discord.TextChannel = None
@@ -202,6 +223,47 @@ class DiscordConnector:
     def is_me(self, message) -> bool:
         return message.author == self.client.user
 
+    async def stop_tautulli_stream_via_reaction(self, reaction: discord.Reaction, message: discord.Message) -> \
+            discord.Message:
+        loc = statics.emoji_numbers.index(str(reaction.emoji))
+        debug(f"Stopping stream {loc}...")
+        stopped_message = self.tautulli.stop_stream(stream_number=loc)
+        info(stopped_message)
+        end_notification = await self.tautulli_channel.send(content=stopped_message)
+        await message.clear_reaction(str(reaction.emoji))
+        return end_notification
+
+    async def post_and_monitor_number_reactions(self, message: discord.Message, reaction_count: int) -> \
+            Union[discord.Message, None]:
+        await add_emoji_number_reactions(message=message, count=reaction_count)
+
+        # check to see if the user clicked a reaction *while* they were being added
+        cache_msg = await message.channel.fetch_message(message.id)
+        for reaction in cache_msg.reactions:
+            if reaction.count > 1:
+                async for user in reaction.users():
+                    if valid_reaction(reaction=reaction,
+                                      user=user,
+                                      valid_user_ids=self.admin_ids,
+                                      valid_emojis=statics.emoji_numbers):
+                        return await self.stop_tautulli_stream_via_reaction(reaction=reaction, message=message)
+
+        def check(r, u) -> bool:
+            return valid_reaction(reaction=r,
+                                  user=u,
+                                  on_message=message,
+                                  valid_user_ids=self.admin_ids,
+                                  valid_emojis=statics.emoji_numbers)
+
+        try:
+            reaction, user = await self.client.wait_for('reaction_add',
+                                                        timeout=float(self.refresh_time),
+                                                        check=check)
+        except asyncio.TimeoutError as e:
+            pass
+        else:
+            return await self.stop_tautulli_stream_via_reaction(reaction=reaction, message=message)
+
     async def edit_message(self, previous_message) -> discord.Message:
         """
         Collect new summary info, replace old message with new one
@@ -210,7 +272,7 @@ class DiscordConnector:
         """
         data_wrapper, count, activity = self.tautulli.refresh_data()
 
-        await self.update_voice_channels(activity)
+        await self.update_voice_channels(activity=activity, category=self.tautulli_voice_category)
 
         """
         For performance and aesthetics, edit the old message if:
@@ -219,6 +281,7 @@ class DiscordConnector:
         (which would be stream stop messages that have already been deleted)
         """
         use_old_message = False
+        end_notification: Union[discord.Message, None] = None
         async for msg in self.tautulli_channel.history(limit=100):
             if msg.author != self.client.user:
                 use_old_message = False
@@ -259,44 +322,11 @@ class DiscordConnector:
                                              embed=self.use_embeds)
 
         if data_wrapper.plex_pass:
-            await add_emoji_number_reactions(message=new_message, count=count)
+            end_notification = await self.post_and_monitor_number_reactions(message=new_message, reaction_count=count)
 
-            # check to see if the user clicked a reaction *while* they were being added
-            cache_msg = await new_message.channel.fetch_message(new_message.id)
-            for reaction in cache_msg.reactions:
-                if reaction.count > 1:
-                    async for user in reaction.users():
-                        if user.id == self.owner_id:
-                            loc = statics.emoji_numbers.index(str(reaction.emoji))
-                            debug(f"Stopping stream {loc}...")
-                            stopped_message = self.tautulli.stop_stream(stream_number=loc)
-                            info(stopped_message)
-                            end_notification = await self.tautulli_channel.send(content=stopped_message)
-                            await asyncio.sleep(self.refresh_time)
-                            await end_notification.delete()
-                            await new_message.clear_reaction(str(reaction.emoji))
-                            return new_message
-
-            def check(reaction, user):
-                return user.id == self.owner_id and reaction.message.id == new_message.id and str(
-                    reaction.emoji) in statics.emoji_numbers
-
-            try:
-                reaction, user = await self.client.wait_for('reaction_add', timeout=float(self.refresh_time),
-                                                            check=check)
-            except asyncio.TimeoutError as e:
-                pass
-            else:
-                loc = statics.emoji_numbers.index(str(reaction.emoji))
-                debug(f"Stopping stream {loc}...")
-                stopped_message = self.tautulli.stop_stream(stream_number=loc)
-                info(stopped_message)
-                end_notification = await self.tautulli_channel.send(content=stopped_message)
-                await asyncio.sleep(self.refresh_time)
-                await end_notification.delete()
-                await new_message.clear_reaction(str(reaction.emoji))
-        else:
-            await asyncio.sleep(self.refresh_time)
+        await asyncio.sleep(self.refresh_time)
+        if end_notification:
+            await end_notification.delete()
         return new_message
 
     async def get_tautulli_channel(self) -> None:
@@ -318,9 +348,12 @@ class DiscordConnector:
             raise Exception(f"Could not load {self.voice_category_name} voice category. Exiting...")
         info(f"{self.voice_category_name} voice category collected.")
 
-    async def edit_library_voice_channel(self, channel_name: str, count: int,
-                                         category: discord.CategoryChannel = None) -> None:
-        info(f"Updating {channel_name} voice channel with new library size")
+    async def edit_int_stat_voice_channel(self,
+                                          channel_name: str,
+                                          number: int,
+                                          category: discord.CategoryChannel = None,
+                                          stat_name: str = None) -> None:
+        position = get_voice_channel_position(stat_type=stat_name) if stat_name else None
         channel = await get_discord_channel_by_starting_name(client=self.client,
                                                              guild_id=self.guild_id,
                                                              starting_channel_name=f"{channel_name}:",
@@ -329,37 +362,7 @@ class DiscordConnector:
             error(f"Could not load {channel_name} channel")
         else:
             try:
-                await channel.edit(name=f"{channel_name}: {count}", category=category)
-            except Exception as voice_channel_edit_error:
-                pass
-
-    async def edit_bandwidth_voice_channel(self, channel_name: str, size: int,
-                                           category: discord.CategoryChannel = None) -> None:
-        info(f"Updating {channel_name} voice channel with new bandwidth")
-        channel = await get_discord_channel_by_starting_name(client=self.client,
-                                                             guild_id=self.guild_id,
-                                                             starting_channel_name=f"{channel_name}:",
-                                                             channel_type=discord.ChannelType.voice)
-        if not channel:
-            error(f"Could not load {channel_name} channel")
-        else:
-            try:
-                await channel.edit(name=f"{channel_name}: {size}", category=category)
-            except Exception as voice_channel_edit_error:
-                pass
-
-    async def edit_stream_count_voice_channel(self, channel_name: str, count: int,
-                                              category: discord.CategoryChannel = None) -> None:
-        info(f"Updating {channel_name} voice channel with new stream count")
-        channel = await get_discord_channel_by_starting_name(client=self.client,
-                                                             guild_id=self.guild_id,
-                                                             starting_channel_name=f"{channel_name}:",
-                                                             channel_type=discord.ChannelType.voice)
-        if not channel:
-            error(f"Could not load {channel_name} channel")
-        else:
-            try:
-                await channel.edit(name=f"{channel_name}: {count}", category=category)
+                await channel.edit(name=f"{channel_name}: {number}", category=category, position=position)
             except Exception as voice_channel_edit_error:
                 pass
 
@@ -380,25 +383,35 @@ class DiscordConnector:
     async def update_voice_channels(self, activity, category: discord.CategoryChannel = None) -> None:
         if activity:
             if self.tautulli.voice_channel_settings.get('count', False):
-                await self.edit_stream_count_voice_channel(channel_name="Current Streams",
-                                                           count=activity.stream_count,
-                                                           category=category)
+                info(f"Updating Streams voice channel with new stream count")
+                await self.edit_int_stat_voice_channel(channel_name="Current Streams",
+                                                       number=activity.stream_count,
+                                                       category=category,
+                                                       stat_name="count")
             if self.tautulli.voice_channel_settings.get('transcodes', False):
-                await self.edit_stream_count_voice_channel(channel_name="Current Transcodes",
-                                                           count=activity.transcode_count,
-                                                           category=category)
+                info(f"Updating Transcodes voice channel with new stream count")
+                await self.edit_int_stat_voice_channel(channel_name="Current Transcodes",
+                                                       number=activity.transcode_count,
+                                                       category=category,
+                                                       stat_name="transcodes")
             if self.tautulli.voice_channel_settings.get('bandwidth', False):
-                await self.edit_bandwidth_voice_channel(channel_name="Bandwidth",
-                                                        size=activity.total_bandwidth,
-                                                        category=category)
+                info(f"Updating Bandwidth voice channel with new bandwidth")
+                await self.edit_int_stat_voice_channel(channel_name="Bandwidth",
+                                                       number=activity.total_bandwidth,
+                                                       category=category,
+                                                       stat_name="bandwidth")
             if self.tautulli.voice_channel_settings.get('localBandwidth', False):
-                await self.edit_bandwidth_voice_channel(channel_name="Local Bandwidth",
-                                                        size=activity.lan_bandwidth,
-                                                        category=category)
+                info(f"Updating Local Bandwidth voice channel with new bandwidth")
+                await self.edit_int_stat_voice_channel(channel_name="Local Bandwidth",
+                                                       number=activity.lan_bandwidth,
+                                                       category=category,
+                                                       stat_name="localBandwidth")
             if self.tautulli.voice_channel_settings.get('remoteBandwidth', False):
-                await self.edit_bandwidth_voice_channel(channel_name="Remote Bandwidth",
-                                                        size=activity.wan_bandwidth,
-                                                        category=category)
+                info(f"Updating Remote Bandwidth voice channel with new bandwidth")
+                await self.edit_int_stat_voice_channel(channel_name="Remote Bandwidth",
+                                                       number=activity.wan_bandwidth,
+                                                       category=category,
+                                                       stat_name="remoteBandwidth")
 
     @tasks.loop(hours=1.0)
     async def update_libraries(self) -> None:
@@ -406,6 +419,8 @@ class DiscordConnector:
         if self.tautulli.voice_channel_settings.get('stats', False):
             for library_name in self.tautulli.voice_channel_settings.get('libraries', []):
                 size = self.tautulli.get_library_item_count(library_name=library_name)
-                await self.edit_library_voice_channel(channel_name=library_name,
-                                                      count=size,
-                                                      category=self.tautulli_voice_category)
+                info(f"Updating {library_name} voice channel with new library size")
+                await self.edit_int_stat_voice_channel(channel_name=library_name,
+                                                       number=size,
+                                                       category=self.tautulli_voice_category,
+                                                       stat_name=None)
