@@ -32,7 +32,7 @@ Users can also indicate what libraries they would like monitored. Tauticord will
 - A Plex Media Server
 - Tautulli (formerly known as PlexPy)
 - A Discord server
-- Python 3.7+
+- Python 3.10+
 
 # Installation and setup
 HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
