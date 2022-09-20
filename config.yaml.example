@@ -14,6 +14,7 @@ Tautulli:
     ServerTimeZone: "UTC"
     Use24HourTime: false
     VoiceChannels:
+      CategoryName: "Tautulli Stats"
       StreamCount: false
       TranscodeCount: false
       Bandwidth: false

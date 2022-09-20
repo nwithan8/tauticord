@@ -19,7 +19,6 @@ async def start_bot(discord_connector, analytics):
     """
     info("Starting monitoring...")
     analytics.event(event_category="Platform", event_action=sys.platform)
-    await discord_connector.get_tautulli_channel()
     message = await discord_connector.get_old_message_in_tautulli_channel()
     while True:
         message = await discord_connector.edit_message(previous_message=message)
@@ -115,6 +114,49 @@ async def send_message(content: TautulliDataResponse, embed: bool = False, messa
                 return await channel.send(content=content.message)
 
 
+async def create_discord_channel(client: discord.Client, guild_id: int, channel_name: str,
+                                 channel_type: discord.ChannelType = discord.ChannelType.text) -> \
+        Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]:
+    try:
+        guild = client.get_guild(guild_id)  # stupid positional-only parameters
+        match channel_type:
+            case discord.ChannelType.voice:
+                return await guild.create_voice_channel(name=channel_name)
+            case discord.ChannelType.text:
+                return await guild.create_text_channel(name=channel_name)
+            case discord.ChannelType.category:
+                return await guild.create_category(name=channel_name)
+    except:
+        raise Exception(f"Could not create channel {channel_name}")
+
+
+async def get_discord_channel_by_starting_name(client: discord.Client, guild_id: int,
+                                               starting_channel_name: str,
+                                               channel_type: discord.ChannelType = discord.ChannelType.text) -> \
+        Union[discord.VoiceChannel, discord.TextChannel]:
+    for channel in client.get_all_channels():
+        if channel.name.startswith(starting_channel_name):
+            return channel
+    return await create_discord_channel(client=client,
+                                        guild_id=guild_id,
+                                        channel_name=starting_channel_name,
+                                        channel_type=channel_type)
+
+
+async def get_discord_channel_by_name(client: discord.Client, guild_id: int,
+                                      channel_name: str,
+                                      channel_type: discord.ChannelType = discord.ChannelType.text) -> \
+        Union[discord.VoiceChannel, discord.TextChannel, discord.CategoryChannel]:
+    for channel in client.get_all_channels():
+        if channel.name == channel_name:
+            return channel
+    error(f"Could not load {channel_name} channel. Attempting to create...")
+    return await create_discord_channel(client=client,
+                                        guild_id=guild_id,
+                                        channel_name=channel_name,
+                                        channel_type=channel_type)
+
+
 class DiscordConnector:
     def __init__(self,
                  token: str,
@@ -131,6 +173,7 @@ class DiscordConnector:
         self._refresh_time = refresh_time
         self.tautulli_channel_name = tautulli_channel_name
         self.tautulli_channel: discord.TextChannel = None
+        self.tautulli_voice_category: discord.CategoryChannel = None
         self.tautulli = tautulli_connector
         self.analytics = analytics
         self.use_embeds = use_embeds
@@ -141,8 +184,14 @@ class DiscordConnector:
     def refresh_time(self) -> int:
         return max([5, self._refresh_time])  # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
 
+    @property
+    def voice_category_name(self) -> str:
+        return self.tautulli.voice_channel_settings.get("category_name", "Tautulli Stats")
+
     async def on_ready(self) -> None:
         info('Connected to Discord.')
+        await self.get_tautulli_channel()
+        await self.get_tautulli_voice_category()
         self.update_libraries.start()
         await start_bot(discord_connector=self, analytics=self.analytics)
 
@@ -253,73 +302,64 @@ class DiscordConnector:
     async def get_tautulli_channel(self) -> None:
         info(f"Getting {self.tautulli_channel_name} channel")
         self.tautulli_channel: discord.TextChannel = \
-            await self.get_discord_channel_by_name(channel_name=self.tautulli_channel_name)
+            await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
+                                              channel_name=self.tautulli_channel_name)
         if not self.tautulli_channel:
             raise Exception(f"Could not load {self.tautulli_channel_name} channel. Exiting...")
         info(f"{self.tautulli_channel_name} channel collected.")
 
-    async def get_discord_channel_by_starting_name(self, starting_channel_name: str, channel_type: str = "text") -> \
-            Union[discord.VoiceChannel, discord.TextChannel]:
-        for channel in self.client.get_all_channels():
-            if channel.name.startswith(starting_channel_name):
-                return channel
-        try:
-            guild = self.client.get_guild(self.guild_id)  # stupid positional-only parameters
-            if channel_type == 'voice':
-                return await guild.create_voice_channel(name=starting_channel_name)
-            else:
-                return await guild.create_text_channel(name=starting_channel_name)
-        except:
-            raise Exception(f"Could not create channel {starting_channel_name}")
+    async def get_tautulli_voice_category(self) -> None:
+        info(f"Getting {self.voice_category_name} voice category")
+        self.tautulli_voice_category: discord.CategoryChannel = \
+            await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
+                                              channel_name=self.voice_category_name,
+                                              channel_type=discord.ChannelType.category)
+        if not self.tautulli_voice_category:
+            raise Exception(f"Could not load {self.voice_category_name} voice category. Exiting...")
+        info(f"{self.voice_category_name} voice category collected.")
 
-    async def get_discord_channel_by_name(self, channel_name: str, channel_type: str = "text") -> \
-            Union[discord.VoiceChannel, discord.TextChannel]:
-        for channel in self.client.get_all_channels():
-            if channel.name == channel_name:
-                return channel
-        error(f"Could not load {channel_name} channel. Attempting to create...")
-        try:
-            guild = self.client.get_guild(self.guild_id)  # stupid positional-only parameters
-            if channel_type == 'voice':
-                return await guild.create_voice_channel(name=channel_name)
-            else:
-                return await guild.create_text_channel(name=channel_name)
-        except:
-            raise Exception(f"Could not create channel {channel_name}")
-
-    async def edit_library_voice_channel(self, channel_name: str, count: int) -> None:
+    async def edit_library_voice_channel(self, channel_name: str, count: int,
+                                         category: discord.CategoryChannel = None) -> None:
         info(f"Updating {channel_name} voice channel with new library size")
-        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
-                                                                  channel_type="voice")
+        channel = await get_discord_channel_by_starting_name(client=self.client,
+                                                             guild_id=self.guild_id,
+                                                             starting_channel_name=f"{channel_name}:",
+                                                             channel_type=discord.ChannelType.voice)
         if not channel:
             error(f"Could not load {channel_name} channel")
         else:
             try:
-                await channel.edit(name=f"{channel_name}: {count}")
+                await channel.edit(name=f"{channel_name}: {count}", category=category)
             except Exception as voice_channel_edit_error:
                 pass
 
-    async def edit_bandwidth_voice_channel(self, channel_name: str, size: int) -> None:
+    async def edit_bandwidth_voice_channel(self, channel_name: str, size: int,
+                                           category: discord.CategoryChannel = None) -> None:
         info(f"Updating {channel_name} voice channel with new bandwidth")
-        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
-                                                                  channel_type="voice")
+        channel = await get_discord_channel_by_starting_name(client=self.client,
+                                                             guild_id=self.guild_id,
+                                                             starting_channel_name=f"{channel_name}:",
+                                                             channel_type=discord.ChannelType.voice)
         if not channel:
             error(f"Could not load {channel_name} channel")
         else:
             try:
-                await channel.edit(name=f"{channel_name}: {size}")
+                await channel.edit(name=f"{channel_name}: {size}", category=category)
             except Exception as voice_channel_edit_error:
                 pass
 
-    async def edit_stream_count_voice_channel(self, channel_name: str, count: int) -> None:
+    async def edit_stream_count_voice_channel(self, channel_name: str, count: int,
+                                              category: discord.CategoryChannel = None) -> None:
         info(f"Updating {channel_name} voice channel with new stream count")
-        channel = await self.get_discord_channel_by_starting_name(starting_channel_name=f"{channel_name}:",
-                                                                  channel_type="voice")
+        channel = await get_discord_channel_by_starting_name(client=self.client,
+                                                             guild_id=self.guild_id,
+                                                             starting_channel_name=f"{channel_name}:",
+                                                             channel_type=discord.ChannelType.voice)
         if not channel:
             error(f"Could not load {channel_name} channel")
         else:
             try:
-                await channel.edit(name=f"{channel_name}: {count}")
+                await channel.edit(name=f"{channel_name}: {count}", category=category)
             except Exception as voice_channel_edit_error:
                 pass
 
@@ -337,25 +377,35 @@ class DiscordConnector:
         info("Couldn't find old message, sending initial message...")
         return await send_starter_message(tautulli_connector=self.tautulli, discord_channel=self.tautulli_channel)
 
-    async def update_voice_channels(self, activity) -> None:
+    async def update_voice_channels(self, activity, category: discord.CategoryChannel = None) -> None:
         if activity:
             if self.tautulli.voice_channel_settings.get('count', False):
-                await self.edit_stream_count_voice_channel(channel_name="Current Streams", count=activity.stream_count)
+                await self.edit_stream_count_voice_channel(channel_name="Current Streams",
+                                                           count=activity.stream_count,
+                                                           category=category)
             if self.tautulli.voice_channel_settings.get('transcodes', False):
                 await self.edit_stream_count_voice_channel(channel_name="Current Transcodes",
-                                                           count=activity.transcode_count)
+                                                           count=activity.transcode_count,
+                                                           category=category)
             if self.tautulli.voice_channel_settings.get('bandwidth', False):
-                await self.edit_bandwidth_voice_channel(channel_name="Bandwidth", size=activity.total_bandwidth)
+                await self.edit_bandwidth_voice_channel(channel_name="Bandwidth",
+                                                        size=activity.total_bandwidth,
+                                                        category=category)
             if self.tautulli.voice_channel_settings.get('localBandwidth', False):
                 await self.edit_bandwidth_voice_channel(channel_name="Local Bandwidth",
-                                                        size=activity.lan_bandwidth)
+                                                        size=activity.lan_bandwidth,
+                                                        category=category)
             if self.tautulli.voice_channel_settings.get('remoteBandwidth', False):
                 await self.edit_bandwidth_voice_channel(channel_name="Remote Bandwidth",
-                                                        size=activity.wan_bandwidth)
+                                                        size=activity.wan_bandwidth,
+                                                        category=category)
 
     @tasks.loop(hours=1.0)
     async def update_libraries(self) -> None:
+        info("Updating libraries...")
         if self.tautulli.voice_channel_settings.get('stats', False):
             for library_name in self.tautulli.voice_channel_settings.get('libraries', []):
                 size = self.tautulli.get_library_item_count(library_name=library_name)
-                await self.edit_library_voice_channel(channel_name=library_name, count=size)
+                await self.edit_library_voice_channel(channel_name=library_name,
+                                                      count=size,
+                                                      category=self.tautulli_voice_category)
