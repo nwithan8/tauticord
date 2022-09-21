@@ -140,6 +140,12 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def library_refresh_interval(self) -> int:
+        value = self._voice_channels._get_value(key="LibraryRefreshSeconds", default=3600,
+                                                env_name_override="TC_VC_LIBRARY_REFRESH_SECONDS")
+        return int(value)
+
+    @property
     def library_names(self) -> List[str]:
         names = self._voice_channels._get_value(key="LibraryNames", default=[], env_name_override="TC_VC_LIBRARY_NAMES")
         if isinstance(names, str):
@@ -156,6 +162,7 @@ class TautulliConfig(ConfigSection):
             'localBandwidth': self.display_local_bandwidth,
             'remoteBandwidth': self.display_remote_bandwidth,
             'stats': self.display_library_stats,
+            'refresh_time': self.library_refresh_interval,
             'libraries': self.library_names
         }
 

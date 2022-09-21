@@ -21,6 +21,7 @@ Tautulli:
       LocalBandwidth: false
       RemoteBandwidth: false
       LibraryStats: false
+      LibraryRefreshSeconds: 3600
       LibraryNames:
         # list of names of the libraries you'd like stats about
         # Voice channels will be made/updated with stats (refreshed every hour)

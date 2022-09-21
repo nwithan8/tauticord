@@ -76,6 +76,7 @@ You will need to set the following environment variables:
 | TC_VC_REMOTE_BANDWIDTH          | Whether to display current remote bandwidth in a voice channel | "False"                              |
 | TC_VC_LIBRARY_STATS             | Whether to display library statistics in voice channels        | "False"                              |
 | TC_VC_LIBRARY_NAMES             | Comma-separated list of libraries to display statistics of     | "Movies,TV Shows,Music"              |       
+| TC_VC_LIBRARY_REFRESH_SECONDS   | Seconds between updates (5-minute minimum built-in)            | 3600                                 |
 | TC_DISCORD_BOT_TOKEN (required) | Discord Bot Token                                              | <key from DiscordApplication above > |
 | TC_DISCORD_SERVER_ID (required) | Discord Server ID                                              | <ID, right-click server>             |
 | TC_DISCORD_ADMIN_IDS            | List of Discord IDs with admin privileges                      | <ID, right-click profile>            |

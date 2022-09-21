@@ -32,6 +32,7 @@ if __name__ == '__main__':
                                  guild_id=config.discord.server_id,
                                  admin_ids=config.discord.admin_ids,
                                  refresh_time=config.tautulli.refresh_interval,
+                                 library_refresh_time=config.tautulli.library_refresh_interval,
                                  tautulli_channel_name=config.discord.channel_name,
                                  tautulli_connector=t,
                                  analytics=analytics,
