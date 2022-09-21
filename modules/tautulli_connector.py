@@ -2,83 +2,12 @@ from typing import List, Tuple, Union
 
 import discord
 import tautulli
-from tautulli.models.activity import Session
 
 import modules.statics as statics
 from modules import utils
 from modules.logs import info, debug, error
 
 session_ids = {}
-
-
-class Activity:
-    def __init__(self, activity_data, time_settings: dict):
-        self._data = activity_data
-        self._time_settings = time_settings
-
-    @property
-    def stream_count(self) -> int:
-        value = self._data.get('stream_count', 0)
-        try:
-            return int(value)
-        except:
-            return 0
-
-    @property
-    def transcode_count(self) -> int:
-        value = self._data.get('stream_count_transcode', 0)
-        try:
-            return int(value)
-        except:
-            return 0
-
-    @property
-    def total_bandwidth(self) -> Union[str, None]:
-        value = self._data.get('total_bandwidth', 0)
-        try:
-            return utils.human_bitrate(float(value) * 1024)
-        except:
-            return None
-
-    @property
-    def lan_bandwidth(self) -> Union[str, None]:
-        value = self._data.get('lan_bandwidth', 0)
-        try:
-            return utils.human_bitrate(float(value) * 1024)
-        except:
-            return None
-
-    @property
-    def wan_bandwidth(self) -> Union[str, None]:
-        total = self._data.get('total_bandwidth', 0)
-        lan = self._data.get('lan_bandwidth', 0)
-        value = total - lan
-        try:
-            return utils.human_bitrate(float(value) * 1024)
-        except:
-            return None
-
-    @property
-    def message(self) -> str:
-        overview_message = ""
-        if self.stream_count > 0:
-            overview_message += statics.sessions_message.format(stream_count=self.stream_count,
-                                                                word=utils.make_plural(word='stream',
-                                                                                       count=self.stream_count))
-            if self.transcode_count > 0:
-                overview_message += f" ({statics.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
-
-        if self.total_bandwidth:
-            overview_message += f" | {statics.bandwidth_message.format(bandwidth=self.total_bandwidth)}"
-            if self.lan_bandwidth:
-                overview_message += f" {statics.lan_bandwidth_message.format(bandwidth=self.lan_bandwidth)}"
-
-        return overview_message
-
-    @property
-    def sessions(self) -> List[Session]:
-        return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in
-                self._data.get('sessions', [])]
 
 
 class Session:
@@ -185,8 +114,12 @@ class Session:
         return utils.human_bitrate(float(value) * 1024)
 
     @property
+    def is_transcoding(self) -> bool:
+        return self.stream_container_decision == 'transcode'
+
+    @property
     def transcoding_stub(self) -> str:
-        return ' (Transcode)' if self.stream_container_decision == 'transcode' else ''
+        return ' (Transcode)' if self.is_transcoding else ''
 
     @property
     def stream_container_decision(self) -> str:
@@ -206,6 +139,76 @@ class Session:
 
     def _session_progress(self) -> str:
         return statics.session_progress_message.format(progress=self.progress_marker, eta=self.eta)
+
+
+class Activity:
+    def __init__(self, activity_data, time_settings: dict):
+        self._data = activity_data
+        self._time_settings = time_settings
+
+    @property
+    def stream_count(self) -> int:
+        value = self._data.get('stream_count', 0)
+        try:
+            return int(value)
+        except:
+            return 0
+
+    @property
+    def transcode_count(self) -> int:
+        # TODO: Tautulli is reporting the wrong data:
+        # https://github.com/Tautulli/Tautulli/blob/444b138e97a272e110fcb4364e8864348eee71c3/plexpy/webserve.py#L6000
+        # Judgment there made by transcode_decision
+        # We want to consider stream_container_decision
+        return max([0, [s.is_transcoding for s in self.sessions].count(True)])
+
+    @property
+    def total_bandwidth(self) -> Union[str, None]:
+        value = self._data.get('total_bandwidth', 0)
+        try:
+            return utils.human_bitrate(float(value) * 1024)
+        except:
+            return None
+
+    @property
+    def lan_bandwidth(self) -> Union[str, None]:
+        value = self._data.get('lan_bandwidth', 0)
+        try:
+            return utils.human_bitrate(float(value) * 1024)
+        except:
+            return None
+
+    @property
+    def wan_bandwidth(self) -> Union[str, None]:
+        total = self._data.get('total_bandwidth', 0)
+        lan = self._data.get('lan_bandwidth', 0)
+        value = total - lan
+        try:
+            return utils.human_bitrate(float(value) * 1024)
+        except:
+            return None
+
+    @property
+    def message(self) -> str:
+        overview_message = ""
+        if self.stream_count > 0:
+            overview_message += statics.sessions_message.format(stream_count=self.stream_count,
+                                                                word=utils.make_plural(word='stream',
+                                                                                       count=self.stream_count))
+            if self.transcode_count > 0:
+                overview_message += f" ({statics.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
+
+        if self.total_bandwidth:
+            overview_message += f" | {statics.bandwidth_message.format(bandwidth=self.total_bandwidth)}"
+            if self.lan_bandwidth:
+                overview_message += f" {statics.lan_bandwidth_message.format(bandwidth=self.lan_bandwidth)}"
+
+        return overview_message
+
+    @property
+    def sessions(self) -> List[Session]:
+        return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in
+                self._data.get('sessions', [])]
 
 
 class TautulliStreamInfo:
