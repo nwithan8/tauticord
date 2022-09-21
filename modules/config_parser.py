@@ -1,7 +1,10 @@
+import json
 import os
+import pprint
 from typing import List
 
 import confuse
+import yaml
 
 
 def _extract_bool(value):
@@ -235,3 +238,9 @@ class Config:
             self.log_level = self.config['logLevel'].get() or "INFO"
         except confuse.NotFoundError:
             self.log_level = "WARN"  # will only be WARN when pulling config from env (i.e. Docker)
+
+    def __repr__(self) -> str:
+        raw_yaml_data = self.config.dump()
+        json_data = yaml.load(raw_yaml_data, Loader=yaml.FullLoader)
+        return json.dumps(json_data, indent=4)
+
