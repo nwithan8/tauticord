@@ -186,7 +186,8 @@ class DiscordConnector:
         self.library_refresh_time = library_refresh_time
         self.tautulli_channel_name = tautulli_channel_name
         self.tautulli_channel: discord.TextChannel = None
-        self.tautulli_voice_category: discord.CategoryChannel = None
+        self.tautulli_stats_voice_category: discord.CategoryChannel = None
+        self.tautulli_libraries_voice_category: discord.CategoryChannel = None
         self.tautulli = tautulli_connector
         self.analytics = analytics
         self.use_embeds = use_embeds
@@ -204,8 +205,12 @@ class DiscordConnector:
         self.client.run(self.token)
 
     @property
-    def voice_category_name(self) -> str:
-        return self.tautulli.voice_channel_settings.get("category_name", "Tautulli Stats")
+    def stats_voice_category_name(self) -> str:
+        return self.tautulli.voice_channel_settings.get("stats_category_name", "Tautulli Stats")
+
+    @property
+    def libraries_voice_category_name(self) -> str:
+        return self.tautulli.voice_channel_settings.get("libraries_category_name", "Tautulli Libraries")
 
     async def on_ready(self) -> None:
         info('Connected to Discord.')
@@ -215,7 +220,10 @@ class DiscordConnector:
         await self.collect_old_message_in_tautulli_channel()
 
         info("Loading Tautulli voice settings...")
-        await self.collect_tautulli_voice_category()
+        self.tautulli_stats_voice_category = await self.collect_tautulli_voice_category(
+            category_name=self.stats_voice_category_name)
+        self.tautulli_libraries_voice_category = await self.collect_tautulli_voice_category(
+            category_name=self.libraries_voice_category_name)
 
         info("Loading Tautulli summary message service...")
         # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
@@ -224,7 +232,7 @@ class DiscordConnector:
 
         info("Starting Tautulli library stats service...")
         # minimum 5-minute sleep time hard-coded, trust me, don't DDoS your server
-        asyncio.create_task(self.run_library_stats_service(refresh_time=max([5*60, self.library_refresh_time])))
+        asyncio.create_task(self.run_library_stats_service(refresh_time=max([5 * 60, self.library_refresh_time])))
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         emoji = payload.emoji
@@ -278,7 +286,7 @@ class DiscordConnector:
         """
         data_wrapper, count, activity = self.tautulli.refresh_data()
 
-        await self.update_live_voice_channels(activity=activity, category=self.tautulli_voice_category)
+        await self.update_live_voice_channels(activity=activity, category=self.tautulli_stats_voice_category)
 
         """
         For performance and aesthetics, edit the old message if:
@@ -344,15 +352,16 @@ class DiscordConnector:
             raise Exception(f"Could not load {self.tautulli_channel_name} channel. Exiting...")
         info(f"{self.tautulli_channel_name} channel collected.")
 
-    async def collect_tautulli_voice_category(self) -> None:
-        info(f"Getting {self.voice_category_name} voice category")
-        self.tautulli_voice_category: discord.CategoryChannel = \
+    async def collect_tautulli_voice_category(self, category_name: str) -> discord.CategoryChannel:
+        info(f"Getting {category_name} voice category")
+        category: discord.CategoryChannel = \
             await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
-                                              channel_name=self.voice_category_name,
+                                              channel_name=category_name,
                                               channel_type=discord.ChannelType.category)
-        if not self.tautulli_voice_category:
-            raise Exception(f"Could not load {self.voice_category_name} voice category. Exiting...")
-        info(f"{self.voice_category_name} voice category collected.")
+        if not category_name:
+            raise Exception(f"Could not load {category_name} voice category. Exiting...")
+        info(f"{category_name} voice category collected.")
+        return category
 
     async def collect_old_message_in_tautulli_channel(self) -> None:
         """
@@ -429,4 +438,4 @@ class DiscordConnector:
                 info(f"Updating {library_name} voice channel with new library size")
                 await self.edit_int_stat_voice_channel(channel_name=library_name,
                                                        number=size,
-                                                       category=self.tautulli_voice_category)
+                                                       category=self.tautulli_libraries_voice_category)

@@ -68,12 +68,13 @@ You will need to set the following environment variables:
 | TC_REFRESH_SECONDS              | Seconds between updates (5-second minimum built-in)            | 15                                   |
 | TC_TERMINATE_MESSAGE            | Message sent to users when a stream is killed                  | "Your stream has ended."             |
 | TC_USE_24_HOUR_TIME             | Whether to display times in 24-hour time                       | "False"                              |
-| TC_VC_CATEGORY_NAME             | Name of the voice channel category                             | "Tautulli Stats"                     |
+| TC_VC_STATS_CATEGORY_NAME       | Name of the stats voice channel category                       | "Tautulli Stats"                     |
 | TC_VC_STREAM_COUNT              | Whether to display current stream count in a voice channel     | "False"                              |
 | TC_VC_TRANSCODE_COUNT           | Whether to display current transcode count in a voice channel  | "False"                              |
 | TC_VC_BANDWIDTH                 | Whether to display current bandwidth in a voice channel        | "False"                              |
 | TC_VC_LOCAL_BANDWIDTH           | Whether to display current local bandwidth in a voice channel  | "False"                              |
 | TC_VC_REMOTE_BANDWIDTH          | Whether to display current remote bandwidth in a voice channel | "False"                              |
+| TC_VC_LIBRARIES_CATEGORY_NAME   | Name of the libraries voice channel category                   | "Tautulli Libraries"                 |                                                                |                                      |
 | TC_VC_LIBRARY_STATS             | Whether to display library statistics in voice channels        | "False"                              |
 | TC_VC_LIBRARY_NAMES             | Comma-separated list of libraries to display statistics of     | "Movies,TV Shows,Music"              |       
 | TC_VC_LIBRARY_REFRESH_SECONDS   | Seconds between updates (5-minute minimum built-in)            | 3600                                 |

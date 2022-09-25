@@ -1,6 +1,5 @@
 import json
 import os
-import pprint
 from typing import List
 
 import confuse
@@ -102,55 +101,69 @@ class TautulliConfig(ConfigSection):
         return self._customization._get_subsection(key="VoiceChannels")
 
     @property
-    def voice_channel_category_name(self) -> str:
-        return self._voice_channels._get_value(key="CategoryName", default="Tautulli Stats",
-                                               env_name_override="TC_VC_CATEGORY_NAME")
+    def _stats_voice_channels(self) -> ConfigSection:
+        return self._voice_channels._get_subsection(key="Stats")
+
+    @property
+    def stats_voice_channel_category_name(self) -> str:
+        return self._stats_voice_channels._get_value(key="CategoryName", default="Tautulli Stats",
+                                                     env_name_override="TC_VC_STATS_CATEGORY_NAME")
 
     @property
     def display_stream_count(self) -> bool:
-        value = self._voice_channels._get_value(key="StreamCount", default=False,
-                                                env_name_override="TC_VC_STREAM_COUNT")
+        value = self._stats_voice_channels._get_value(key="StreamCount", default=False,
+                                                      env_name_override="TC_VC_STREAM_COUNT")
         return _extract_bool(value)
 
     @property
     def display_transcode_count(self) -> bool:
-        value = self._voice_channels._get_value(key="TranscodeCount", default=False,
-                                                env_name_override="TC_VC_TRANSCODE_COUNT")
+        value = self._stats_voice_channels._get_value(key="TranscodeCount", default=False,
+                                                      env_name_override="TC_VC_TRANSCODE_COUNT")
         return _extract_bool(value)
 
     @property
     def display_bandwidth(self) -> bool:
-        value = self._voice_channels._get_value(key="Bandwidth", default=False,
-                                                env_name_override="TC_VC_BANDWIDTH")
+        value = self._stats_voice_channels._get_value(key="Bandwidth", default=False,
+                                                      env_name_override="TC_VC_BANDWIDTH")
         return _extract_bool(value)
 
     @property
     def display_local_bandwidth(self) -> bool:
-        value = self._voice_channels._get_value(key="LocalBandwidth", default=False,
-                                                env_name_override="TC_VC_LOCAL_BANDWIDTH")
+        value = self._stats_voice_channels._get_value(key="LocalBandwidth", default=False,
+                                                      env_name_override="TC_VC_LOCAL_BANDWIDTH")
         return _extract_bool(value)
 
     @property
     def display_remote_bandwidth(self) -> bool:
-        value = self._voice_channels._get_value(key="RemoteBandwidth", default=False,
-                                                env_name_override="TC_VC_REMOTE_BANDWIDTH")
+        value = self._stats_voice_channels._get_value(key="RemoteBandwidth", default=False,
+                                                      env_name_override="TC_VC_REMOTE_BANDWIDTH")
         return _extract_bool(value)
 
     @property
+    def _libraries_voice_channels(self) -> ConfigSection:
+        return self._voice_channels._get_subsection(key="Libraries")
+
+    @property
+    def libraries_voice_channel_category_name(self) -> str:
+        return self._libraries_voice_channels._get_value(key="CategoryName", default="Tautulli Libraries",
+                                                         env_name_override="TC_VC_LIBRARIES_CATEGORY_NAME")
+
+    @property
     def display_library_stats(self) -> bool:
-        value = self._voice_channels._get_value(key="LibraryStats", default=False,
-                                                env_name_override="TC_VC_LIBRARY_STATS")
+        value = self._libraries_voice_channels._get_value(key="Enable", default=False,
+                                                          env_name_override="TC_VC_LIBRARY_STATS")
         return _extract_bool(value)
 
     @property
     def library_refresh_interval(self) -> int:
-        value = self._voice_channels._get_value(key="LibraryRefreshSeconds", default=3600,
-                                                env_name_override="TC_VC_LIBRARY_REFRESH_SECONDS")
+        value = self._libraries_voice_channels._get_value(key="LibraryRefreshSeconds", default=3600,
+                                                          env_name_override="TC_VC_LIBRARY_REFRESH_SECONDS")
         return int(value)
 
     @property
     def library_names(self) -> List[str]:
-        names = self._voice_channels._get_value(key="LibraryNames", default=[], env_name_override="TC_VC_LIBRARY_NAMES")
+        names = self._libraries_voice_channels._get_value(key="LibraryNames", default=[],
+                                                          env_name_override="TC_VC_LIBRARY_NAMES")
         if isinstance(names, str):
             return names.split(",")
         return names
@@ -158,7 +171,7 @@ class TautulliConfig(ConfigSection):
     @property
     def voice_channel_settings(self):
         return {
-            'category_name': self.voice_channel_category_name,
+            'stats_category_name': self.stats_voice_channel_category_name,
             'count': self.display_stream_count,
             'transcodes': self.display_transcode_count,
             'bandwidth': self.display_bandwidth,
@@ -166,6 +179,7 @@ class TautulliConfig(ConfigSection):
             'remoteBandwidth': self.display_remote_bandwidth,
             'stats': self.display_library_stats,
             'refresh_time': self.library_refresh_interval,
+            'libraries_category_name': self.libraries_voice_channel_category_name,
             'libraries': self.library_names
         }
 
@@ -243,4 +257,3 @@ class Config:
         raw_yaml_data = self.config.dump()
         json_data = yaml.load(raw_yaml_data, Loader=yaml.FullLoader)
         return json.dumps(json_data, indent=4)
-
