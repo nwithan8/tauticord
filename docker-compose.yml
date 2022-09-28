@@ -2,8 +2,8 @@ version: "3.9"
 services:
   tauticord:
     build:
-        context: docker
-        dockerfile: docker/Dockerfile
+        context: .
+        dockerfile: Dockerfile
         args:
             INFO_VERSION: "docker-compose-develop"
     environment:
