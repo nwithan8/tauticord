@@ -12,9 +12,9 @@ from modules.logs import info, debug, error
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 
 
-async def add_emoji_number_reactions(message: discord.Message, count: int):
+async def add_emoji_reactions(message: discord.Message, count: int):
     """
-    Add number reactions to a message for user interaction
+    Add reactions to a message for user interaction
     :param message: message to add emojis to
     :param count: how many emojis to add
     :return: None
@@ -36,7 +36,7 @@ async def add_emoji_number_reactions(message: discord.Message, count: int):
     emoji_to_remove = []
 
     for i, e in enumerate(msg_emoji):
-        if i >= count or i != statics.emoji_numbers.index(e):
+        if i >= count or i != statics.emojis.index(e):
             emoji_to_remove.append(e)
 
     # if all reactions need to be removed, do it all at once
@@ -48,9 +48,10 @@ async def add_emoji_number_reactions(message: discord.Message, count: int):
             await message.clear_reaction(e)
             del (msg_emoji[msg_emoji.index(e)])
 
-    for i in range(0, count):
-        if statics.emoji_numbers[i] not in msg_emoji:
-            await message.add_reaction(statics.emoji_numbers[i])
+    for i in range(1, count + 1):
+        emoji = statics.emoji_from_stream_number(i)
+        if emoji not in msg_emoji:
+            await message.add_reaction(emoji)
 
 
 async def send_starter_message(tautulli_connector, discord_channel: discord.TextChannel) -> discord.Message:
@@ -246,7 +247,7 @@ class DiscordConnector:
                           reaction_type=reaction_type,
                           valid_message=self.current_message,
                           valid_reaction_type=None,  # We already know it's the right type
-                          valid_emojis=statics.emoji_numbers,
+                          valid_emojis=statics.emojis,
                           valid_user_ids=self.admin_ids):
             # message here will be the current message, so we can just use that
             end_notification = await self.stop_tautulli_stream_via_reaction_emoji(emoji=emoji, message=message)
@@ -269,10 +270,10 @@ class DiscordConnector:
     async def stop_tautulli_stream_via_reaction_emoji(self, emoji: discord.PartialEmoji, message: discord.Message) -> \
             discord.Message:
         # remember to shift by 1 to convert index to human-readable
-        stream_number = statics.emoji_numbers.index(str(emoji)) + 1
+        stream_number = statics.stream_number_from_emoji(emoji)
 
-        debug(f"Stopping stream {stream_number}...")
-        stopped_message = self.tautulli.stop_stream(stream_number=stream_number)
+        debug(f"Stopping stream {emoji}...")
+        stopped_message = self.tautulli.stop_stream(emoji=emoji, stream_number=stream_number)
         info(stopped_message)
         end_notification = await self.tautulli_channel.send(content=stopped_message)
         await message.clear_reaction(str(emoji))
@@ -336,7 +337,7 @@ class DiscordConnector:
                                              embed=self.use_embeds)
 
         if data_wrapper.plex_pass:
-            await add_emoji_number_reactions(message=new_message, count=count)
+            await add_emoji_reactions(message=new_message, count=count)
             # on_raw_reaction_add will handle the rest
 
         # Store the message

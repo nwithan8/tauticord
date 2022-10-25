@@ -126,7 +126,7 @@ class Session:
         return self._data['stream_container_decision']
 
     def _session_title(self, session_number: int) -> str:
-        return statics.session_title_message.format(count=statics.emoji_numbers[session_number - 1],
+        return statics.session_title_message.format(emoji=statics.emoji_from_stream_number(session_number),
                                                     icon=self.status_icon, username=self.username,
                                                     media_type_icon=self.type_icon, title=self.title)
 
@@ -330,20 +330,21 @@ class TautulliConnector:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
         return TautulliDataResponse(overview_message="**Connection lost.**", error_occurred=True), 0, None
 
-    def stop_stream(self, stream_number) -> str:
+    def stop_stream(self, emoji, stream_number) -> str:
         """
         Stop a Plex stream
+        :param emoji: Emoji used to stop the stream
         :param stream_number: stream number used to react to Discord message (ex. 1, 2, 3)
         :return: Success/failure message
         """
         if stream_number not in session_ids.keys():
             return "**Invalid stream number.**"
-        info(f"User attempting to stop session {stream_number}, id {session_ids[stream_number]}")
+        info(f"User attempting to stop session {emoji}, id {session_ids[stream_number]}")
         try:
             if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):
-                return f"Stream {stream_number} was stopped."
+                return f"Stream {emoji} was stopped."
             else:
-                return f"Stream {stream_number} could not be stopped."
+                return f"Stream {emoji} could not be stopped."
         except Exception as e:
             self._error_and_analytics(error_message=e, function_name='stop_stream')
         return "Something went wrong."
