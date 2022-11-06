@@ -16,7 +16,7 @@ analytics = GoogleAnalytics(analytics_id='UA-174268200-2',
                             anonymous_ip=True,
                             do_not_track=not config.extras.allow_analytics)
 
-logging.init(log_level_name=config.log_level)
+logging.init(app_name="Tauticord", console_log_level=config.log_level, log_to_file=True)
 
 if __name__ == '__main__':
     logging.info("Starting application...")
