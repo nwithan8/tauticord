@@ -11,6 +11,8 @@ _nameToLevel = {
     'NOTSET': logging.NOTSET,
 }
 
+def init(log_level_name: str):
+    logging.basicConfig(format='%(asctime)s - [%(levelname)s]: %(message)s', level=level_name_to_level(level_name=log_level_name))
 
 def level_name_to_level(level_name: str):
     return _nameToLevel.get(level_name, _nameToLevel['NOTSET'])

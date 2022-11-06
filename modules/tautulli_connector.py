@@ -5,7 +5,7 @@ import tautulli
 
 import modules.statics as statics
 from modules import utils
-from modules.logs import info, debug, error
+import modules.logs as logging
 
 session_ids = {}
 
@@ -81,7 +81,7 @@ class Session:
         elif self._data.get('live'):
             return statics.media_type_icons['live']
         else:
-            info("New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
+            logging.info("New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
             return '🎁'
 
     @property
@@ -240,7 +240,7 @@ class TautulliStreamInfo:
         try:
             return f"{self.player}\n{self.details}\n{self.progress}"
         except Exception as body_exception:
-            error(body_exception)
+            logging.error(body_exception)
             return f"Could not display data for session {self._session_number}"
 
 
@@ -295,7 +295,7 @@ class TautulliConnector:
         self.time_settings = time_settings
 
     def _error_and_analytics(self, error_message, function_name) -> None:
-        error(error_message)
+        logging.error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
     def refresh_data(self) -> Tuple[TautulliDataResponse, int, Union[Activity, None]]:
@@ -306,7 +306,7 @@ class TautulliConnector:
         global session_ids
         data = self.api.activity()
         if data:
-            debug(f"JSON returned by GET request: {data}")
+            logging.debug(f"JSON returned by GET request: {data}")
             try:
                 activity = Activity(activity_data=data, time_settings=self.time_settings)
                 sessions = activity.sessions
@@ -321,7 +321,7 @@ class TautulliConnector:
                     except ValueError as err:
                         self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
                         pass
-                debug(f"Count: {count}")
+                logging.debug(f"Count: {count}")
                 return TautulliDataResponse(overview_message=activity.message, streams_info=session_details,
                                             plex_pass=self.plex_pass), count, activity
             except KeyError as e:
@@ -337,7 +337,7 @@ class TautulliConnector:
         """
         if stream_number not in session_ids.keys():
             return "**Invalid stream number.**"
-        info(f"User attempting to stop session {emoji}, id {session_ids[stream_number]}")
+        logging.info(f"User attempting to stop session {emoji}, id {session_ids[stream_number]}")
         try:
             if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):
                 return f"Stream {emoji} was stopped."
@@ -351,11 +351,11 @@ class TautulliConnector:
         for library in self.api.library_names:
             if library.get('section_name') == library_name:
                 return library.get('section_id')
-        error(f"Could not get ID for library {library_name}")
+        logging.error(f"Could not get ID for library {library_name}")
         return None
 
     def get_library_info(self, library_name: str) -> Union[dict, None]:
-        info(f"Collecting stats about library {library_name}")
+        logging.info(f"Collecting stats about library {library_name}")
         library_id = self.get_library_id(library_name=library_name)
         if not library_id:
             return None
