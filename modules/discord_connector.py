@@ -20,9 +20,6 @@ async def add_emoji_reactions(message: discord.Message, count: int):
     :return: None
     """
 
-    if count <= 0:
-        return
-
     # Only add reactions if necessary, and remove unnecessary reactions
     cache_msg = await message.channel.fetch_message(message.id)
     msg_emoji = [str(r.emoji) for r in cache_msg.reactions]
@@ -32,6 +29,11 @@ async def add_emoji_reactions(message: discord.Message, count: int):
         if len(msg_emoji) > 0:
             await message.clear_reactions()
         return
+
+    if count > statics.max_controllable_stream_count_supported():
+        debug(f"""Tauticord supports controlling a maximum of {statics.max_controllable_stream_count_supported()} streams.
+        Stats will be displayed correctly, but any additional streams will not be able to be terminated.""")
+        count = statics.max_controllable_stream_count_supported()
 
     emoji_to_remove = []
 

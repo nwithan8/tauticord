@@ -1,4 +1,6 @@
 # Number 1-9, and A-Z
+from typing import Optional
+
 emojis = [
     "1️⃣",
     "2️⃣",
@@ -36,6 +38,9 @@ emojis = [
     "🇾",
     "🇿",
 ]
+
+def max_controllable_stream_count_supported(max_streams_override: Optional[int] = None) -> int:
+    return max_streams_override or len(emojis)
 
 
 def emoji_from_stream_number(number):

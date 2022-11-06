@@ -321,8 +321,6 @@ class TautulliConnector:
                     except ValueError as err:
                         self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
                         pass
-                    if count >= 9:
-                        break
                 debug(f"Count: {count}")
                 return TautulliDataResponse(overview_message=activity.message, streams_info=session_details,
                                             plex_pass=self.plex_pass), count, activity
