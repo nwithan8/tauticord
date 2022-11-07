@@ -21,6 +21,7 @@ Tautulli:
         Bandwidth: false
         LocalBandwidth: false
         RemoteBandwidth: false
+        PlexStatus: false
       Libraries:
         CategoryName: "Tautulli Libraries"
         Enable: false

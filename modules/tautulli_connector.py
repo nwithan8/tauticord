@@ -3,9 +3,9 @@ from typing import List, Tuple, Union
 import discord
 import tautulli
 
+import modules.logs as logging
 import modules.statics as statics
 from modules import utils
-import modules.logs as logging
 
 session_ids = {}
 
@@ -81,7 +81,8 @@ class Session:
         elif self._data.get('live'):
             return statics.media_type_icons['live']
         else:
-            logging.info("New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
+            logging.info(
+                "New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
             return '🎁'
 
     @property
@@ -298,10 +299,10 @@ class TautulliConnector:
         logging.error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
-    def refresh_data(self) -> Tuple[TautulliDataResponse, int, Union[Activity, None]]:
+    def refresh_data(self) -> Tuple[TautulliDataResponse, int, Union[Activity, None], bool]:
         """
         Parse activity JSON from Tautulli, prepare summary message for Discord
-        :return: data wrapper, number of active streams and activity data
+        :return: data wrapper, number of active streams, activity data and whether Plex is online
         """
         global session_ids
         data = self.api.activity()
@@ -323,10 +324,11 @@ class TautulliConnector:
                         pass
                 logging.debug(f"Count: {count}")
                 return TautulliDataResponse(overview_message=activity.message, streams_info=session_details,
-                                            plex_pass=self.plex_pass), count, activity
+                                            plex_pass=self.plex_pass), count, activity, self.is_plex_server_online()
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
-        return TautulliDataResponse(overview_message="**Connection lost.**", error_occurred=True), 0, None
+        return TautulliDataResponse(overview_message="**Connection lost.**",
+                                    error_occurred=True), 0, None, False  # If Tautulli is offline, assume Plex is offline
 
     def stop_stream(self, emoji, stream_number) -> str:
         """
@@ -368,3 +370,6 @@ class TautulliConnector:
         if library_info.get('section_type') == 'artist':
             return library_info.get('child_count')  # child_count is the number of tracks
         return library_info.get('count', 0)
+
+    def is_plex_server_online(self) -> bool:
+        return self.api.server_status.get("connected", False)

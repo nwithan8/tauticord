@@ -4,6 +4,7 @@ from typing import List
 
 import confuse
 import yaml
+import statics
 
 
 def _extract_bool(value):
@@ -140,6 +141,12 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def display_plex_status(self) -> bool:
+        value = self._stats_voice_channels._get_value(key="PlexStatus", default=False,
+                                                      env_name_override="TC_VC_PLEX_STATUS")
+        return _extract_bool(value)
+
+    @property
     def _libraries_voice_channels(self) -> ConfigSection:
         return self._voice_channels._get_subsection(key="Libraries")
 
@@ -171,16 +178,17 @@ class TautulliConfig(ConfigSection):
     @property
     def voice_channel_settings(self):
         return {
-            'stats_category_name': self.stats_voice_channel_category_name,
-            'count': self.display_stream_count,
-            'transcodes': self.display_transcode_count,
-            'bandwidth': self.display_bandwidth,
-            'localBandwidth': self.display_local_bandwidth,
-            'remoteBandwidth': self.display_remote_bandwidth,
-            'stats': self.display_library_stats,
-            'refresh_time': self.library_refresh_interval,
-            'libraries_category_name': self.libraries_voice_channel_category_name,
-            'libraries': self.library_names
+            statics.KEY_STATS_CATEGORY_NAME: self.stats_voice_channel_category_name,
+            statics.KEY_COUNT: self.display_stream_count,
+            statics.KEY_TRANSCODE_COUNT: self.display_transcode_count,
+            statics.KEY_BANDWIDTH: self.display_bandwidth,
+            statics.KEY_LAN_BANDWIDTH: self.display_local_bandwidth,
+            statics.KEY_REMOTE_BANDWIDTH: self.display_remote_bandwidth,
+            statics.KEY_STATS: self.display_library_stats,
+            statics.KEY_PLEX_STATUS: self.display_plex_status,
+            statics.KEY_REFRESH_TIME: self.library_refresh_interval,
+            statics.KEY_LIBRARIES_CATEGORY_NAME: self.libraries_voice_channel_category_name,
+            statics.KEY_LIBRARIES: self.library_names
         }
 
 
