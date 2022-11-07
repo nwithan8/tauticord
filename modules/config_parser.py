@@ -4,7 +4,7 @@ from typing import List
 
 import confuse
 import yaml
-import statics
+from modules import statics
 
 
 def _extract_bool(value):
