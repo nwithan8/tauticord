@@ -28,3 +28,4 @@ services:
       TC_DISCORD_CHANNEL_NAME: "Tautulli Status"
       TC_USE_EMBEDS: "True"
       TC_ALLOWS_ANALYTICS: "True"
+      TC_LOG_LEVEL: "DEBUG"

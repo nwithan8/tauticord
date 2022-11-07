@@ -85,6 +85,7 @@ You will need to set the following environment variables:
 | TC_DISCORD_CHANNEL_NAME         | Channel name for updates                                       | "Tautulli Status"                    |
 | TC_USE_EMBEDS                   | Use embedded messages rather than regular text chat            | "True"                               |
 | TC_ALLOW_ANALYTICS              | Allow Anonymous Crash Analytics?                               | "True"                               |                          |                                                                               |                                       
+| TC_LOG_LEVEL                    | Severity threshold for logs                                    | "INFO"                               |
 | TZ                              | Timezone that your server is in                                | "America/New_York"                   |
 
 # Analytics

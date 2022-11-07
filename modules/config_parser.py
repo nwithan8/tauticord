@@ -4,6 +4,7 @@ from typing import List
 
 import confuse
 import yaml
+
 from modules import statics
 
 
@@ -240,6 +241,11 @@ class ExtrasConfig(ConfigSection):
                                 env_name_override="TC_ALLOW_ANALYTICS")
         return _extract_bool(value)
 
+    @property
+    def log_level(self) -> str:
+        return self._get_value(key="LogLevel", default="INFO",
+                               env_name_override="TC_LOG_LEVEL")
+
 
 class Config:
     def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True):
@@ -256,10 +262,7 @@ class Config:
         self.tautulli = TautulliConfig(self.config, self.pull_from_env)
         self.discord = DiscordConfig(self.config, self.pull_from_env)
         self.extras = ExtrasConfig(self.config, self.pull_from_env)
-        try:
-            self.log_level = self.config['logLevel'].get() or "INFO"
-        except confuse.NotFoundError:
-            self.log_level = "WARN"  # will only be WARN when pulling config from env (i.e. Docker)
+        self.log_level = self.extras.log_level
 
     def __repr__(self) -> str:
         raw_yaml_data = self.config.dump()

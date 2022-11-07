@@ -1,5 +1,4 @@
 appName: Tauticord
-logLevel: WARN
 
 Tautulli:
   Connection:
@@ -50,3 +49,4 @@ Discord:
 Extras:
   # See README.md for details
   Analytics: true
+  LogLevel: DEBUG
