@@ -108,6 +108,19 @@ Tauticord uses Google Analytics to collect statistics such as common errors that
 # To come
 This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull request.
 
+# Contact
+Please leave a pull request if you would like to contribute.
+
+Follow me on Twitter: [@nwithan8](https://twitter.com/nwithan8)
+
+Also feel free to check out my other projects here on [GitHub](https://github.com/nwithan8) or join the #developer channel in my Discord server below.
+
+<div align="center">
+	<p>
+		<a href="https://discord.gg/ygRDVE9"><img src="https://discordapp.com/api/guilds/472537215457689601/widget.png?style=banner2" alt="" /></a>
+	</p>
+</div>
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
