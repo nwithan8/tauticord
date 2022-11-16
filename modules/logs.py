@@ -12,9 +12,13 @@ _nameToLevel = {
     'NOTSET': logging.NOTSET,
 }
 
+_DEFAULT_LOGGER_NAME = None
 
 def init(app_name: str, console_log_level: str, log_to_file: Optional[bool] = False,
          file_log_level: Optional[str] = None):
+    global _DEFAULT_LOGGER_NAME
+    _DEFAULT_LOGGER_NAME = app_name
+
     logger = logging.getLogger(app_name)
 
     # Default log to DEBUG
@@ -41,21 +45,12 @@ def level_name_to_level(level_name: str):
 
 
 def info(message: str, specific_logger: Optional[str] = None):
-    if specific_logger:
-        logging.getLogger(specific_logger).info(msg=message)
-    else:
-        logging.info(msg=message)
+    logging.getLogger(specific_logger if specific_logger else _DEFAULT_LOGGER_NAME).info(msg=message)
 
 
 def debug(message: str, specific_logger: Optional[str] = None):
-    if specific_logger:
-        logging.getLogger(specific_logger).debug(msg=message)
-    else:
-        logging.debug(msg=message)
+    logging.getLogger(specific_logger if specific_logger else _DEFAULT_LOGGER_NAME).debug(msg=message)
 
 
 def error(message: str, specific_logger: Optional[str] = None):
-    if specific_logger:
-        logging.getLogger(specific_logger).error(msg=message)
-    else:
-        logging.error(msg=message)
+    logging.getLogger(specific_logger if specific_logger else _DEFAULT_LOGGER_NAME).error(msg=message)
