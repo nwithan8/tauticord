@@ -14,7 +14,9 @@ _nameToLevel = {
 
 _DEFAULT_LOGGER_NAME = None
 
-def init(app_name: str, console_log_level: str, log_to_file: Optional[bool] = False,
+def init(app_name: str,
+         console_log_level: str,
+         log_to_file: Optional[bool] = False,
          file_log_level: Optional[str] = None):
     global _DEFAULT_LOGGER_NAME
     _DEFAULT_LOGGER_NAME = app_name
