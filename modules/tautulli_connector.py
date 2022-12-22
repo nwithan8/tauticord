@@ -357,7 +357,7 @@ class TautulliConnector:
         return None
 
     def get_library_info(self, library_name: str) -> Union[dict, None]:
-        logging.info(f"Collecting stats about library {library_name}")
+        logging.info(f"Collecting stats about library \"{library_name}\"")
         library_id = self.get_library_id(library_name=library_name)
         if not library_id:
             return None

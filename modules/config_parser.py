@@ -6,6 +6,7 @@ import confuse
 import yaml
 
 from modules import statics
+import modules.logs as logging
 
 
 def _extract_bool(value):
@@ -241,11 +242,6 @@ class ExtrasConfig(ConfigSection):
                                 env_name_override="TC_ALLOW_ANALYTICS")
         return _extract_bool(value)
 
-    @property
-    def log_level(self) -> str:
-        return self._get_value(key="LogLevel", default="INFO",
-                               env_name_override="TC_LOG_LEVEL")
-
 
 class Config:
     def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True):
@@ -254,15 +250,16 @@ class Config:
         # noinspection PyBroadException
         try:
             self.config.set_file(filename=config_path)
+            logging.debug(f"Loaded config from {config_path}")
         except Exception:  # pylint: disable=broad-except # not sure what confuse will throw
             if not fallback_to_env:
                 raise FileNotFoundError(f"Config file not found: {config_path}")
             self.pull_from_env = True
+            logging.debug(f"Config file not found: {config_path}, falling back to environment variables")
 
         self.tautulli = TautulliConfig(self.config, self.pull_from_env)
         self.discord = DiscordConfig(self.config, self.pull_from_env)
         self.extras = ExtrasConfig(self.config, self.pull_from_env)
-        self.log_level = self.extras.log_level
 
     def __repr__(self) -> str:
         raw_yaml_data = self.config.dump()

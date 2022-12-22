@@ -10,16 +10,16 @@ import modules.tautulli_connector as tautulli
 from modules import config_parser
 from modules.analytics import GoogleAnalytics
 
+logging.init(app_name="Tauticord", console_log_level="INFO", log_to_file=True, file_log_level="DEBUG")
+
 config = config_parser.Config(app_name="Tauticord", config_path=f"{Path(Path(__file__).parent / 'config.yaml')}")
 
 analytics = GoogleAnalytics(analytics_id='UA-174268200-2',
                             anonymous_ip=True,
                             do_not_track=not config.extras.allow_analytics)
 
-logging.init(app_name="Tauticord", console_log_level=config.log_level, log_to_file=True)
-
 if __name__ == '__main__':
-    logging.info("Starting application...")
+    logging.info("Starting Tauticord...")
 
     d = discord.DiscordConnector(
         token=config.discord.bot_token,

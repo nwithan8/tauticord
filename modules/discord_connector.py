@@ -347,7 +347,7 @@ class DiscordConnector:
         return self.current_message
 
     async def collect_tautulli_channel(self) -> None:
-        logging.info(f"Getting {self.tautulli_channel_name} channel")
+        logging.info(f"Getting \"{self.tautulli_channel_name}\" channel")
         self.tautulli_channel: discord.TextChannel = \
             await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
                                               channel_name=self.tautulli_channel_name)
@@ -411,36 +411,42 @@ class DiscordConnector:
                                          category: discord.CategoryChannel = None) -> None:
 
         if self.tautulli.voice_channel_settings.get(statics.KEY_PLEX_STATUS, False):
-            logging.info(f"Updating Plex Status voice channel with new status")
+            status = "Online" if plex_online else "Offline"
+            logging.info(f"Updating Plex Status voice channel with new status: {status}")
             await self.edit_stat_voice_channel(channel_name="Plex Status",
-                                               stat="Online" if plex_online else "Offline",
+                                               stat=status,
                                                category=category)
 
         if activity:
             if self.tautulli.voice_channel_settings.get(statics.KEY_COUNT, False):
-                logging.info(f"Updating Streams voice channel with new stream count")
+                count = activity.stream_count
+                logging.info(f"Updating Streams voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Streams",
-                                                   stat=activity.stream_count,
+                                                   stat=count,
                                                    category=category)
             if self.tautulli.voice_channel_settings.get(statics.KEY_TRANSCODE_COUNT, False):
-                logging.info(f"Updating Transcodes voice channel with new stream count")
+                count = activity.transcode_count
+                logging.info(f"Updating Transcodes voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Transcodes",
-                                                   stat=activity.transcode_count,
+                                                   stat=count,
                                                    category=category)
             if self.tautulli.voice_channel_settings.get(statics.KEY_BANDWIDTH, False):
-                logging.info(f"Updating Bandwidth voice channel with new bandwidth")
+                bandwidth = activity.total_bandwidth
+                logging.info(f"Updating Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Bandwidth",
-                                                   stat=activity.total_bandwidth,
+                                                   stat=bandwidth,
                                                    category=category)
             if self.tautulli.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
-                logging.info(f"Updating Local Bandwidth voice channel with new bandwidth")
+                bandwidth = activity.lan_bandwidth
+                logging.info(f"Updating Local Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Local Bandwidth",
-                                                   stat=activity.lan_bandwidth,
+                                                   stat=bandwidth,
                                                    category=category)
             if self.tautulli.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
-                logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth")
+                bandwidth = activity.wan_bandwidth
+                logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Remote Bandwidth",
-                                                   stat=activity.wan_bandwidth,
+                                                   stat=bandwidth,
                                                    category=category)
 
     async def update_library_stats_voice_channels(self) -> None:
@@ -448,7 +454,7 @@ class DiscordConnector:
         if self.tautulli.voice_channel_settings.get(statics.KEY_STATS, False):
             for library_name in self.tautulli.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
                 size = self.tautulli.get_library_item_count(library_name=library_name)
-                logging.info(f"Updating {library_name} voice channel with new library size")
+                logging.info(f"Updating {library_name} voice channel with new library size: {size}")
                 await self.edit_stat_voice_channel(channel_name=library_name,
                                                    stat=size,
                                                    category=self.tautulli_libraries_voice_category)
