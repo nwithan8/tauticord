@@ -1,20 +1,42 @@
-# Copyright 2022, Nathan Harris.
+# Copyright 2023, Nathan Harris.
 # All rights reserved.
 # Tauticord is released as-is under the "GNU General Public License".
 # Please see the LICENSE file that should have been included as part of this package.
-from pathlib import Path
+import argparse
 
 import modules.discord_connector as discord
 import modules.logs as logging
 import modules.tautulli_connector as tautulli
-from modules import config_parser
+from consts import (
+    GOOGLE_ANALYTICS_ID,
+    APP_NAME,
+    DEFAULT_CONFIG_PATH,
+    CONSOLE_LOG_LEVEL,
+    FILE_LOG_LEVEL,
+)
 from modules.analytics import GoogleAnalytics
+from modules.config_parser import Config
 
-logging.init(app_name="Tauticord", console_log_level="INFO", log_to_file=True, file_log_level="DEBUG")
+# Parse arguments
+parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
 
-config = config_parser.Config(app_name="Tauticord", config_path=f"{Path(Path(__file__).parent / 'config.yaml')}")
+"""
+Bot will use, in order:
+1. Explicit config file path provided as CLI argument, if included, or
+2. Default config file path, if exists, or
+3. Environmental variables
+"""
+parser.add_argument("-c", "--config", help="Path to config file", default=DEFAULT_CONFIG_PATH)
+args = parser.parse_args()
 
-analytics = GoogleAnalytics(analytics_id='UA-174268200-2',
+# Set up logging
+logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, file_log_level=FILE_LOG_LEVEL)
+
+# Set up configuration
+config = Config(app_name=APP_NAME, config_path=f"{args.config}")
+
+# Set up analytics
+analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
                             anonymous_ip=True,
                             do_not_track=not config.extras.allow_analytics)
 
@@ -46,4 +68,4 @@ if __name__ == '__main__':
 
         d.connect()
     except Exception as e:
-        exit(1)  # Exit the script if an error bubbles up (like a internet connection error)
+        exit(1)  # Exit the script if an error bubbles up (like an internet connection error)
