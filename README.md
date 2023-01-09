@@ -1,4 +1,5 @@
-[![Donate with Bitcoin](https://en.cryptobadges.io/badge/micro/3H94aowuz4hgbvNjceZ2xeq14rjmGz4cD9)](https://en.cryptobadges.io/donate/3H94aowuz4hgbvNjceZ2xeq14rjmGz4cD9)
+<a href="https://www.buymeacoffee.com/nwithan8" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+![GitHub Sponsors](https://img.shields.io/github/sponsors/nwithan8)
 
 # Tauticord
 A Discord bot that displays live data from Tautulli
@@ -11,6 +12,8 @@ Tauticord uses the Tautulli API to pull information from Tautulli and display th
 * Number of transcoding streams
 * Total bandwidth
 * Total LAN bandwidth
+* Total remote bandwidth
+* Library item counts
 
 ### FOR EACH STREAM:
 * Stream state (playing, paused, stopped, loading)
@@ -32,7 +35,7 @@ Users can also indicate what libraries they would like monitored. Tauticord will
 - A Plex Media Server
 - Tautulli (formerly known as PlexPy)
 - A Discord server
-- Python 3.10+
+- Docker
 
 # Installation and setup
 HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
@@ -44,21 +47,7 @@ Permissions required:
 - Read Message History
 - Add Reactions
 
-Install requirements with:
-
-	pip3 install -r requirements.txt
-
-Copy ``config.yaml.example`` to ``config.yaml`` and complete the variables in the file.
-
-# Usage
-Run the script with the following command:
-
-	python3 Tauticord.py
-
-Because the script is configured to quit if internet connectivity issues occur, it is HIGHLY RECOMMENDED to run this application as a Docker container (see below). The Docker container is configured to automatically restart the bot if an internet connection is lost.
-	
-# Docker
-You can also run Tauticord as a Docker container. The Dockerfile is included in this repository, or can be pulled from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord) or [GitHub Packages](https://github.com/nwithan8/tauticord/pkgs/container/tauticord).
+Tauticord runs as a Docker container. The Dockerfile is included in this repository, or can be pulled from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord) or [GitHub Packages](https://github.com/nwithan8/tauticord/pkgs/container/tauticord).
 
 You will need to set the following environment variables:
 
@@ -89,6 +78,10 @@ You will need to set the following environment variables:
 | TC_ALLOW_ANALYTICS              | Allow Anonymous Crash Analytics?                               | "True"                               |                
 | TZ                              | Timezone that your server is in                                | "America/New_York"                   |
 
+You can also set these variables by copying ``config.yaml.example`` inside the Docker container to ``config.yaml`` and completing the variables in the file.
+
+Please note, if the `config.yaml` file is present in the filesystem, the application will ONLY use this file for configuration. If you are going to use it, you need to fill it out in its entirety.
+
 # Analytics
 Tauticord uses Google Analytics to collect statistics such as common errors that will help with future development.
 **This data is limited, anonymous, and never sold or redistributed.**
@@ -97,7 +90,7 @@ Tauticord uses Google Analytics to collect statistics such as common errors that
 - Whenever the bot comes online
 	- What operating system the bot is running on (Windows, Linux, MacOS, etc.)
 - Whenever an error is logged
- 	- What Python function the error occurred in.
+ 	- What function the error occurred in.
 
 **What data is NOT collected:**
 - Any identifying information about the user
