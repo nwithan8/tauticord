@@ -98,6 +98,14 @@ You can also set these variables via a configuration file:
 Please note, if the `config.yaml` file is present, the application will ONLY use this file for
 configuration. If you are going to use it, you need to fill it out in its entirety.
 
+# Run without Docker
+
+You can run Tauticord outside of Docker by cloning this repository and either:
+- renaming `config.yaml.example` to `config.yaml`, filling out the settings inside `config.yaml` and running the bot with `python3 run.py --config config.yaml`
+- adding the above environmental variables to your system and running the bot with `python3 run.py`
+
+Please note, this is NOT ADVISED. Running this application as a Docker container is the only officially-supported method of running Tauticord.
+
 # Analytics
 
 Tauticord uses Google Analytics to collect statistics such as common errors that will help with future development.
