@@ -54,6 +54,8 @@ Copy ``config.yaml.example`` to ``config.yaml`` and complete the variables in th
 Run the script with the following command:
 
 	python3 Tauticord.py
+
+Because the script is configured to quit if internet connectivity issues occur, it is HIGHLY RECOMMENDED to run this application as a Docker container (see below). The Docker container is configured to automatically restart the bot if an internet connection is lost.
 	
 # Docker
 You can also run Tauticord as a Docker container. The Dockerfile is included in this repository, or can be pulled from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord) or [GitHub Packages](https://github.com/nwithan8/tauticord/pkgs/container/tauticord).

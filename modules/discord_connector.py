@@ -256,13 +256,19 @@ class DiscordConnector:
 
     async def run_live_summary_message_service(self, message: discord.Message, refresh_time: int):
         while True:
-            message = await self.edit_summary_message(previous_message=message)
-            await asyncio.sleep(refresh_time)
+            try:
+                message = await self.edit_summary_message(previous_message=message)
+                await asyncio.sleep(refresh_time)
+            except Exception:
+                exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
 
     async def run_library_stats_service(self, refresh_time: int):
         while True:
-            await self.update_library_stats_voice_channels()
-            await asyncio.sleep(refresh_time)
+            try:
+                await self.update_library_stats_voice_channels()
+                await asyncio.sleep(refresh_time)
+            except Exception:
+                exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
 
     def is_me(self, message) -> bool:
         return message.author == self.client.user
