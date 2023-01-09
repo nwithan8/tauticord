@@ -203,7 +203,7 @@ class DiscordConnector:
 
     def connect(self) -> None:
         logging.info('Connecting to Discord...')
-        self.client.run(self.token)
+        self.client.run(self.token, reconnect=True)
 
     @property
     def stats_voice_category_name(self) -> str:
