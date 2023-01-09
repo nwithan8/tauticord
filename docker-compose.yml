@@ -12,20 +12,22 @@ services:
       TC_PLEX_PASS: "False"
       TC_REFRESH_SECONDS: 15
       TC_TERMINATE_MESSAGE: "Your stream has ended."
-      TZ: America/New_York
       TC_USE_24_HOUR_TIME: "False"
+      TC_VC_STATS_CATEGORY_NAME: "Plex Stream Stats"
       TC_VC_STREAM_COUNT: "False"
       TC_VC_TRANSCODE_COUNT: "False"
       TC_VC_BANDWIDTH: "False"
       TC_VC_LOCAL_BANDWIDTH: "False"
       TC_VC_REMOTE_BANDWIDTH: "False"
       TC_VC_PLEX_STATUS: "False"
+      TC_VC_LIBRARIES_CATEGORY_NAME: "Plex Library Stats"
       TC_VC_LIBRARY_STATS: "False"
       TC_VC_LIBRARY_NAMES: Movies,TV Shows,Music
+      TC_VC_LIBRARY_REFRESH_SECONDS: 3600
       TC_DISCORD_BOT_TOKEN: my_secret_bot_token
       TC_DISCORD_SERVER_ID: my_server_id
-      TC_DISCORD_OWNER_ID: my_user_id
+      TC_DISCORD_ADMIN_IDS: my_user_id,my_second_user_id
       TC_DISCORD_CHANNEL_NAME: "Tautulli Status"
       TC_USE_EMBEDS: "True"
       TC_ALLOWS_ANALYTICS: "True"
-      TC_LOG_LEVEL: "DEBUG"
+      TZ: America/New_York
