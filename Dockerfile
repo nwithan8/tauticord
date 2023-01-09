@@ -9,12 +9,25 @@ RUN apk add --no-cache --update alpine-sdk git wget python3 python3-dev ca-certi
 # Install pm2-logrotate
 RUN pm2 install pm2-logrotate
 
-# Install script requirements
+# Copy requirements.txt from build machine to WORKDIR (/app) folder (important we do this BEFORE copying the rest of the files to avoid re-running pip install on every code change)
 COPY requirements.txt requirements.txt
+
+# Install Python requirements
 RUN pip3 install -r requirements.txt
 
-# Copy source code
+# Make Docker /config volume for optional config file
+VOLUME /config
+
+# Copy example config file from build machine to Docker /config folder
+# Also copies any existing config.yaml file from build machine to Docker /config folder, (will cause the bot to use the existing config file if it exists)
+COPY config.yaml* /config/
+
+# Copy source code from build machine to WORKDIR (/app) folder
 COPY . .
+
+# Delete unnecessary files in WORKDIR (/app) folder (not caught by .dockerignore)
+RUN echo "**** removing unneeded files ****"
+RUN rm -rf /app/requirements.txt /app/config.yaml*
 
 # Run the app
 CMD [ "pm2-runtime", "start", "ecosystem.config.json" ]

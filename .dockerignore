@@ -1,0 +1,12 @@
+*.md
+LICENSE
+Dockerfile
+.dockerignore
+.gitignore
+.github
+.git
+.idea
+docker-compose.yml
+venv
+__pycache__
+Tauticord.log

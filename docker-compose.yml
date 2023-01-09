@@ -2,11 +2,15 @@ version: "3.9"
 services:
   tauticord:
     build:
-        context: .
-        dockerfile: Dockerfile
-        args:
-            INFO_VERSION: "docker-compose-develop"
+      context: .
+      dockerfile: Dockerfile
+      args:
+        INFO_VERSION: "docker-compose-develop"
+    volumes:
+      - /path/to/config:/config
     environment:
+      TC_DISCORD_BOT_TOKEN: my_secret_bot_token
+      TC_DISCORD_SERVER_ID: my_server_id
       TC_TAUTULLI_KEY: my_secret_api_key
       TC_TAUTULLI_URL: http://localhost:8181
       TC_PLEX_PASS: "False"
@@ -24,8 +28,6 @@ services:
       TC_VC_LIBRARY_STATS: "False"
       TC_VC_LIBRARY_NAMES: Movies,TV Shows,Music
       TC_VC_LIBRARY_REFRESH_SECONDS: 3600
-      TC_DISCORD_BOT_TOKEN: my_secret_bot_token
-      TC_DISCORD_SERVER_ID: my_server_id
       TC_DISCORD_ADMIN_IDS: my_user_id,my_second_user_id
       TC_DISCORD_CHANNEL_NAME: "Tautulli Status"
       TC_USE_EMBEDS: "True"
