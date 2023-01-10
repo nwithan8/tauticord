@@ -11,6 +11,7 @@ from consts import (
     GOOGLE_ANALYTICS_ID,
     APP_NAME,
     DEFAULT_CONFIG_PATH,
+    DEFAULT_LOG_DIR,
     CONSOLE_LOG_LEVEL,
     FILE_LOG_LEVEL,
 )
@@ -21,16 +22,20 @@ from modules.config_parser import Config
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
 
 """
-Bot will use, in order:
+Bot will use config, in order:
 1. Explicit config file path provided as CLI argument, if included, or
 2. Default config file path, if exists, or
 3. Environmental variables
 """
 parser.add_argument("-c", "--config", help="Path to config file", default=DEFAULT_CONFIG_PATH)
+
+# Should include trailing backslash
+parser.add_argument("-l", "--log", help="Log file directory", default=DEFAULT_LOG_DIR)
+
 args = parser.parse_args()
 
 # Set up logging
-logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, file_log_level=FILE_LOG_LEVEL)
+logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log, file_log_level=FILE_LOG_LEVEL)
 
 # Set up configuration
 config = Config(app_name=APP_NAME, config_path=f"{args.config}")

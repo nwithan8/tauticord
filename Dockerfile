@@ -22,6 +22,9 @@ VOLUME /config
 # Also copies any existing config.yaml file from build machine to Docker /config folder, (will cause the bot to use the existing config file if it exists)
 COPY config.yaml* /config/
 
+# Make Docker /logs volume for log file
+VOLUME /logs
+
 # Copy source code from build machine to WORKDIR (/app) folder
 COPY . .
 
