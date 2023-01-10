@@ -8,6 +8,7 @@ services:
         INFO_VERSION: "docker-compose-develop"
     volumes:
       - /path/to/config:/config
+      - /path/to/logs:/logs
     environment:
       TC_DISCORD_BOT_TOKEN: my_secret_bot_token
       TC_DISCORD_SERVER_ID: my_server_id

@@ -17,6 +17,7 @@ _DEFAULT_LOGGER_NAME = None
 def init(app_name: str,
          console_log_level: str,
          log_to_file: Optional[bool] = False,
+         log_file_dir: Optional[str] = "",
          file_log_level: Optional[str] = None):
     global _DEFAULT_LOGGER_NAME
     _DEFAULT_LOGGER_NAME = app_name
@@ -36,7 +37,7 @@ def init(app_name: str,
 
     # File logging
     if log_to_file:
-        file_logger = logging.FileHandler(f'{app_name}.log')
+        file_logger = logging.FileHandler(f'{log_file_dir}{app_name}.log')
         file_logger.setFormatter(formatter)
         file_logger.setLevel(level_name_to_level(file_log_level or console_log_level))
         logger.addHandler(file_logger)

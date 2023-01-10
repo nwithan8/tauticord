@@ -59,6 +59,13 @@ Tauticord runs as a Docker container. The Dockerfile is included in this reposit
 from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord)
 or [GitHub Packages](https://github.com/nwithan8/tauticord/pkgs/container/tauticord).
 
+You will need to map the following volumes:
+
+| Host Path       | Container Path | Reason                                                                    |
+|-----------------|----------------|---------------------------------------------------------------------------|
+| /path/to/logs   | /logs          | Required, debug log file for bot will be available here                   |
+| /path/to/config | /config        | Optional, path to a configuration file (override environmental variables) |
+
 You will need to set the following environment variables:
 
 | Environment Variable            | Required | Value                                                          | Example/Default                         |
@@ -90,7 +97,7 @@ You will need to set the following environment variables:
 
 You can also set these variables via a configuration file:
 
-1. Map a directory to `/config` in the container
+1. Map the `/config` directory (see volumes above)
 2. Enter the mapped directory on your host machine
 3. Rename the ``config.yaml.example`` file in the path to ``config.yaml``
 4. Complete the variables in ``config.yaml``
@@ -101,10 +108,13 @@ configuration. If you are going to use it, you need to fill it out in its entire
 # Run without Docker
 
 You can run Tauticord outside of Docker by cloning this repository and either:
-- renaming `config.yaml.example` to `config.yaml`, filling out the settings inside `config.yaml` and running the bot with `python3 run.py --config config.yaml`
+
+- renaming `config.yaml.example` to `config.yaml`, filling out the settings inside `config.yaml` and running the bot
+  with `python3 run.py --config config.yaml`
 - adding the above environmental variables to your system and running the bot with `python3 run.py`
 
-Please note, this is NOT ADVISED. Running this application as a Docker container is the only officially-supported method of running Tauticord.
+Please note, this is NOT ADVISED. Running this application as a Docker container is the only officially-supported method
+of running Tauticord.
 
 # Analytics
 
