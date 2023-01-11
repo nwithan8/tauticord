@@ -1,11 +1,7 @@
 version: "3.9"
 services:
   tauticord:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        INFO_VERSION: "docker-compose-develop"
+    image: nwithan8/tauticord:latest
     volumes:
       - /path/to/config:/config
       - /path/to/logs:/logs
