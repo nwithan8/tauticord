@@ -1,15 +1,26 @@
-<a href="https://www.buymeacoffee.com/nwithan8" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
-![GitHub Sponsors](https://img.shields.io/github/sponsors/nwithan8)
+<div align="center">
 
 # Tauticord
 
 A Discord bot that displays live data from Tautulli
 
+[![Release](https://img.shields.io/github/v/release/nwithan8/tauticord?color=yellow&include_prereleases&label=version&style=flat-square)](https://github.com/nwithan8/tauticord/releases)
+[![Docker](https://img.shields.io/docker/pulls/nwithan8/tauticord?style=flat-square)](https://hub.docker.com/r/nwithan8/tauticord)
+[![Licence](https://img.shields.io/github/license/nwithan8/tauticord?style=flat-square)](https://opensource.org/licenses/GPL-3.0)
+
+<a href="https://www.buymeacoffee.com/nwithan8" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="19" width="95"></a>
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/nwithan8?style=flat-square)](https://github.com/sponsors/nwithan8)
+
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/main/logo.png" alt="logo">
+
+</div>
+
+
 # Features
 
 Tauticord uses the Tautulli API to pull information from Tautulli and display them in a Discord channel, including:
 
-### OVERVIEW:
+### Overview:
 
 * Number of current streams
 * Number of transcoding streams
@@ -18,7 +29,7 @@ Tauticord uses the Tautulli API to pull information from Tautulli and display th
 * Total remote bandwidth
 * Library item counts
 
-### FOR EACH STREAM:
+### For each stream:
 
 * Stream state (playing, paused, stopped, loading)
 * Media type (tv show/movie/song/photo)
@@ -36,24 +47,22 @@ Administrator (the bot owner) can react to Tauticord's messages to terminate a s
 Users can also indicate what libraries they would like monitored. Tauticord will create/update a voice channel for each
 library name with item counts every hour.
 
-# Requirements
+# Installation and setup
+
+## Requirements
 
 - A Plex Media Server
 - Tautulli (formerly known as PlexPy)
 - A Discord server
 - Docker
-
-# Installation and setup
-
-HOW TO MAKE A DISCORD BOT: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
-Permissions required:
-
-- Manage Channels
-- View Channels
-- Send Messages
-- Manage Messages
-- Read Message History
-- Add Reactions
+- [A Discord bot token](https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/)
+  - Permissions required:
+    - Manage Channels
+    - View Channels
+    - Send Messages
+    - Manage Messages
+    - Read Message History
+    - Add Reactions
 
 Tauticord runs as a Docker container. The Dockerfile is included in this repository, or can be pulled
 from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord)
@@ -105,7 +114,7 @@ You can also set these variables via a configuration file:
 Please note, if the `config.yaml` file is present, the application will ONLY use this file for
 configuration. If you are going to use it, you need to fill it out in its entirety.
 
-# Run without Docker
+## Run without Docker
 
 You can run Tauticord outside of Docker by cloning this repository and either:
 
@@ -137,9 +146,9 @@ Tauticord uses Google Analytics to collect statistics such as common errors that
 - Any data from Tautulli
 - Anything typed in Discord.
 
-# To come
+# Development
 
-This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please do a pull
+This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please open an issue or a pull
 request.
 
 # Contact
