@@ -7,6 +7,7 @@ import modules.logs as logging
 import modules.statics as statics
 import modules.tautulli_connector
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
+from modules.utils import quote
 
 
 async def add_emoji_reactions(message: discord.Message, count: int):
@@ -217,13 +218,13 @@ class DiscordConnector:
         logging.info('Connected to Discord.')
 
         logging.info("Loading Tautulli text settings...")
-        await self.collect_tautulli_channel()
+        await self.collect_discord_text_channel()
         await self.collect_old_message_in_tautulli_channel()
 
         logging.info("Loading Tautulli voice settings...")
-        self.tautulli_stats_voice_category = await self.collect_tautulli_voice_category(
+        self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
             category_name=self.stats_voice_category_name)
-        self.tautulli_libraries_voice_category = await self.collect_tautulli_voice_category(
+        self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
             category_name=self.libraries_voice_category_name)
 
         logging.info("Loading Tautulli summary message service...")
@@ -352,24 +353,24 @@ class DiscordConnector:
         self.current_message = new_message
         return self.current_message
 
-    async def collect_tautulli_channel(self) -> None:
-        logging.info(f"Getting \"{self.tautulli_channel_name}\" channel")
+    async def collect_discord_text_channel(self) -> None:
+        logging.info(f"Getting {quote(self.tautulli_channel_name)} channel")
         self.tautulli_channel: discord.TextChannel = \
             await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
                                               channel_name=self.tautulli_channel_name)
         if not self.tautulli_channel:
-            raise Exception(f"Could not load {self.tautulli_channel_name} channel. Exiting...")
-        logging.info(f"{self.tautulli_channel_name} channel collected.")
+            raise Exception(f"Could not load {quote(self.tautulli_channel_name)} channel. Exiting...")
+        logging.info(f"{quote(self.tautulli_channel_name)} channel collected.")
 
-    async def collect_tautulli_voice_category(self, category_name: str) -> discord.CategoryChannel:
-        logging.info(f"Getting {category_name} voice category")
+    async def collect_discord_voice_category(self, category_name: str) -> discord.CategoryChannel:
+        logging.info(f"Getting {quote(category_name)} voice category")
         category: discord.CategoryChannel = \
             await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
                                               channel_name=category_name,
                                               channel_type=discord.ChannelType.category)
         if not category_name:
-            raise Exception(f"Could not load {category_name} voice category. Exiting...")
-        logging.info(f"{category_name} voice category collected.")
+            raise Exception(f"Could not load {quote(category_name)} voice category. Exiting...")
+        logging.info(f"{quote(category_name)} voice category collected.")
         return category
 
     async def collect_old_message_in_tautulli_channel(self) -> None:

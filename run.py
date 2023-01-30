@@ -73,4 +73,5 @@ if __name__ == '__main__':
 
         d.connect()
     except Exception as e:
+        logging.fatal(f"Fatal error occurred. Shutting down: {e}")
         exit(1)  # Exit the script if an error bubbles up (like an internet connection error)
