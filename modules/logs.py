@@ -14,6 +14,7 @@ _nameToLevel = {
 
 _DEFAULT_LOGGER_NAME = None
 
+
 def init(app_name: str,
          console_log_level: str,
          log_to_file: Optional[bool] = False,
@@ -57,3 +58,11 @@ def debug(message: str, specific_logger: Optional[str] = None):
 
 def error(message: str, specific_logger: Optional[str] = None):
     logging.getLogger(specific_logger if specific_logger else _DEFAULT_LOGGER_NAME).error(msg=message)
+
+
+def critical(message: str, specific_logger: Optional[str] = None):
+    logging.getLogger(specific_logger if specific_logger else _DEFAULT_LOGGER_NAME).critical(msg=message)
+
+
+def fatal(message: str, specific_logger: Optional[str] = None):
+    logging.getLogger(specific_logger if specific_logger else _DEFAULT_LOGGER_NAME).critical(msg=message)

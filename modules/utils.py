@@ -8,6 +8,9 @@ def make_plural(word, count: int, suffix_override: str = 's') -> str:
         return f"{word}{suffix_override}"
     return word
 
+def quote(string: str) -> str:
+    return f"\"{string}\""
+
 
 def _human_bitrate(number, denominator: int = 1, letter: str = "", d: int = 1) -> str:
     if d <= 0:
