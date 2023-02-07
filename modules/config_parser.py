@@ -207,16 +207,16 @@ class DiscordConfig(ConfigSection):
         return self._connection._get_value(key="BotToken", env_name_override="TC_DISCORD_BOT_TOKEN")
 
     @property
-    def server_id(self) -> int:
+    def server_id(self) -> str:
         value = self._connection._get_value(key="ServerID", env_name_override="TC_DISCORD_SERVER_ID")
-        return int(value)
+        return str(value)
 
     @property
-    def admin_ids(self) -> List[int]:
+    def admin_ids(self) -> List[str]:
         ids = self._connection._get_value(key="AdminIDs", default=[], env_name_override="TC_DISCORD_ADMIN_IDS")
         if isinstance(ids, str):
-            return [int(i) for i in ids.split(",")]
-        return [int(i) for i in ids]
+            return [str(i) for i in ids.split(",")]
+        return [str(i) for i in ids]
 
     @property
     def channel_name(self) -> str:

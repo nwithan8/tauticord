@@ -104,11 +104,12 @@ async def send_message(content: TautulliDataResponse, embed: bool = False, messa
                 return await channel.send(content=content.message)
 
 
-async def create_discord_channel(client: discord.Client, guild_id: int, channel_name: str,
+async def create_discord_channel(client: discord.Client, guild_id: str, channel_name: str,
                                  channel_type: discord.ChannelType = discord.ChannelType.text) -> \
         Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]:
     try:
-        guild = client.get_guild(guild_id)  # stupid positional-only parameters
+        # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
+        guild = client.get_guild(int(guild_id))  # stupid positional-only parameters
         match channel_type:
             case discord.ChannelType.voice:
                 return await guild.create_voice_channel(name=channel_name)
@@ -120,7 +121,7 @@ async def create_discord_channel(client: discord.Client, guild_id: int, channel_
         raise Exception(f"Could not create channel {channel_name}")
 
 
-async def get_discord_channel_by_starting_name(client: discord.Client, guild_id: int,
+async def get_discord_channel_by_starting_name(client: discord.Client, guild_id: str,
                                                starting_channel_name: str,
                                                channel_type: discord.ChannelType = discord.ChannelType.text) -> \
         Union[discord.VoiceChannel, discord.TextChannel]:
@@ -133,7 +134,7 @@ async def get_discord_channel_by_starting_name(client: discord.Client, guild_id:
                                         channel_type=channel_type)
 
 
-async def get_discord_channel_by_name(client: discord.Client, guild_id: int,
+async def get_discord_channel_by_name(client: discord.Client, guild_id: str,
                                       channel_name: str,
                                       channel_type: discord.ChannelType = discord.ChannelType.text) -> \
         Union[discord.VoiceChannel, discord.TextChannel, discord.CategoryChannel]:
@@ -154,14 +155,14 @@ def valid_reaction(reaction_emoji: discord.PartialEmoji,
                    valid_reaction_type: str = None,
                    valid_message: discord.Message = None,
                    valid_emojis: List[str] = None,
-                   valid_user_ids: List[int] = None) -> bool:
+                   valid_user_ids: List[str] = None) -> bool:
     if valid_reaction_type and reaction_type != valid_reaction_type:
         return False
     if valid_message and reaction_message.id != valid_message.id:
         return False
     if valid_emojis and str(reaction_emoji) not in valid_emojis:
         return False
-    if valid_user_ids and reaction_user_id not in valid_user_ids:
+    if valid_user_ids and str(reaction_user_id) not in valid_user_ids:
         return False
     return True
 
@@ -173,8 +174,8 @@ def get_voice_channel_position(stat_type: str) -> int:
 class DiscordConnector:
     def __init__(self,
                  token: str,
-                 guild_id: int,
-                 admin_ids: List[int],
+                 guild_id: str,
+                 admin_ids: List[str],
                  refresh_time: int,
                  library_refresh_time: int,
                  tautulli_channel_name: str,
