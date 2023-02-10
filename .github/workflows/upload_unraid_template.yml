@@ -1,11 +1,11 @@
-name: Copy Unraid Community Applications template to templates repository
+name: Copy Unraid Community Applications template(s) to templates repository
 
 on:
   push:
     branches: [ master, main ]
 
 jobs:
-  build:
+  copy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,9 +17,9 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
         with:
-          source_folder: 'unraid'
+          # Will mirror folder structure (copying "templates" folder to "templates" folder in destination repo)
+          source_folder: 'templates'
           destination_repo: 'nwithan8/unraid_templates'
-          destination_folder: 'templates'
           destination_base_branch: 'main'
           destination_head_branch: 'tauticord'
           user_email: 'nwithan8@users.noreply.github.com'
