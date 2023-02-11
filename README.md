@@ -68,12 +68,17 @@ Tauticord runs as a Docker container. The Dockerfile is included in this reposit
 from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord)
 or [GitHub Packages](https://github.com/nwithan8/tauticord/pkgs/container/tauticord).
 
+
+### Volumes
+
 You will need to map the following volumes:
 
-| Host Path       | Container Path | Reason                                                                    |
-|-----------------|----------------|---------------------------------------------------------------------------|
-| /path/to/logs   | /logs          | Required, debug log file for bot will be available here                   |
-| /path/to/config | /config        | Optional, path to a configuration file (override environmental variables) |
+| Host Path              | Container Path | Reason                                                                                            |
+|------------------------|----------------|---------------------------------------------------------------------------------------------------|
+| /path/to/logs/folder   | /logs          | Required, debug log file for bot will be generated here                                           |
+| /path/to/config/folder | /config        | Optional, path to the folder containing the configuration file (override environmental variables) |
+
+### Environmental Variables
 
 You will need to set the following environment variables:
 
