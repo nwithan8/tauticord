@@ -1,6 +1,6 @@
-from typing import Union, List, Tuple
-
 import asyncio
+from typing import Union, List
+
 import discord
 from discord import Emoji
 
@@ -11,6 +11,7 @@ from modules import emojis
 from modules.emojis import EmojiManager
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 from modules.utils import quote
+
 
 async def add_emoji_reactions(message: discord.Message, count: int):
     """
@@ -57,23 +58,19 @@ async def add_emoji_reactions(message: discord.Message, count: int):
             await message.add_reaction(emoji)
 
 
-async def send_starter_message(tautulli_connector, discord_channel: discord.TextChannel) -> discord.Message:
-    if tautulli_connector.use_embeds:
-        embed = discord.Embed(title="Welcome to Tauticord!")
-        embed.add_field(name="Starting up...",
-                        value='This will be replaced once we get data.',
-                        inline=False)
-        return await discord_channel.send(content=None, embed=embed)
-    else:
-        return await discord_channel.send(content="Welcome to Tauticord!")
+async def send_starter_message(discord_channel: discord.TextChannel) -> discord.Message:
+    embed = discord.Embed(title="Welcome to Tauticord!")
+    embed.add_field(name="Starting up...",
+                    value='This will be replaced once we get data.',
+                    inline=False)
+    return await discord_channel.send(content=None, embed=embed)
 
 
-async def send_message(content: TautulliDataResponse, embed: bool = False, message: discord.Message = None,
+async def send_message(content: TautulliDataResponse, message: discord.Message = None,
                        channel: discord.TextChannel = None):
     """
     Send or edit a message.
     :param content: Contents of the message to send
-    :param embed: Whether to use embeds
     :param message: Message to edit
     :param channel: Channel to send the message to
     :return: Message sent
@@ -82,28 +79,16 @@ async def send_message(content: TautulliDataResponse, embed: bool = False, messa
     if not channel and not message:
         raise ValueError("Must specify either a channel or a message")
     if message:  # if message exists, use it to edit the message
-        if embed:  # let's send an embed
-            if not content.embed:  # oops, no embed to send
-                await message.edit(content="Something went wrong.", embed=None)  # erase any existing content and embeds
-            else:
-                await message.edit(content=None, embed=content.embed)  # erase any existing content and embeds
-        else:  # let's send a normal message
-            if not content.message:  # oops, no message to send
-                await message.edit(content="Something went wrong.", embed=None)  # erase any existing content and embeds
-            else:
-                await message.edit(content=content.message, embed=None)  # erase any existing content and embeds
+        if not content.embed:  # oops, no embed to send
+            await message.edit(content="Something went wrong.", embed=None)  # erase any existing content and embeds
+        else:
+            await message.edit(content=None, embed=content.embed)  # erase any existing content and embeds
         return message
     else:  # otherwise, send a new message in the channel
-        if embed:  # let's send an embed
-            if not content.embed:  # oops, no embed to send
-                return await channel.send(content="Something went wrong.")
-            else:
-                return await channel.send(content=None, embed=content.embed)
-        else:  # let's send a normal message
-            if not content.message:  # oops, no message to send
-                return await channel.send(content="Something went wrong.")
-            else:
-                return await channel.send(content=content.message)
+        if not content.embed:  # oops, no embed to send
+            return await channel.send(content="Something went wrong.")
+        else:
+            return await channel.send(content=None, embed=content.embed)
 
 
 async def create_discord_channel(client: discord.Client, guild_id: str, channel_name: str,
@@ -182,8 +167,7 @@ class DiscordConnector:
                  library_refresh_time: int,
                  tautulli_channel_name: str,
                  tautulli_connector: TautulliConnector,
-                 analytics,
-                 use_embeds: bool):
+                 analytics):
         self.token = token
         self.guild_id = guild_id
         self.admin_ids = admin_ids
@@ -195,7 +179,6 @@ class DiscordConnector:
         self.tautulli_libraries_voice_category: discord.CategoryChannel = None
         self.tautulli = tautulli_connector
         self.analytics = analytics
-        self.use_embeds = use_embeds
 
         intents = discord.Intents.default()
         intents.reactions = True
@@ -221,10 +204,12 @@ class DiscordConnector:
 
     async def on_ready(self) -> None:
         logging.info('Connected to Discord.')
-        await self.client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='for Tautulli stats'))
+        await self.client.change_presence(
+            activity=discord.Activity(type=discord.ActivityType.watching, name='for Tautulli stats'))
 
         logging.info("Uploading required resources...")
-        await self.emoji_manager.load_emojis(source_folder=statics.EMOJIS_FOLDER, client=self.client, guild_id=self.guild_id)
+        await self.emoji_manager.load_emojis(source_folder=statics.EMOJIS_FOLDER, client=self.client,
+                                             guild_id=self.guild_id)
 
         logging.info("Loading Tautulli text settings...")
         await self.collect_discord_text_channel()
@@ -362,7 +347,6 @@ class DiscordConnector:
                 logging.debug('Editing old message...')
             # update the message regardless of whether the content has changed
             new_message = await send_message(content=data_wrapper,
-                                             embed=self.use_embeds,
                                              message=previous_message)
         else:
             # send a new message each time
@@ -380,8 +364,7 @@ class DiscordConnector:
             else:
                 logging.debug('Sending new message...')
             # send a new message, regardless of whether the content has changed
-            new_message = await send_message(content=data_wrapper, channel=self.tautulli_channel,
-                                             embed=self.use_embeds)
+            new_message = await send_message(content=data_wrapper, channel=self.tautulli_channel)
 
         if data_wrapper.plex_pass:
             await add_emoji_reactions(message=new_message, count=count)
@@ -427,8 +410,7 @@ class DiscordConnector:
 
         # If the very last message in the channel is not from Tauticord, make a new one.
         logging.info("Couldn't find old message, sending initial message...")
-        starter_message = await send_starter_message(tautulli_connector=self.tautulli,
-                                                     discord_channel=self.tautulli_channel)
+        starter_message = await send_starter_message(discord_channel=self.tautulli_channel)
         # Store the message
         self.current_message = starter_message
         return

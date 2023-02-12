@@ -39,9 +39,6 @@ Discord:
       - 00000000000
     # Where the live stats will be posted
     ChannelName: "tautulli"
-  Customization:
-    # If True, use embeds to print information, use regular text message if False
-    UseEmbeds: true
 
 Extras:
   # See README.md for details

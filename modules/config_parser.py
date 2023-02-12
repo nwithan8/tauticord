@@ -226,11 +226,6 @@ class DiscordConfig(ConfigSection):
     def _customization(self) -> ConfigSection:
         return self._get_subsection(key="Customization")
 
-    @property
-    def use_embeds(self) -> bool:
-        value = self._customization._get_value(key="UseEmbeds", default=False, env_name_override="TC_USE_EMBEDS")
-        return _extract_bool(value)
-
 
 class ExtrasConfig(ConfigSection):
     def __init__(self, data, pull_from_env: bool = True):

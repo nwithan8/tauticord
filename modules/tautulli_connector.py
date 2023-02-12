@@ -249,7 +249,7 @@ class TautulliStreamInfo:
         try:
             return f"{self.get_user(emoji_manager=emoji_manager)}\n{self.player}\n{self.details}\n{self.progress}"
         except Exception as body_exception:
-            logging.error(body_exception)
+            logging.error(str(body_exception))
             return f"Could not display data for session {self._session_number}"
 
 
@@ -273,19 +273,11 @@ class TautulliDataResponse:
         embed = discord.Embed(title=self._overview_message)
         for stream in self._streams:
             embed.add_field(name=stream.get_title(emoji_manager=self._emoji_manager), value=stream.get_body(emoji_manager=self._emoji_manager), inline=False)
+        footer_text = self._overview_message
         if self.plex_pass:
-            embed.set_footer(text=f"To terminate a stream, react with the stream number.")
+            footer_text += f"\nTo terminate a stream, react with the stream number."
+        embed.set_footer(text=footer_text)
         return embed
-
-    @property
-    def message(self) -> str:
-        if len(self._streams) <= 0:
-            return "No current activity."
-        final_message = f"{self._overview_message}\n"
-        for stream in self._streams:
-            final_message += f"{stream.get_title(emoji_manager=self._emoji_manager)}\n{stream.body}\n"
-        final_message += f"\nTo terminate a stream, react with the stream number."
-        return final_message
 
 
 class TautulliConnector:
@@ -294,7 +286,6 @@ class TautulliConnector:
                  api_key: str,
                  terminate_message: str,
                  analytics,
-                 use_embeds: bool,
                  plex_pass: bool,
                  voice_channel_settings: dict,
                  time_settings: dict):
@@ -303,7 +294,6 @@ class TautulliConnector:
         self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key)
         self.terminate_message = terminate_message
         self.analytics = analytics
-        self.use_embeds = use_embeds
         self.plex_pass = plex_pass
         self.voice_channel_settings = voice_channel_settings
         self.time_settings = time_settings

@@ -56,7 +56,6 @@ if __name__ == '__main__':
             api_key=config.tautulli.api_key,
             terminate_message=config.tautulli.terminate_message,
             analytics=analytics,
-            use_embeds=config.discord.use_embeds,
             plex_pass=config.tautulli.has_plex_pass,
             voice_channel_settings=config.tautulli.voice_channel_settings,
             time_settings=config.tautulli.time_settings
@@ -71,7 +70,6 @@ if __name__ == '__main__':
             tautulli_channel_name=config.discord.channel_name,
             tautulli_connector=tautulli_connector,
             analytics=analytics,
-            use_embeds=config.discord.use_embeds,
         )
 
         discord_connector.connect()
