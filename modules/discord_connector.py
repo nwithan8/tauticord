@@ -221,6 +221,7 @@ class DiscordConnector:
 
     async def on_ready(self) -> None:
         logging.info('Connected to Discord.')
+        await self.client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='for Tautulli stats'))
 
         logging.info("Uploading required resources...")
         await self.emoji_manager.load_emojis(source_folder=statics.EMOJIS_FOLDER, client=self.client, guild_id=self.guild_id)
