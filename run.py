@@ -15,6 +15,7 @@ from consts import (
     CONSOLE_LOG_LEVEL,
     FILE_LOG_LEVEL,
 )
+from modules import emojis
 from modules.analytics import GoogleAnalytics
 from modules.config_parser import Config
 
@@ -50,28 +51,30 @@ if __name__ == '__main__':
 
     # noinspection PyBroadException
     try:
-        d = discord.DiscordConnector(
+        tautulli_connector=tautulli.TautulliConnector(
+            base_url=config.tautulli.url,
+            api_key=config.tautulli.api_key,
+            terminate_message=config.tautulli.terminate_message,
+            analytics=analytics,
+            use_embeds=config.discord.use_embeds,
+            plex_pass=config.tautulli.has_plex_pass,
+            voice_channel_settings=config.tautulli.voice_channel_settings,
+            time_settings=config.tautulli.time_settings
+        )
+
+        discord_connector = discord.DiscordConnector(
             token=config.discord.bot_token,
             guild_id=config.discord.server_id,
             admin_ids=config.discord.admin_ids,
             refresh_time=config.tautulli.refresh_interval,
             library_refresh_time=config.tautulli.library_refresh_interval,
             tautulli_channel_name=config.discord.channel_name,
-            tautulli_connector=tautulli.TautulliConnector(
-                base_url=config.tautulli.url,
-                api_key=config.tautulli.api_key,
-                terminate_message=config.tautulli.terminate_message,
-                analytics=analytics,
-                use_embeds=config.discord.use_embeds,
-                plex_pass=config.tautulli.has_plex_pass,
-                voice_channel_settings=config.tautulli.voice_channel_settings,
-                time_settings=config.tautulli.time_settings
-            ),
+            tautulli_connector=tautulli_connector,
             analytics=analytics,
             use_embeds=config.discord.use_embeds,
         )
 
-        d.connect()
+        discord_connector.connect()
     except Exception as e:
         logging.fatal(f"Fatal error occurred. Shutting down: {e}")
         exit(1)  # Exit the script if an error bubbles up (like an internet connection error)

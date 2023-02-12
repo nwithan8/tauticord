@@ -15,7 +15,6 @@ A Discord bot that displays live data from Tautulli
 
 </div>
 
-
 # Features
 
 Tauticord uses the Tautulli API to pull information from Tautulli and display them in a Discord channel, including:
@@ -56,18 +55,20 @@ library name with item counts every hour.
 - A Discord server
 - Docker
 - [A Discord bot token](https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/)
-  - Permissions required:
-    - Manage Channels
-    - View Channels
-    - Send Messages
-    - Manage Messages
-    - Read Message History
-    - Add Reactions
+    - Permissions required:
+        - Manage Channels
+        - View Channels
+        - Send Messages
+        - Manage Messages
+        - Read Message History
+        - Add Reactions
+        - Manage Emojis
+    - **Shortcut**: Use the following link to invite your bot to your server with the above permissions:
+      https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot&permissions=1074080848
 
 Tauticord runs as a Docker container. The Dockerfile is included in this repository, or can be pulled
 from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord)
 or [GitHub Packages](https://github.com/nwithan8/tauticord/pkgs/container/tauticord).
-
 
 ### Volumes
 
@@ -130,6 +131,15 @@ You can run Tauticord outside of Docker by cloning this repository and either:
 Please note, this is NOT ADVISED. Running this application as a Docker container is the only officially-supported method
 of running Tauticord.
 
+# Common Issues
+
+- On startup, Tauticord attempts to upload a set of custom emojis that it will use when displaying stream information (
+  if they do not already exist). Your bot will need to have the `Manage Emojis` permission in order to do this.
+    - Discord has a limit of 50 custom emojis per server. If you have reached this limit, you will need to remove some
+      of your existing emojis before Tauticord can upload its own.
+    - If you do not want to remove any of your existing emojis, Tauticord will simply skip uploading its own emojis and
+      use the default emojis that Discord provides instead.
+
 # Analytics
 
 Tauticord uses Google Analytics to collect statistics such as common errors that will help with future development.
@@ -153,7 +163,8 @@ Tauticord uses Google Analytics to collect statistics such as common errors that
 
 # Development
 
-This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please open an issue or a pull
+This bot is still a work in progress. If you have any ideas for improving or adding to Tauticord, please open an issue
+or a pull
 request.
 
 # Contact
