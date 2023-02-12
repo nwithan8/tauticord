@@ -1,14 +1,16 @@
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import asyncio
 import discord
+from discord import Emoji
 
 import modules.logs as logging
 import modules.statics as statics
 import modules.tautulli_connector
+from modules import emojis
+from modules.emojis import EmojiManager
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 from modules.utils import quote
-
 
 async def add_emoji_reactions(message: discord.Message, count: int):
     """
@@ -28,16 +30,16 @@ async def add_emoji_reactions(message: discord.Message, count: int):
             await message.clear_reactions()
         return
 
-    if count > statics.max_controllable_stream_count_supported():
+    if count > emojis.max_controllable_stream_count_supported():
         logging.debug(
-            f"""Tauticord supports controlling a maximum of {statics.max_controllable_stream_count_supported()} streams.
+            f"""Tauticord supports controlling a maximum of {emojis.max_controllable_stream_count_supported()} streams.
         Stats will be displayed correctly, but any additional streams will not be able to be terminated.""")
-        count = statics.max_controllable_stream_count_supported()
+        count = emojis.max_controllable_stream_count_supported()
 
     emoji_to_remove = []
 
     for i, e in enumerate(msg_emoji):
-        if i >= count or i != statics.emojis.index(e):
+        if i >= count or i != emojis.stream_number_emojis.index(e):
             emoji_to_remove.append(e)
 
     # if all reactions need to be removed, do it all at once
@@ -50,7 +52,7 @@ async def add_emoji_reactions(message: discord.Message, count: int):
             del (msg_emoji[msg_emoji.index(e)])
 
     for i in range(1, count + 1):
-        emoji = statics.emoji_from_stream_number(i)
+        emoji = emojis.emoji_from_stream_number(i)
         if emoji not in msg_emoji:
             await message.add_reaction(emoji)
 
@@ -203,6 +205,8 @@ class DiscordConnector:
 
         self.current_message = None
 
+        self.emoji_manager: EmojiManager = EmojiManager()
+
     def connect(self) -> None:
         logging.info('Connecting to Discord...')
         self.client.run(self.token)
@@ -217,6 +221,9 @@ class DiscordConnector:
 
     async def on_ready(self) -> None:
         logging.info('Connected to Discord.')
+
+        logging.info("Uploading required resources...")
+        await self.emoji_manager.load_emojis(source_folder=statics.EMOJIS_FOLDER, client=self.client, guild_id=self.guild_id)
 
         logging.info("Loading Tautulli text settings...")
         await self.collect_discord_text_channel()
@@ -249,12 +256,41 @@ class DiscordConnector:
                           reaction_type=reaction_type,
                           valid_message=self.current_message,
                           valid_reaction_type=None,  # We already know it's the right type
-                          valid_emojis=statics.emojis,
+                          valid_emojis=emojis.stream_number_emojis,
                           valid_user_ids=self.admin_ids):
             # message here will be the current message, so we can just use that
             end_notification = await self.stop_tautulli_stream_via_reaction_emoji(emoji=emoji, message=message)
             if end_notification:
                 await end_notification.delete(delay=5)  # delete after 5 seconds
+
+    async def collect_guild_emojis(self) -> tuple[Emoji, ...]:
+        # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
+        guild = self.client.get_guild(int(self.guild_id))  # stupid positional-only parameters
+        return guild.emojis
+
+    async def upload_new_emoji(self, file: str, name: str) -> Union[discord.Emoji, None]:
+        """
+        Upload a new emoji to the server
+        :param file: Path to the file to upload
+        :param name: Name of the emoji
+        :return: None
+        """
+        # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
+        guild = self.client.get_guild(int(self.guild_id))  # stupid positional-only parameters
+
+        # Check if the emoji already exists
+        for emoji in guild.emojis:
+            if emoji.name == name:
+                return emoji
+
+        # Upload the new emoji
+        try:
+            with open(file, 'rb') as f:
+                image_bytes: bytes = f.read()
+                return await guild.create_custom_emoji(name=name, image=image_bytes, reason="Tauticord emoji upload")
+        except Exception as e:
+            logging.error(f"Failed to upload emoji {name} to server: {e}. Will use default emoji instead.")
+            return None
 
     async def run_live_summary_message_service(self, message: discord.Message, refresh_time: int):
         while True:
@@ -278,7 +314,7 @@ class DiscordConnector:
     async def stop_tautulli_stream_via_reaction_emoji(self, emoji: discord.PartialEmoji, message: discord.Message) -> \
             discord.Message:
         # remember to shift by 1 to convert index to human-readable
-        stream_number = statics.stream_number_from_emoji(emoji)
+        stream_number = emojis.stream_number_from_emoji(emoji)
 
         logging.debug(f"Stopping stream {emoji}...")
         stopped_message = self.tautulli.stop_stream(emoji=emoji, stream_number=stream_number)
@@ -293,7 +329,7 @@ class DiscordConnector:
         :param previous_message: discord.Message to replace
         :return: new discord.Message
         """
-        data_wrapper, count, activity, plex_online = self.tautulli.refresh_data()
+        data_wrapper, count, activity, plex_online = self.tautulli.refresh_data(emoji_manager=self.emoji_manager)
 
         await self.update_live_voice_channels(activity=activity,
                                               plex_online=plex_online,
