@@ -10,3 +10,4 @@ docker-compose.yml
 venv
 __pycache__
 Tauticord.log
+documentation

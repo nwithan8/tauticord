@@ -15,7 +15,6 @@ from consts import (
     CONSOLE_LOG_LEVEL,
     FILE_LOG_LEVEL,
 )
-from modules import emojis
 from modules.analytics import GoogleAnalytics
 from modules.config_parser import Config
 
@@ -36,7 +35,8 @@ parser.add_argument("-l", "--log", help="Log file directory", default=DEFAULT_LO
 args = parser.parse_args()
 
 # Set up logging
-logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log, file_log_level=FILE_LOG_LEVEL)
+logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log,
+             file_log_level=FILE_LOG_LEVEL)
 
 # Set up configuration
 config = Config(app_name=APP_NAME, config_path=f"{args.config}")
@@ -51,14 +51,15 @@ if __name__ == '__main__':
 
     # noinspection PyBroadException
     try:
-        tautulli_connector=tautulli.TautulliConnector(
+        tautulli_connector = tautulli.TautulliConnector(
             base_url=config.tautulli.url,
             api_key=config.tautulli.api_key,
             terminate_message=config.tautulli.terminate_message,
             analytics=analytics,
             plex_pass=config.tautulli.has_plex_pass,
             voice_channel_settings=config.tautulli.voice_channel_settings,
-            time_settings=config.tautulli.time_settings
+            time_settings=config.tautulli.time_settings,
+            server_name=config.tautulli.server_name
         )
 
         discord_connector = discord.DiscordConnector(

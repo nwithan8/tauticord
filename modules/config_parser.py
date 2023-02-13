@@ -87,6 +87,11 @@ class TautulliConfig(ConfigSection):
         return int(value)
 
     @property
+    def server_name(self) -> str:
+        return self._customization._get_value(key='ServerName', default="Plex",
+                                              env_name_override="TC_SERVER_NAME")
+
+    @property
     def terminate_message(self) -> str:
         return self._customization._get_value(key='TerminateMessage', default="Your stream has ended.",
                                               env_name_override="TC_TERMINATE_MESSAGE")

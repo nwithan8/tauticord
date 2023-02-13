@@ -27,6 +27,5 @@ services:
       TC_VC_LIBRARY_REFRESH_SECONDS: 3600
       TC_DISCORD_ADMIN_IDS: my_user_id,my_second_user_id
       TC_DISCORD_CHANNEL_NAME: "Tautulli Status"
-      TC_USE_EMBEDS: "True"
       TC_ALLOWS_ANALYTICS: "True"
       TZ: America/New_York

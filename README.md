@@ -83,32 +83,32 @@ You will need to map the following volumes:
 
 You will need to set the following environment variables:
 
-| Environment Variable            | Required | Value                                                          | Example/Default                         |
-|---------------------------------|----------|----------------------------------------------------------------|-----------------------------------------|
-| TC_DISCORD_BOT_TOKEN (required) | Yes      | Discord Bot Token                                              | key from Discord Application above      |
-| TC_DISCORD_SERVER_ID (required) | Yes      | Discord Server ID                                              | ID, right-click server icon in Discord  |
-| TC_TAUTULLI_URL (required)      | Yes      | IP of your Tautulli server                                     | http://192.168.1.x:8181                 |
-| TC_TAUTULLI_KEY (required)      | Yes      | API key for Tautulli server                                    | abcd1234efgh5678ijkl9012mnop3456qrst    |
-| TC_PLEX_PASS                    | No       | Enable PlexPass Features                                       | "False"                                 |
-| TC_REFRESH_SECONDS              | No       | Seconds between updates (5-second minimum built-in)            | 15                                      |
-| TC_TERMINATE_MESSAGE            | No       | Message sent to users when a stream is killed                  | "Your stream has ended."                |
-| TC_USE_24_HOUR_TIME             | No       | Whether to display times in 24-hour time                       | "False"                                 |
-| TC_VC_STATS_CATEGORY_NAME       | No       | Name of the stats voice channel category                       | "Tautulli Stats"                        |
-| TC_VC_STREAM_COUNT              | No       | Whether to display current stream count in a voice channel     | "False"                                 |
-| TC_VC_TRANSCODE_COUNT           | No       | Whether to display current transcode count in a voice channel  | "False"                                 |
-| TC_VC_BANDWIDTH                 | No       | Whether to display current bandwidth in a voice channel        | "False"                                 |
-| TC_VC_LOCAL_BANDWIDTH           | No       | Whether to display current local bandwidth in a voice channel  | "False"                                 |
-| TC_VC_REMOTE_BANDWIDTH          | No       | Whether to display current remote bandwidth in a voice channel | "False"                                 |
-| TC_VC_PLEX_STATUS               | No       | Whether to display Plex online status in a voice channel       | "False"                                 |
-| TC_VC_LIBRARIES_CATEGORY_NAME   | No       | Name of the libraries voice channel category                   | "Tautulli Libraries"                    |                                  
-| TC_VC_LIBRARY_STATS             | No       | Whether to display library statistics in voice channels        | "False"                                 |
-| TC_VC_LIBRARY_NAMES             | No       | Comma-separated list of libraries to display statistics of     | "Movies,TV Shows,Music"                 |       
-| TC_VC_LIBRARY_REFRESH_SECONDS   | No       | Seconds between updates (5-minute minimum built-in)            | 3600                                    |
-| TC_DISCORD_ADMIN_IDS            | No       | List of Discord IDs with admin privileges                      | ID, right-click user profile in Discord |
-| TC_DISCORD_CHANNEL_NAME         | No       | Channel name for updates                                       | "Tautulli Status"                       |
-| TC_USE_EMBEDS                   | No       | Use embedded messages rather than regular text chat            | "True"                                  |
-| TC_ALLOW_ANALYTICS              | No       | Allow Anonymous Crash Analytics?                               | "True"                                  |                
-| TZ                              | No       | Timezone that your server is in                                | "America/New_York"                      |
+| Environment Variable            | Required | Value                                                                                                                                                                       | Example/Default                         |
+|---------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| TC_DISCORD_BOT_TOKEN (required) | Yes      | Discord Bot Token                                                                                                                                                           | key from Discord Application above      |
+| TC_DISCORD_SERVER_ID (required) | Yes      | Discord Server ID                                                                                                                                                           | ID, right-click server icon in Discord  |
+| TC_TAUTULLI_URL (required)      | Yes      | IP of your Tautulli server                                                                                                                                                  | http://192.168.1.x:8181                 |
+| TC_TAUTULLI_KEY (required)      | Yes      | API key for Tautulli server                                                                                                                                                 | abcd1234efgh5678ijkl9012mnop3456qrst    |
+| TC_PLEX_PASS                    | No       | Enable PlexPass Features                                                                                                                                                    | "False"                                 |
+| TC_REFRESH_SECONDS              | No       | Seconds between updates (5-second minimum built-in)                                                                                                                         | 15                                      |
+| TC_TERMINATE_MESSAGE            | No       | Message sent to users when a stream is killed                                                                                                                               | "Your stream has ended."                |
+| TC_SERVER_NAME                  | No       | Name of the Plex server.<br/>Will use provided; if not provided, will use "Plex"; if provided string is empty, will attempt to extract Plex Media Server name via Tautulli. | "Plex"                                  |
+| TC_USE_24_HOUR_TIME             | No       | Whether to display times in 24-hour time                                                                                                                                    | "False"                                 |
+| TC_VC_STATS_CATEGORY_NAME       | No       | Name of the stats voice channel category                                                                                                                                    | "Tautulli Stats"                        |
+| TC_VC_STREAM_COUNT              | No       | Whether to display current stream count in a voice channel                                                                                                                  | "False"                                 |
+| TC_VC_TRANSCODE_COUNT           | No       | Whether to display current transcode count in a voice channel                                                                                                               | "False"                                 |
+| TC_VC_BANDWIDTH                 | No       | Whether to display current bandwidth in a voice channel                                                                                                                     | "False"                                 |
+| TC_VC_LOCAL_BANDWIDTH           | No       | Whether to display current local bandwidth in a voice channel                                                                                                               | "False"                                 |
+| TC_VC_REMOTE_BANDWIDTH          | No       | Whether to display current remote bandwidth in a voice channel                                                                                                              | "False"                                 |
+| TC_VC_PLEX_STATUS               | No       | Whether to display Plex online status in a voice channel                                                                                                                    | "False"                                 |
+| TC_VC_LIBRARIES_CATEGORY_NAME   | No       | Name of the libraries voice channel category                                                                                                                                | "Tautulli Libraries"                    |                                  
+| TC_VC_LIBRARY_STATS             | No       | Whether to display library statistics in voice channels                                                                                                                     | "False"                                 |
+| TC_VC_LIBRARY_NAMES             | No       | Comma-separated list of libraries to display statistics of                                                                                                                  | "Movies,TV Shows,Music"                 |       
+| TC_VC_LIBRARY_REFRESH_SECONDS   | No       | Seconds between updates (5-minute minimum built-in)                                                                                                                         | 3600                                    |
+| TC_DISCORD_ADMIN_IDS            | No       | List of Discord IDs with admin privileges                                                                                                                                   | ID, right-click user profile in Discord |
+| TC_DISCORD_CHANNEL_NAME         | No       | Channel name for updates                                                                                                                                                    | "Tautulli Status"                       |
+| TC_ALLOW_ANALYTICS              | No       | Allow Anonymous Crash Analytics?                                                                                                                                            | "True"                                  |                
+| TZ                              | No       | Timezone that your server is in                                                                                                                                             | "America/New_York"                      |
 
 You can also set these variables via a configuration file:
 
