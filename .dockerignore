@@ -11,3 +11,4 @@ venv
 __pycache__
 Tauticord.log
 documentation
+templates

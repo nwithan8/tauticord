@@ -41,10 +41,14 @@ Tauticord uses the Tautulli API to pull information from Tautulli and display th
 * Progress of stream
 * ETA of stream completion
 
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/embed.png">
+
 Administrator (the bot owner) can react to Tauticord's messages to terminate a specific stream (if they have Plex Pass).
 
 Users can also indicate what libraries they would like monitored. Tauticord will create/update a voice channel for each
 library name with item counts every hour.
+
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/libraries.png">
 
 # Installation and setup
 
