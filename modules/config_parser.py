@@ -87,6 +87,11 @@ class TautulliConfig(ConfigSection):
         return int(value)
 
     @property
+    def server_name(self) -> str:
+        return self._customization._get_value(key='ServerName', default="Plex",
+                                              env_name_override="TC_SERVER_NAME")
+
+    @property
     def terminate_message(self) -> str:
         return self._customization._get_value(key='TerminateMessage', default="Your stream has ended.",
                                               env_name_override="TC_TERMINATE_MESSAGE")
@@ -225,11 +230,6 @@ class DiscordConfig(ConfigSection):
     @property
     def _customization(self) -> ConfigSection:
         return self._get_subsection(key="Customization")
-
-    @property
-    def use_embeds(self) -> bool:
-        value = self._customization._get_value(key="UseEmbeds", default=False, env_name_override="TC_USE_EMBEDS")
-        return _extract_bool(value)
 
 
 class ExtrasConfig(ConfigSection):

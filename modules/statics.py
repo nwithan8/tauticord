@@ -8,11 +8,11 @@ transcodes_message = """{transcode_count} {word}"""
 bandwidth_message = """{emoji} {bandwidth}"""
 lan_bandwidth_message = """({emoji} {bandwidth})"""
 
-session_title_message = """{emoji} | {icon} {media_type_icon} {username}: *{title}*"""
+session_title_message = """{emoji} | {icon} {media_type_icon} *{title}*"""
 session_user_message = """{emoji} **{username}**"""
-session_player_message = """__Player__: {product} ({player})"""
-session_details_message = """__Quality__: {quality_profile} ({bandwidth}){transcoding}"""
-session_progress_message = """__Progress__: {progress} (ETA: {eta})"""
+session_player_message = """{emoji} **{product}** ({player})"""
+session_details_message = """{emoji} **{quality_profile}** ({bandwidth}){transcoding}"""
+session_progress_message = """{emoji} **{progress}** (ETA: {eta})"""
 
 voice_channel_order = {
     'count': 1,

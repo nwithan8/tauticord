@@ -96,6 +96,9 @@ class EmojiManager:
             "playing": "▶️",
             "stopped": "⏹",
             "track": "🎧",
+            "device": "📱",
+            "resolution": "🖥",
+            "progress": "⏰",
         }
 
     async def load_emojis(self, source_folder: str, client: discord.Client, guild_id: str) -> None:
