@@ -68,7 +68,7 @@ library name with item counts every hour.
         - Add Reactions
         - Manage Emojis
     - **Shortcut**: Use the following link to invite your bot to your server with the above permissions:
-      https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot&permissions=1074080848
+      https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot&permissions=1073818704
 
 Tauticord runs as a Docker container. The Dockerfile is included in this repository, or can be pulled
 from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord)
