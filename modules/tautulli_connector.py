@@ -364,8 +364,9 @@ class TautulliConnector:
         return "Something went wrong."
 
     def get_library_id(self, library_name: str) -> Union[str, None]:
+        library_name = library_name.strip()
         for library in self.api.library_names:
-            if library.get('section_name') == library_name:
+            if library.get('section_name').strip() == library_name:
                 return library.get('section_id')
         logging.error(f"Could not get ID for library {library_name}")
         return None
