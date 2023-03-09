@@ -225,7 +225,7 @@ class DiscordConfig(ConfigSection):
 
     @property
     def channel_name(self) -> str:
-        return self._connection._get_value(key="ChannelName", env_name_override="TC_DISCORD_CHANNEL_NAME")
+        return self._connection._get_value(key="ChannelName", default="tauticord", env_name_override="TC_DISCORD_CHANNEL_NAME")
 
     @property
     def _customization(self) -> ConfigSection:
