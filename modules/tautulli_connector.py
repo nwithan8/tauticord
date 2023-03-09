@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
 import discord
 import tautulli
@@ -378,13 +378,19 @@ class TautulliConnector:
             return None
         return self.api.get_library(section_id=library_id)
 
-    def get_library_item_count(self, library_name: str) -> int:
+    def get_library_item_count(self, library_name: str) -> List[Tuple[str, int]]:
         library_info = self.get_library_info(library_name=library_name)
         if not library_info:
-            return 0
-        if library_info.get('section_type') == 'artist':
-            return library_info.get('child_count')  # child_count is the number of tracks
-        return library_info.get('count', 0)
+            return [('', 0)]
+        library_type = library_info.get('section_type')
+        match library_type:
+            case 'show':
+                return [('Series', library_info.get('count')), ('Episodes', library_info.get('child_count'))]
+            case 'artist':
+                return [('Artists', library_info.get('count')), ('Tracks', library_info.get('child_count'))]
+            case 'movie':
+                return [('Movies', library_info.get('count'))]
+        return [('', 0)]
 
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)

@@ -1,5 +1,5 @@
 import asyncio
-from typing import Union, List
+from typing import Union, List, Dict, Tuple
 
 import discord
 from discord import Emoji
@@ -480,8 +480,14 @@ class DiscordConnector:
         logging.info("Updating library stats...")
         if self.tautulli.voice_channel_settings.get(statics.KEY_STATS, False):
             for library_name in self.tautulli.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
-                size = self.tautulli.get_library_item_count(library_name=library_name)
-                logging.info(f"Updating {library_name} voice channel with new library size: {size}")
-                await self.edit_stat_voice_channel(channel_name=library_name,
-                                                   stat=size,
-                                                   category=self.tautulli_libraries_voice_category)
+                stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name)
+                for stat in stats:
+                    stat_type = stat[0]
+                    stat_value = stat[1]
+                    channel_name = f"{library_name}"
+                    if stat_type:
+                        channel_name += f" ({stat_type})"
+                    logging.info(f"Updating {library_name} voice channel with new library size: {stat_value}")
+                    await self.edit_stat_voice_channel(channel_name=channel_name,
+                                                       stat=stat_value,
+                                                       category=self.tautulli_libraries_voice_category)
