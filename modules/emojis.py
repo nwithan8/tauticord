@@ -105,6 +105,7 @@ class EmojiManager:
             "artists": "🎤",
             "track": "🎵",
             "tracks": "🎵",
+            "unknown": "❓",
         }
 
     async def load_emojis(self, source_folder: str, client: discord.Client, guild_id: str) -> None:
