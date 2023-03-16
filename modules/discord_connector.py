@@ -123,8 +123,9 @@ async def get_discord_channel_by_starting_name(client: discord.Client, guild_id:
 
 async def get_discord_channel_by_name(client: discord.Client, guild_id: str,
                                       channel_name: str,
-                                      channel_type: discord.ChannelType = discord.ChannelType.text) -> \
-        Union[discord.VoiceChannel, discord.TextChannel, discord.CategoryChannel]:
+                                      channel_type: discord.ChannelType = discord.ChannelType.text,
+                                      create_if_not_exist: bool = True) -> \
+        Union[discord.VoiceChannel, discord.TextChannel, discord.CategoryChannel, None]:
     for channel in client.get_all_channels():
         if channel.name == channel_name:
             return channel
@@ -167,6 +168,9 @@ class DiscordConnector:
                  library_refresh_time: int,
                  tautulli_channel_name: str,
                  tautulli_connector: TautulliConnector,
+                 voice_channel_settings: dict,
+                 display_live_stats: bool,
+                 display_library_stats: bool,
                  analytics):
         self.token = token
         self.guild_id = guild_id
@@ -174,6 +178,9 @@ class DiscordConnector:
         self.refresh_time = refresh_time
         self.library_refresh_time = library_refresh_time
         self.tautulli_channel_name = tautulli_channel_name
+        self.voice_channel_settings = voice_channel_settings
+        self.display_live_stats = display_live_stats
+        self.display_library_stats = display_library_stats
         self.tautulli_channel: discord.TextChannel = None
         self.tautulli_stats_voice_category: discord.CategoryChannel = None
         self.tautulli_libraries_voice_category: discord.CategoryChannel = None
@@ -196,11 +203,11 @@ class DiscordConnector:
 
     @property
     def stats_voice_category_name(self) -> str:
-        return self.tautulli.voice_channel_settings.get(statics.KEY_STATS_CATEGORY_NAME, "Tautulli Stats")
+        return self.voice_channel_settings.get(statics.KEY_STATS_CATEGORY_NAME, "Tautulli Stats")
 
     @property
     def libraries_voice_category_name(self) -> str:
-        return self.tautulli.voice_channel_settings.get(statics.KEY_LIBRARIES_CATEGORY_NAME, "Tautulli Libraries")
+        return self.voice_channel_settings.get(statics.KEY_LIBRARIES_CATEGORY_NAME, "Tautulli Libraries")
 
     async def on_ready(self) -> None:
         logging.info('Connected to Discord.')
@@ -216,10 +223,13 @@ class DiscordConnector:
         await self.collect_old_message_in_tautulli_channel()
 
         logging.info("Loading Tautulli voice settings...")
-        self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
-            category_name=self.stats_voice_category_name)
-        self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
-            category_name=self.libraries_voice_category_name)
+        # Only grab the voice category (make it) if we're going to use it
+        if self.display_live_stats:
+            self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
+                category_name=self.stats_voice_category_name)
+        if self.display_library_stats:
+            self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
+                category_name=self.libraries_voice_category_name)
 
         logging.info("Loading Tautulli summary message service...")
         # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
@@ -287,6 +297,8 @@ class DiscordConnector:
                 exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
 
     async def run_library_stats_service(self, refresh_time: int):
+        if not self.tautulli_libraries_voice_category:
+            return # No libraries voice category set, so don't bother
         while True:
             try:
                 await self.update_library_stats_voice_channels()
@@ -317,7 +329,9 @@ class DiscordConnector:
         """
         data_wrapper, count, activity, plex_online = self.tautulli.refresh_data(emoji_manager=self.emoji_manager)
 
-        await self.update_live_voice_channels(activity=activity,
+        # Update the stats voice channels if the category is set
+        if self.tautulli_stats_voice_category:
+            await self.update_live_voice_channels(activity=activity,
                                               plex_online=plex_online,
                                               category=self.tautulli_stats_voice_category)
 
@@ -383,12 +397,13 @@ class DiscordConnector:
             raise Exception(f"Could not load {quote(self.tautulli_channel_name)} channel. Exiting...")
         logging.info(f"{quote(self.tautulli_channel_name)} channel collected.")
 
-    async def collect_discord_voice_category(self, category_name: str) -> discord.CategoryChannel:
+    async def collect_discord_voice_category(self, category_name: str, create_if_not_exist: bool = False) -> discord.CategoryChannel:
         logging.info(f"Getting {quote(category_name)} voice category")
         category: discord.CategoryChannel = \
             await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
                                               channel_name=category_name,
-                                              channel_type=discord.ChannelType.category)
+                                              channel_type=discord.ChannelType.category,
+                                              create_if_not_exist=create_if_not_exist)
         if not category_name:
             raise Exception(f"Could not load {quote(category_name)} voice category. Exiting...")
         logging.info(f"{quote(category_name)} voice category collected.")
@@ -437,7 +452,7 @@ class DiscordConnector:
                                          plex_online: bool,
                                          category: discord.CategoryChannel = None) -> None:
 
-        if self.tautulli.voice_channel_settings.get(statics.KEY_PLEX_STATUS, False):
+        if self.voice_channel_settings.get(statics.KEY_PLEX_STATUS, False):
             status = "Online" if plex_online else "Offline"
             logging.info(f"Updating Plex Status voice channel with new status: {status}")
             await self.edit_stat_voice_channel(channel_name="Plex Status",
@@ -445,31 +460,31 @@ class DiscordConnector:
                                                category=category)
 
         if activity:
-            if self.tautulli.voice_channel_settings.get(statics.KEY_COUNT, False):
+            if self.voice_channel_settings.get(statics.KEY_COUNT, False):
                 count = activity.stream_count
                 logging.info(f"Updating Streams voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Streams",
                                                    stat=count,
                                                    category=category)
-            if self.tautulli.voice_channel_settings.get(statics.KEY_TRANSCODE_COUNT, False):
+            if self.voice_channel_settings.get(statics.KEY_TRANSCODE_COUNT, False):
                 count = activity.transcode_count
                 logging.info(f"Updating Transcodes voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Transcodes",
                                                    stat=count,
                                                    category=category)
-            if self.tautulli.voice_channel_settings.get(statics.KEY_BANDWIDTH, False):
+            if self.voice_channel_settings.get(statics.KEY_BANDWIDTH, False):
                 bandwidth = activity.total_bandwidth
                 logging.info(f"Updating Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Bandwidth",
                                                    stat=bandwidth,
                                                    category=category)
-            if self.tautulli.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
+            if self.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
                 bandwidth = activity.lan_bandwidth
                 logging.info(f"Updating Local Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Local Bandwidth",
                                                    stat=bandwidth,
                                                    category=category)
-            if self.tautulli.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
+            if self.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
                 bandwidth = activity.wan_bandwidth
                 logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Remote Bandwidth",
@@ -478,8 +493,8 @@ class DiscordConnector:
 
     async def update_library_stats_voice_channels(self) -> None:
         logging.info("Updating library stats...")
-        if self.tautulli.voice_channel_settings.get(statics.KEY_STATS, False):
-            for library_name in self.tautulli.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
+        if self.voice_channel_settings.get(statics.KEY_STATS, False):
+            for library_name in self.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
                 stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name, emoji_manager=self.emoji_manager)
                 for stat in stats:
                     stat_emoji = stat[0]

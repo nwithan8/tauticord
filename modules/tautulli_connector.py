@@ -291,7 +291,6 @@ class TautulliConnector:
                  terminate_message: str,
                  analytics,
                  plex_pass: bool,
-                 voice_channel_settings: dict,
                  time_settings: dict,
                  server_name: str = None):
         self.base_url = base_url
@@ -301,7 +300,6 @@ class TautulliConnector:
         self.terminate_message = terminate_message
         self.analytics = analytics
         self.plex_pass = plex_pass
-        self.voice_channel_settings = voice_channel_settings
         self.time_settings = time_settings
 
     def _error_and_analytics(self, error_message, function_name) -> None:

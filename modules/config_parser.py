@@ -198,6 +198,17 @@ class TautulliConfig(ConfigSection):
             statics.KEY_LIBRARIES: self.library_names
         }
 
+    @property
+    def any_live_stats_channels_enabled(self) -> bool:
+        keys = [statics.KEY_COUNT, statics.KEY_TRANSCODE_COUNT, statics.KEY_BANDWIDTH,
+                    statics.KEY_LAN_BANDWIDTH, statics.KEY_REMOTE_BANDWIDTH, statics.KEY_PLEX_STATUS]
+        return any([self.voice_channel_settings.get(key, False) for key in keys])
+
+    @property
+    def any_library_stats_channels_enabled(self) -> bool:
+        keys = [statics.KEY_STATS]
+        return any([self.voice_channel_settings.get(key, False) for key in keys])
+
 
 class DiscordConfig(ConfigSection):
     def __init__(self, data, pull_from_env: bool = True):
