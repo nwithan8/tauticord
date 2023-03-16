@@ -57,7 +57,6 @@ if __name__ == '__main__':
             terminate_message=config.tautulli.terminate_message,
             analytics=analytics,
             plex_pass=config.tautulli.has_plex_pass,
-            voice_channel_settings=config.tautulli.voice_channel_settings,
             time_settings=config.tautulli.time_settings,
             server_name=config.tautulli.server_name
         )
@@ -70,6 +69,9 @@ if __name__ == '__main__':
             library_refresh_time=config.tautulli.library_refresh_interval,
             tautulli_channel_name=config.discord.channel_name,
             tautulli_connector=tautulli_connector,
+            voice_channel_settings=config.tautulli.voice_channel_settings,
+            display_live_stats=config.tautulli.any_live_stats_channels_enabled,
+            display_library_stats=config.tautulli.any_library_stats_channels_enabled,
             analytics=analytics,
         )
 
