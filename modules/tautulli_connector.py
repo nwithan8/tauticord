@@ -390,7 +390,7 @@ class TautulliConnector:
                 return [(emoji_manager.get_emoji("artists"), library_info.get('count')), (emoji_manager.get_emoji("tracks"), library_info.get('child_count'))]
             case 'movie':
                 return [(emoji_manager.get_emoji("movies"), library_info.get('count'))]
-        return [('', 0)]
+        return [(emoji_manager.get_emoji("unknown"), 0)]
 
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)
