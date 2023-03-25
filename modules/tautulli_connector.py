@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple, Union
 
 import discord
 import tautulli
@@ -292,7 +292,8 @@ class TautulliConnector:
                  analytics,
                  plex_pass: bool,
                  time_settings: dict,
-                 server_name: str = None):
+                 server_name: str = None,
+                 ):
         self.base_url = base_url
         self.api_key = api_key
         self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key)
@@ -302,7 +303,7 @@ class TautulliConnector:
         self.plex_pass = plex_pass
         self.time_settings = time_settings
 
-        tautulli_version = self.api.tautulli_info.get('tautulli_version', None)
+        tautulli_version = self.api.shortcuts.api_version
         logging.debug(f"Connected to Tautulli version: {tautulli_version}")
 
     def _error_and_analytics(self, error_message, function_name) -> None:
@@ -386,9 +387,11 @@ class TautulliConnector:
         library_type = library_info.get('section_type')
         match library_type:
             case 'show':
-                return [(emoji_manager.get_emoji("series"), library_info.get('count')), (emoji_manager.get_emoji("episodes"), library_info.get('child_count'))]
+                return [(emoji_manager.get_emoji("series"), library_info.get('count')),
+                        (emoji_manager.get_emoji("episodes"), library_info.get('child_count'))]
             case 'artist':
-                return [(emoji_manager.get_emoji("artists"), library_info.get('count')), (emoji_manager.get_emoji("tracks"), library_info.get('child_count'))]
+                return [(emoji_manager.get_emoji("artists"), library_info.get('count')),
+                        (emoji_manager.get_emoji("tracks"), library_info.get('child_count'))]
             case 'movie':
                 return [(emoji_manager.get_emoji("movies"), library_info.get('count'))]
         return [(emoji_manager.get_emoji("unknown"), 0)]
