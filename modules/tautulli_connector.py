@@ -302,6 +302,9 @@ class TautulliConnector:
         self.plex_pass = plex_pass
         self.time_settings = time_settings
 
+        tautulli_version = self.api.tautulli_info.get('tautulli_version', None)
+        logging.debug(f"Connected to Tautulli version: {tautulli_version}")
+
     def _error_and_analytics(self, error_message, function_name) -> None:
         logging.error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
