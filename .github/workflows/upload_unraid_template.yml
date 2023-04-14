@@ -13,6 +13,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Establish variables
+        id: vars
+        run: |
+          VERSION=${{ github.event.inputs.version || github.ref_name }}
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=today::$(date +'%Y-%m-%d')
+
       - name: Open PR with template changes to unraid_templates
         uses: paygoc6/action-pull-request-another-repo@v1.0.1
         env:
@@ -22,6 +30,6 @@ jobs:
           source_folder: 'templates'
           destination_repo: 'nwithan8/unraid_templates'
           destination_base_branch: 'main'
-          destination_head_branch: 'tauticord'
+          destination_head_branch: tauticord-${{ steps.vars.outputs.version }}
           user_email: 'nwithan8@users.noreply.github.com'
           user_name: 'nwithan8'
