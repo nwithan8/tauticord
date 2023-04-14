@@ -29,6 +29,11 @@ Tautulli:
           - Movies
           - TV Shows
           - Music
+        # Which stats to show for each type of library
+        TVSeriesCount: true
+        TVEpisodeCount: true
+        MusicArtistCount: true
+        MusicTrackCount: true
 
 Discord:
   Connection:

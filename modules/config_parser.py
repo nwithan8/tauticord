@@ -183,6 +183,30 @@ class TautulliConfig(ConfigSection):
         return names
 
     @property
+    def show_tv_series_count(self) -> bool:
+        value = self._libraries_voice_channels._get_value(key="TVSeriesCount", default=True,
+                                                          env_name_override="TC_VC_TV_SERIES_COUNT")
+        return _extract_bool(value)
+
+    @property
+    def show_tv_episode_count(self) -> bool:
+        value = self._libraries_voice_channels._get_value(key="TVEpisodeCount", default=True,
+                                                          env_name_override="TC_VC_TV_EPISODE_COUNT")
+        return _extract_bool(value)
+
+    @property
+    def show_music_artist_count(self) -> bool:
+        value = self._libraries_voice_channels._get_value(key="MusicArtistCount", default=True,
+                                                          env_name_override="TC_VC_MUSIC_ARTIST_COUNT")
+        return _extract_bool(value)
+
+    @property
+    def show_music_track_count(self) -> bool:
+        value = self._libraries_voice_channels._get_value(key="MusicTrackCount", default=True,
+                                                          env_name_override="TC_VC_MUSIC_TRACK_COUNT")
+        return _extract_bool(value)
+
+    @property
     def voice_channel_settings(self):
         return {
             statics.KEY_STATS_CATEGORY_NAME: self.stats_voice_channel_category_name,
@@ -195,7 +219,11 @@ class TautulliConfig(ConfigSection):
             statics.KEY_PLEX_STATUS: self.display_plex_status,
             statics.KEY_REFRESH_TIME: self.library_refresh_interval,
             statics.KEY_LIBRARIES_CATEGORY_NAME: self.libraries_voice_channel_category_name,
-            statics.KEY_LIBRARIES: self.library_names
+            statics.KEY_LIBRARIES: self.library_names,
+            statics.KEY_SHOW_TV_EPISODES: self.show_tv_episode_count,
+            statics.KEY_SHOW_TV_SERIES: self.show_tv_series_count,
+            statics.KEY_SHOW_MUSIC_ARTISTS: self.show_music_artist_count,
+            statics.KEY_SHOW_MUSIC_TRACKS: self.show_music_track_count
         }
 
     @property

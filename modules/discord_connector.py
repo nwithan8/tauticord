@@ -9,6 +9,7 @@ import modules.statics as statics
 import modules.tautulli_connector
 from modules import emojis
 from modules.emojis import EmojiManager
+from modules.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 from modules.utils import quote
 
@@ -495,8 +496,9 @@ class DiscordConnector:
     async def update_library_stats_voice_channels(self) -> None:
         logging.info("Updating library stats...")
         if self.voice_channel_settings.get(statics.KEY_STATS, False):
+            visibility_settings = LibraryVoiceChannelsVisibilities(settings=self.voice_channel_settings)
             for library_name in self.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
-                stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name, emoji_manager=self.emoji_manager)
+                stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name, emoji_manager=self.emoji_manager, visibility_settings=visibility_settings)
                 for stat in stats:
                     stat_emoji = stat[0]
                     stat_value = stat[1]
