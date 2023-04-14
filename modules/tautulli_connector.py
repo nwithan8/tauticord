@@ -7,6 +7,7 @@ import modules.logs as logging
 import modules.statics as statics
 from modules import utils, emojis
 from modules.emojis import EmojiManager
+from modules.settings_transports import LibraryVoiceChannelsVisibilities
 
 session_ids = {}
 
@@ -380,18 +381,25 @@ class TautulliConnector:
             return None
         return self.api.get_library(section_id=library_id)
 
-    def get_library_item_count(self, library_name: str, emoji_manager: EmojiManager) -> List[Tuple[str, int]]:
+    def get_library_item_count(self, library_name: str, emoji_manager: EmojiManager, visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
         library_info = self.get_library_info(library_name=library_name)
         if not library_info:
             return [('', 0)]
         library_type = library_info.get('section_type')
+        results = []
         match library_type:
             case 'show':
-                return [(emoji_manager.get_emoji("series"), library_info.get('count')),
-                        (emoji_manager.get_emoji("episodes"), library_info.get('child_count'))]
+                if visibility_settings.show_tv_series:
+                    results.append((emoji_manager.get_emoji("series"), library_info.get('count')))
+                if visibility_settings.show_tv_episodes:
+                    results.append((emoji_manager.get_emoji("episodes"), library_info.get('child_count')))
+                return results
             case 'artist':
-                return [(emoji_manager.get_emoji("artists"), library_info.get('count')),
-                        (emoji_manager.get_emoji("tracks"), library_info.get('child_count'))]
+                if visibility_settings.show_music_artists:
+                    results.append((emoji_manager.get_emoji("artists"), library_info.get('count')))
+                if visibility_settings.show_music_tracks:
+                    results.append((emoji_manager.get_emoji("tracks"), library_info.get('child_count')))
+                return results
             case 'movie':
                 return [(emoji_manager.get_emoji("movies"), library_info.get('count'))]
         return [(emoji_manager.get_emoji("unknown"), 0)]
