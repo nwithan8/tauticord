@@ -144,7 +144,10 @@ def valid_reaction(reaction_emoji: discord.PartialEmoji,
                    valid_reaction_type: str = None,
                    valid_message: discord.Message = None,
                    valid_emojis: List[str] = None,
-                   valid_user_ids: List[str] = None) -> bool:
+                   valid_user_ids: List[str] = None,
+                   skip_self_reaction: bool = True) -> bool:
+    if skip_self_reaction and reaction_user_id == valid_message.author.id:
+        return False
     if valid_reaction_type and reaction_type != valid_reaction_type:
         return False
     if valid_message and reaction_message.id != valid_message.id:
@@ -314,7 +317,7 @@ class DiscordConnector:
     async def stop_tautulli_stream_via_reaction_emoji(self, emoji: discord.PartialEmoji, message: discord.Message) -> \
             discord.Message:
         # remember to shift by 1 to convert index to human-readable
-        stream_number = emojis.stream_number_from_emoji(emoji)
+        stream_number = emojis.stream_number_from_emoji(emoji=emoji)
 
         logging.debug(f"Stopping stream {emoji}...")
         stopped_message = self.tautulli.stop_stream(emoji=emoji, stream_number=stream_number)

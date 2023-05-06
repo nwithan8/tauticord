@@ -90,6 +90,12 @@ class TautulliConfig(ConfigSection):
     def server_name(self) -> str:
         return self._customization._get_value(key='ServerName', default="Plex",
                                               env_name_override="TC_SERVER_NAME")
+    
+    @property
+    def anonymous_users(self) -> bool:
+        value = self._customization._get_value(key='AnonymousUsers', default=False,
+                                               env_name_override="TC_ANON_USERS")
+        return _extract_bool(value)
 
     @property
     def terminate_message(self) -> str:

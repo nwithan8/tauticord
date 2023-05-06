@@ -69,7 +69,7 @@ def max_controllable_stream_count_supported(max_streams_override: Optional[int] 
     return max_streams_override or len(stream_number_emojis)
 
 
-def emoji_from_stream_number(number):
+def emoji_from_stream_number(number: int):
     return stream_number_emojis[number - 1]
 
 
