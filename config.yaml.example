@@ -11,6 +11,7 @@ Tautulli:
     PlexPass: true
     ServerTimeZone: "UTC"
     Use24HourTime: false
+    
     VoiceChannels:
       Stats:
         CategoryName: "Tautulli Stats"
