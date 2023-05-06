@@ -133,8 +133,10 @@ class Session:
                                                     media_type_icon=self.get_type_icon(emoji_manager=emoji_manager),
                                                     title=self.title)
 
-    def get_session_user(self, emoji_manager: EmojiManager) -> str:
+    def get_session_user(self, emoji_manager: EmojiManager, anon_streams) -> str:
         emoji = emoji_manager.get_emoji("person")
+        if anon_streams:
+            return statics.session_user_message.format(emoji=emoji, username="Anonymous")
         return statics.session_user_message.format(emoji=emoji, username=self.username)
 
     def get_session_player(self, emoji_manager: EmojiManager) -> str:
@@ -238,8 +240,8 @@ class TautulliStreamInfo:
     def get_player(self, emoji_manager: EmojiManager) -> str:
         return self._session.get_session_player(emoji_manager=emoji_manager)
 
-    def get_user(self, emoji_manager: EmojiManager) -> str:
-        return self._session.get_session_user(emoji_manager=emoji_manager)
+    def get_user(self, emoji_manager: EmojiManager, anon_streams) -> str:
+        return self._session.get_session_user(emoji_manager=emoji_manager, anon_streams=anon_streams)
 
     def get_details(self, emoji_manager: EmojiManager) -> str:
         return self._session.get_session_details(emoji_manager=emoji_manager)
@@ -247,9 +249,9 @@ class TautulliStreamInfo:
     def get_progress(self, emoji_manager: EmojiManager) -> str:
         return self._session.get_session_progress(emoji_manager=emoji_manager)
 
-    def get_body(self, emoji_manager: EmojiManager) -> str:
+    def get_body(self, emoji_manager: EmojiManager, anon_streams) -> str:
         try:
-            return f"{self.get_user(emoji_manager=emoji_manager)}\n{self.get_player(emoji_manager=emoji_manager)}\n{self.get_details(emoji_manager=emoji_manager)}\n{self.get_progress(emoji_manager=emoji_manager)}"
+            return f"{self.get_user(emoji_manager=emoji_manager, anon_streams=anon_streams)}\n{self.get_player(emoji_manager=emoji_manager)}\n{self.get_details(emoji_manager=emoji_manager)}\n{self.get_progress(emoji_manager=emoji_manager)}"
         except Exception as body_exception:
             logging.error(str(body_exception))
             return f"Could not display data for session {self._session_number}"
@@ -262,13 +264,15 @@ class TautulliDataResponse:
                  emoji_manager: EmojiManager,
                  streams_info: List[TautulliStreamInfo] = None,
                  plex_pass: bool = False,
-                 error_occurred: bool = False):
+                 error_occurred: bool = False,
+                 anon_streams: bool = False):
         self._overview_message = overview_message
         self._streams = streams_info or []
         self.plex_pass = plex_pass
         self.error = error_occurred
         self._emoji_manager = emoji_manager
         self._server_name = server_name
+        self.anon_streams = anon_streams
 
     @property
     def embed(self) -> discord.Embed:
@@ -277,7 +281,7 @@ class TautulliDataResponse:
         embed = discord.Embed(title=f"Current activity on {self._server_name}")
         for stream in self._streams:
             embed.add_field(name=stream.get_title(emoji_manager=self._emoji_manager),
-                            value=stream.get_body(emoji_manager=self._emoji_manager), inline=False)
+                            value=stream.get_body(emoji_manager=self._emoji_manager, anon_streams=self.anon_streams), inline=False)
         footer_text = self._overview_message
         if self.plex_pass:
             footer_text += f"\n\nTo terminate a stream, react with the stream number."
@@ -294,8 +298,10 @@ class TautulliConnector:
                  plex_pass: bool,
                  time_settings: dict,
                  server_name: str = None,
+                 anon_streams: bool = False,
                  ):
         self.base_url = base_url
+        self.anon_streams = anon_streams
         self.api_key = api_key
         self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key)
         self.server_name = server_name or self.api.server_friendly_name
@@ -340,7 +346,8 @@ class TautulliConnector:
                                             emoji_manager=emoji_manager,
                                             streams_info=session_details,
                                             plex_pass=self.plex_pass,
-                                            server_name=self.server_name), count, activity, self.is_plex_server_online()
+                                            server_name=self.server_name,
+                                            anon_streams=self.anon_streams), count, activity, self.is_plex_server_online()
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
         return TautulliDataResponse(overview_message="**Connection lost.**", emoji_manager=emoji_manager,
