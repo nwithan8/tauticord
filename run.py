@@ -59,7 +59,7 @@ if __name__ == '__main__':
             plex_pass=config.tautulli.has_plex_pass,
             time_settings=config.tautulli.time_settings,
             server_name=config.tautulli.server_name,
-            anon_streams=config.tautulli.anon_streams,
+            anon_users=config.tautulli.anonymous_users,
         )
 
         discord_connector = discord.DiscordConnector(

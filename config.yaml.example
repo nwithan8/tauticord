@@ -11,6 +11,7 @@ Tautulli:
     PlexPass: true
     ServerTimeZone: "UTC"
     Use24HourTime: false
+    AnonymousUsers: false
     
     VoiceChannels:
       Stats:

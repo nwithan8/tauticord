@@ -92,9 +92,9 @@ class TautulliConfig(ConfigSection):
                                               env_name_override="TC_SERVER_NAME")
     
     @property
-    def anon_streams(self) -> bool:
-        value = self._customization._get_value(key='AnonStreams', default=False,
-                                               env_name_override="TC_ANON_STREAMS")
+    def anonymous_users(self) -> bool:
+        value = self._customization._get_value(key='AnonymousUsers', default=False,
+                                               env_name_override="TC_ANON_USERS")
         return _extract_bool(value)
 
     @property
