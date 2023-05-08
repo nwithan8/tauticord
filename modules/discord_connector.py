@@ -14,7 +14,7 @@ from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 from modules.utils import quote
 
 
-async def add_emoji_reactions(message: discord.Message, count: int):
+async def add_emoji_reactions(message: discord.Message, count: int, emoji_manager: EmojiManager):
     """
     Add reactions to a message for user interaction
     :param message: message to add emojis to
@@ -41,7 +41,9 @@ async def add_emoji_reactions(message: discord.Message, count: int):
     emoji_to_remove = []
 
     for i, e in enumerate(msg_emoji):
-        if i >= count or i != emojis.stream_number_emojis.index(e):
+        if i >= count:  # ex. 5 streams, 6 reactions
+            emoji_to_remove.append(e)
+        elif not emoji_manager.valid_emoji_for_stream_number(emoji=e, number=i + 1): # "6" emoji used for stream 5
             emoji_to_remove.append(e)
 
     # if all reactions need to be removed, do it all at once
@@ -54,7 +56,7 @@ async def add_emoji_reactions(message: discord.Message, count: int):
             del (msg_emoji[msg_emoji.index(e)])
 
     for i in range(1, count + 1):
-        emoji = emojis.emoji_from_stream_number(i)
+        emoji = emoji_manager.emoji_from_stream_number(i)
         if emoji not in msg_emoji:
             await message.add_reaction(emoji)
 
@@ -175,9 +177,11 @@ class DiscordConnector:
                  voice_channel_settings: dict,
                  display_live_stats: bool,
                  display_library_stats: bool,
+                 nitro: bool,
                  analytics):
         self.token = token
         self.guild_id = guild_id
+        self.nitro: bool = nitro
         self.admin_ids = admin_ids
         self.refresh_time = refresh_time
         self.library_refresh_time = library_refresh_time
@@ -220,8 +224,13 @@ class DiscordConnector:
             activity=discord.Activity(type=discord.ActivityType.watching, name='for Tautulli stats'))
 
         logging.info("Uploading required resources...")
-        await self.emoji_manager.load_emojis(source_folder=statics.EMOJIS_FOLDER, client=self.client,
+        # Load normal emojis
+        await self.emoji_manager.load_emojis(source_folder=statics.STANDARD_EMOJIS_FOLDER, client=self.client,
                                              guild_id=self.guild_id)
+        # Load extra emojis if Nitro is enabled
+        if self.nitro:
+            await self.emoji_manager.load_emojis(source_folder=statics.NITRO_EMOJIS_FOLDER, client=self.client,
+                                                 guild_id=self.guild_id)
 
         logging.info("Loading Tautulli text settings...")
         await self.collect_discord_text_channel()
@@ -257,7 +266,7 @@ class DiscordConnector:
                           reaction_type=reaction_type,
                           valid_message=self.current_message,
                           valid_reaction_type=None,  # We already know it's the right type
-                          valid_emojis=emojis.stream_number_emojis,
+                          valid_emojis=self.emoji_manager.stream_number_emojis,
                           valid_user_ids=self.admin_ids):
             # message here will be the current message, so we can just use that
             end_notification = await self.stop_tautulli_stream_via_reaction_emoji(emoji=emoji, message=message)
@@ -317,7 +326,7 @@ class DiscordConnector:
     async def stop_tautulli_stream_via_reaction_emoji(self, emoji: discord.PartialEmoji, message: discord.Message) -> \
             discord.Message:
         # remember to shift by 1 to convert index to human-readable
-        stream_number = emojis.stream_number_from_emoji(emoji=emoji)
+        stream_number = self.emoji_manager.stream_number_from_emoji(emoji=emoji)
 
         logging.debug(f"Stopping stream {emoji}...")
         stopped_message = self.tautulli.stop_stream(emoji=emoji, stream_number=stream_number)
@@ -386,7 +395,7 @@ class DiscordConnector:
             new_message = await send_message(content=data_wrapper, channel=self.tautulli_channel)
 
         if data_wrapper.plex_pass:
-            await add_emoji_reactions(message=new_message, count=count)
+            await add_emoji_reactions(message=new_message, count=count, emoji_manager=self.emoji_manager)
             # on_raw_reaction_add will handle the rest
 
         # Store the message

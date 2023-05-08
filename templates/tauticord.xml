@@ -21,6 +21,7 @@
     </Maintainer>
     <Config Name="Discord bot token" Target="TC_DISCORD_BOT_TOKEN" Default="" Description="Discord bot token" Type="Variable" Display="always" Required="true" Mask="true" />
     <Config Name="Discord server ID" Target="TC_DISCORD_SERVER_ID" Default="" Description="Discord server ID" Type="Variable" Display="always" Required="true" Mask="false" />
+    <Config Name="Discord Nitro" Target="TC_DISCORD_NITRO" Default="" Description="Discord Nitro subscriber" Type="Variable" Display="always" Required="false" Mask="false" />
     <Config Name="URL to Tautulli" Target="TC_TAUTULLI_URL" Default="http://localhost:8181" Description="URL to Tautulli" Type="Variable" Display="always" Required="true" Mask="false">http://localhost:8181</Config>
     <Config Name="Tautulli API key" Target="TC_TAUTULLI_KEY" Default="" Description="Tautulli API key" Type="Variable" Display="always" Required="true" Mask="true" />
     <Config Name="Enable Plex Pass features" Target="TC_PLEX_PASS" Default="False" Description="Enable Plex Pass features" Type="Variable" Display="always" Required="false" Mask="false">False</Config>
@@ -46,6 +47,7 @@
     <Config Name="Display music track counts" Target="TC_VC_MUSIC_TRACK_COUNT" Default="True" Description="Display track counts for all configured Music libraries" Type="Variable" Display="always" Required="false" Mask="false">True</Config>    <Config Name="Discord admin IDs" Target="TC_DISCORD_ADMIN_IDS" Default="" Description="Comma-separated list of IDs of Discord users with bot admin privileges" Type="Variable" Display="always" Required="false" Mask="false" />
     <Config Name="Discord admin IDs" Target="TC_DISCORD_ADMIN_IDS" Default="" Description="Comma-separated list of IDs of Discord users with bot admin privileges" Type="Variable" Display="always" Required="false" Mask="false" />
     <Config Name="Stream details text channel" Target="TC_DISCORD_CHANNEL_NAME" Default="tauticord" Description="Name of Discord text channel where the bot will post" Type="Variable" Display="always" Required="true" Mask="false">tauticord</Config>
+    <Config Name="Discord Nitro" Target="TC_DISCORD_NITRO" Default="False" Description="Discord Nitro subscriber" Type="Variable" Display="always" Required="false" Mask="false">False</Config>
     <Config Name="Allow analytics" Target="TC_ALLOW_ANALYTICS" Default="True" Description="Whether to allow anonymous analytics collection" Type="Variable" Display="always" Required="false" Mask="false">True</Config>
     <Config Name="Timezone" Target="TZ" Default="UTC" Description="Timezone for the server" Type="Variable" Display="always" Required="false" Mask="false">UTC</Config>
     <Config Name="Config Path" Target="/config" Default="/mnt/user/appdata/tauticord/config" Mode="rw" Description="Where optional config file will be stored" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/config</Config>

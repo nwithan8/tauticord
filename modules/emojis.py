@@ -1,47 +1,11 @@
 import logging
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 import discord
 from discord import Emoji
 
-stream_number_emojis = [
-    "1️⃣",
-    "2️⃣",
-    "3️⃣",
-    "4️⃣",
-    "5️⃣",
-    "6️⃣",
-    "7️⃣",
-    "8️⃣",
-    "9️⃣",
-    "🇦",
-    "🇧",
-    "🇨",
-    "🇩",
-    "🇪",
-    "🇫",
-    "🇬",
-    "🇭",
-    "🇮",
-    "🇯",
-    "🇰",
-    "🇱",
-    "🇲",
-    "🇳",
-    "🇴",
-    "🇵",
-    "🇶",
-    "🇷",
-    "🇸",
-    "🇹",
-    "🇺",
-    "🇻",
-    "🇼",
-    "🇽",
-    "🇾",
-    "🇿",
-]
+from modules import statics
 
 
 async def upload_new_emoji(file: str, name: str, client: discord.Client, guild_id: str) -> Union[discord.Emoji, None]:
@@ -66,15 +30,7 @@ async def collect_guild_emojis(client: discord.Client, guild_id: str) -> tuple[E
 
 
 def max_controllable_stream_count_supported(max_streams_override: Optional[int] = None) -> int:
-    return max_streams_override or len(stream_number_emojis)
-
-
-def emoji_from_stream_number(number: int):
-    return stream_number_emojis[number - 1]
-
-
-def stream_number_from_emoji(emoji):
-    return stream_number_emojis.index(str(emoji)) + 1
+    return max_streams_override or statics.MAX_STREAM_COUNT
 
 
 class EmojiManager:
@@ -82,6 +38,42 @@ class EmojiManager:
         self._emoji_prefix = "tc"
         # Define the default emojis here
         self._emojis = {
+            "1": "1️⃣",
+            "2": "2️⃣",
+            "3": "3️⃣",
+            "4": "4️⃣",
+            "5": "5️⃣",
+            "6": "6️⃣",
+            "7": "7️⃣",
+            "8": "8️⃣",
+            "9": "9️⃣",
+            "10": "🔟",
+            "11": "🇦",
+            "12": "🇧",
+            "13": "🇨",
+            "14": "🇩",
+            "15": "🇪",
+            "16": "🇫",
+            "17": "🇬",
+            "18": "🇭",
+            "19": "🇮",
+            "20": "🇯",
+            "21": "🇰",
+            "22": "🇱",
+            "23": "🇲",
+            "24": "🇳",
+            "25": "🇴",
+            "26": "🇵",
+            "27": "🇶",
+            "28": "🇷",
+            "29": "🇸",
+            "30": "🇹",
+            "31": "🇺",
+            "32": "🇻",
+            "33": "🇼",
+            "34": "🇽",
+            "35": "🇾",
+            "36": "🇿",
             "bandwidth": "📶",
             "buffering": "⏳",
             "clip": "🎞",
@@ -108,8 +100,34 @@ class EmojiManager:
             "unknown": "❓",
         }
 
+    @property
+    def stream_number_emojis(self) -> List[str]:
+        number_emojis = []
+        for i in range(1, max_controllable_stream_count_supported() + 1):
+            number_emojis.append(self.emoji_from_stream_number(i))
+        return number_emojis
+
+    def stream_number_from_emoji(self, emoji) -> Union[int, None]:
+        for i, e in enumerate(self._emojis):
+            if e == str(emoji):
+                return i + 1
+        return None
+
+    def emoji_from_stream_number(self, number: int) -> str:
+        number_str = str(number)
+        if number_str in self._emojis:
+            return self._emojis[number_str]
+        else:
+            return self._emojis["unknown"]
+
+    def valid_emoji(self, emoji) -> bool:
+        return str(emoji) in self._emojis
+
+    def valid_emoji_for_stream_number(self, emoji, number: int) -> bool:
+        return str(emoji) == self.emoji_from_stream_number(number)
+
     async def load_emojis(self, source_folder: str, client: discord.Client, guild_id: str) -> None:
-        # Upload PNG emojis from the emoji folder
+        # Upload PNG emojis from the source folder
         for file in Path(source_folder).glob("*.png"):
             await self.add_new_emoji(file=str(file), client=client, guild_id=guild_id)
 
@@ -122,7 +140,7 @@ class EmojiManager:
         for emoji in existing_emojis:
             if emoji.name == name_with_prefix:
                 # Store the emoji in the cache if it already exists
-                self._emojis[name] = f"<:{name_with_prefix}:{emoji.id}>"
+                self._emojis[str(name)] = f"<:{name_with_prefix}:{emoji.id}>"
                 return
 
         # Upload the new emoji

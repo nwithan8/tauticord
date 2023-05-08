@@ -1,7 +1,8 @@
 # Number 1-9, and A-Z
 from typing import Optional
 
-EMOJIS_FOLDER = "resources/emojis"
+STANDARD_EMOJIS_FOLDER = "resources/emojis/standard"
+NITRO_EMOJIS_FOLDER = "resources/emojis/nitro"
 
 sessions_message = """{stream_count} {word}"""
 transcodes_message = """{transcode_count} {word}"""
@@ -38,3 +39,5 @@ KEY_SHOW_TV_EPISODES = "show_tv_episodes"
 KEY_SHOW_TV_SERIES = "show_tv_series"
 KEY_SHOW_MUSIC_ARTISTS = "show_music_artists"
 KEY_SHOW_MUSIC_TRACKS = "show_music_tracks"
+
+MAX_STREAM_COUNT = 36
