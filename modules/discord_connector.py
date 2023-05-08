@@ -1,5 +1,5 @@
 import asyncio
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Tuple
 
 import discord
 from discord import Emoji
@@ -43,7 +43,7 @@ async def add_emoji_reactions(message: discord.Message, count: int, emoji_manage
     for i, e in enumerate(msg_emoji):
         if i >= count:  # ex. 5 streams, 6 reactions
             emoji_to_remove.append(e)
-        elif not emoji_manager.valid_emoji_for_stream_number(emoji=e, number=i + 1): # "6" emoji used for stream 5
+        elif not emoji_manager.valid_emoji_for_stream_number(emoji=e, number=i + 1):  # "6" emoji used for stream 5
             emoji_to_remove.append(e)
 
     # if all reactions need to be removed, do it all at once
@@ -111,12 +111,16 @@ async def create_discord_channel(client: discord.Client, guild_id: str, channel_
         raise Exception(f"Could not create channel {channel_name}")
 
 
-async def get_discord_channel_by_starting_name(client: discord.Client, guild_id: str,
+async def get_discord_channel_by_starting_name(client: discord.Client,
+                                               guild_id: str,
                                                starting_channel_name: str,
-                                               channel_type: discord.ChannelType = discord.ChannelType.text) -> \
+                                               channel_type: discord.ChannelType = discord.ChannelType.text,
+                                               category: discord.CategoryChannel = None) -> \
         Union[discord.VoiceChannel, discord.TextChannel]:
     for channel in client.get_all_channels():
         if channel.name.startswith(starting_channel_name):
+            if category and channel.category != category:
+                continue
             return channel
     return await create_discord_channel(client=client,
                                         guild_id=guild_id,
@@ -124,13 +128,17 @@ async def get_discord_channel_by_starting_name(client: discord.Client, guild_id:
                                         channel_type=channel_type)
 
 
-async def get_discord_channel_by_name(client: discord.Client, guild_id: str,
+async def get_discord_channel_by_name(client: discord.Client,
+                                      guild_id: str,
                                       channel_name: str,
                                       channel_type: discord.ChannelType = discord.ChannelType.text,
+                                      category: discord.CategoryChannel = None,
                                       create_if_not_exist: bool = True) -> \
         Union[discord.VoiceChannel, discord.TextChannel, discord.CategoryChannel, None]:
     for channel in client.get_all_channels():
         if channel.name == channel_name:
+            if category and channel.category != category:
+                continue
             return channel
     logging.error(f"Could not load {channel_name} channel. Attempting to create...")
     return await create_discord_channel(client=client,
@@ -312,7 +320,7 @@ class DiscordConnector:
 
     async def run_library_stats_service(self, refresh_time: int):
         if not self.tautulli_libraries_voice_category:
-            return # No libraries voice category set, so don't bother
+            return  # No libraries voice category set, so don't bother
         while True:
             try:
                 await self.update_library_stats_voice_channels()
@@ -346,8 +354,8 @@ class DiscordConnector:
         # Update the stats voice channels if the category is set
         if self.tautulli_stats_voice_category:
             await self.update_live_voice_channels(activity=activity,
-                                              plex_online=plex_online,
-                                              category=self.tautulli_stats_voice_category)
+                                                  plex_online=plex_online,
+                                                  category=self.tautulli_stats_voice_category)
 
         """
         For performance and aesthetics, edit the old message if:
@@ -405,16 +413,20 @@ class DiscordConnector:
     async def collect_discord_text_channel(self) -> None:
         logging.info(f"Getting {quote(self.tautulli_channel_name)} channel")
         self.tautulli_channel: discord.TextChannel = \
-            await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
+            await get_discord_channel_by_name(client=self.client,
+                                              guild_id=self.guild_id,
                                               channel_name=self.tautulli_channel_name)
         if not self.tautulli_channel:
             raise Exception(f"Could not load {quote(self.tautulli_channel_name)} channel. Exiting...")
         logging.info(f"{quote(self.tautulli_channel_name)} channel collected.")
 
-    async def collect_discord_voice_category(self, category_name: str, create_if_not_exist: bool = False) -> discord.CategoryChannel:
+    async def collect_discord_voice_category(self,
+                                             category_name: str,
+                                             create_if_not_exist: bool = False) -> discord.CategoryChannel:
         logging.info(f"Getting {quote(category_name)} voice category")
         category: discord.CategoryChannel = \
-            await get_discord_channel_by_name(client=self.client, guild_id=self.guild_id,
+            await get_discord_channel_by_name(client=self.client,
+                                              guild_id=self.guild_id,
                                               channel_name=category_name,
                                               channel_type=discord.ChannelType.category,
                                               create_if_not_exist=create_if_not_exist)
@@ -451,7 +463,8 @@ class DiscordConnector:
         channel = await get_discord_channel_by_starting_name(client=self.client,
                                                              guild_id=self.guild_id,
                                                              starting_channel_name=f"{channel_name}:",
-                                                             channel_type=discord.ChannelType.voice)
+                                                             channel_type=discord.ChannelType.voice,
+                                                             category=category)
         if not channel:
             logging.error(f"Could not load {channel_name} channel")
         else:
@@ -510,7 +523,9 @@ class DiscordConnector:
         if self.voice_channel_settings.get(statics.KEY_STATS, False):
             visibility_settings = LibraryVoiceChannelsVisibilities(settings=self.voice_channel_settings)
             for library_name in self.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
-                stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name, emoji_manager=self.emoji_manager, visibility_settings=visibility_settings)
+                stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name,
+                                                                                    emoji_manager=self.emoji_manager,
+                                                                                    visibility_settings=visibility_settings)
                 for stat in stats:
                     stat_emoji = stat[0]
                     stat_value = stat[1]
