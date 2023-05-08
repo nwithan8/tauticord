@@ -276,6 +276,12 @@ class DiscordConfig(ConfigSection):
     def _customization(self) -> ConfigSection:
         return self._get_subsection(key="Customization")
 
+    @property
+    def has_discord_nitro(self) -> bool:
+        value = self._customization._get_value(key="Nitro", env_name_override="TC_DISCORD_NITRO",
+                                               default=False)
+        return _extract_bool(value)
+
 
 class ExtrasConfig(ConfigSection):
     def __init__(self, data, pull_from_env: bool = True):

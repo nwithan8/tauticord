@@ -5,7 +5,7 @@ import tautulli
 
 import modules.logs as logging
 import modules.statics as statics
-from modules import utils, emojis
+from modules import utils
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
 
@@ -127,7 +127,7 @@ class Session:
         return self._data['stream_container_decision']
 
     def get_session_title(self, session_number: int, emoji_manager: EmojiManager) -> str:
-        emoji = emojis.emoji_from_stream_number(number=session_number)
+        emoji = emoji_manager.emoji_from_stream_number(number=session_number)
         return statics.session_title_message.format(emoji=emoji,
                                                     icon=self.get_status_icon(emoji_manager=emoji_manager),
                                                     media_type_icon=self.get_type_icon(emoji_manager=emoji_manager),
