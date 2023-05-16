@@ -137,9 +137,9 @@ class Session:
         emoji = emoji_manager.get_emoji(key="person")
         return statics.session_user_message.format(emoji=emoji, username="Anonymous" if anon_users else self.username)
 
-    def get_session_player(self, emoji_manager: EmojiManager) -> str:
+    def get_session_player(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
         emoji = emoji_manager.get_emoji(key="device")
-        return statics.session_player_message.format(emoji=emoji, product=self.product, player=self.player)
+        return statics.session_player_message.format(emoji=emoji, product=self.product, player="Anonymous" if anon_users else self.player)
 
     def get_session_details(self, emoji_manager: EmojiManager) -> str:
         emoji = emoji_manager.get_emoji(key="resolution")
@@ -235,8 +235,8 @@ class TautulliStreamInfo:
         except Exception as title_exception:
             return "Unknown"
 
-    def get_player(self, emoji_manager: EmojiManager) -> str:
-        return self._session.get_session_player(emoji_manager=emoji_manager)
+    def get_player(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
+        return self._session.get_session_player(emoji_manager=emoji_manager, anon_users=anon_users)
 
     def get_user(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
         return self._session.get_session_user(emoji_manager=emoji_manager, anon_users=anon_users)
@@ -249,7 +249,7 @@ class TautulliStreamInfo:
 
     def get_body(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
         try:
-            return f"{self.get_user(emoji_manager=emoji_manager, anon_users=anon_users)}\n{self.get_player(emoji_manager=emoji_manager)}\n{self.get_details(emoji_manager=emoji_manager)}\n{self.get_progress(emoji_manager=emoji_manager)}"
+            return f"{self.get_user(emoji_manager=emoji_manager, anon_users=anon_users)}\n{self.get_player(emoji_manager=emoji_manager, anon_users=anon_users)}\n{self.get_details(emoji_manager=emoji_manager)}\n{self.get_progress(emoji_manager=emoji_manager)}"
         except Exception as body_exception:
             logging.error(str(body_exception))
             return f"Could not display data for session {self._session_number}"
