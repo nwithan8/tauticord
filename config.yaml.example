@@ -36,6 +36,15 @@ Tautulli:
         TVEpisodeCount: true
         MusicArtistCount: true
         MusicTrackCount: true
+    Anonymize:
+      HideUsernames: false
+      HidePlayerNames: false
+      HidePlatforms: false
+      HideQuality: false
+      HideBandwidth: false
+      HideTranscode: false
+      HideProgress: false
+      HideETA: false
 
 Discord:
   Connection:

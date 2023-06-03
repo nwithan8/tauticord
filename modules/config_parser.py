@@ -1,12 +1,13 @@
 import json
 import os
-from typing import List
+from typing import List, Dict, Any
 
 import confuse
 import yaml
 
-from modules import statics
 import modules.logs as logging
+from modules import statics
+from modules.text_manager import TextManager
 
 
 def _extract_bool(value):
@@ -90,7 +91,7 @@ class TautulliConfig(ConfigSection):
     def server_name(self) -> str:
         return self._customization._get_value(key='ServerName', default="Plex",
                                               env_name_override="TC_SERVER_NAME")
-    
+
     @property
     def anonymous_users(self) -> bool:
         value = self._customization._get_value(key='AnonymousUsers', default=False,
@@ -213,7 +214,7 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
-    def voice_channel_settings(self):
+    def voice_channel_settings(self) -> Dict[str, Any]:
         return {
             statics.KEY_STATS_CATEGORY_NAME: self.stats_voice_channel_category_name,
             statics.KEY_COUNT: self.display_stream_count,
@@ -235,13 +236,78 @@ class TautulliConfig(ConfigSection):
     @property
     def any_live_stats_channels_enabled(self) -> bool:
         keys = [statics.KEY_COUNT, statics.KEY_TRANSCODE_COUNT, statics.KEY_BANDWIDTH,
-                    statics.KEY_LAN_BANDWIDTH, statics.KEY_REMOTE_BANDWIDTH, statics.KEY_PLEX_STATUS]
+                statics.KEY_LAN_BANDWIDTH, statics.KEY_REMOTE_BANDWIDTH, statics.KEY_PLEX_STATUS]
         return any([self.voice_channel_settings.get(key, False) for key in keys])
 
     @property
     def any_library_stats_channels_enabled(self) -> bool:
         keys = [statics.KEY_STATS]
         return any([self.voice_channel_settings.get(key, False) for key in keys])
+
+    @property
+    def _anonymize_rules(self) -> ConfigSection:
+        return self._customization._get_subsection(key="Anonymize")
+
+    @property
+    def _anonymize_hide_usernames(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HideUsernames", default=False,
+                                                 env_name_override="TC_HIDE_USERNAMES")
+        return _extract_bool(value)
+
+    @property
+    def _anonymize_hide_platforms(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HidePlatforms", default=False,
+                                                 env_name_override="TC_HIDE_PLATFORMS")
+        return _extract_bool(value)
+
+    @property
+    def _anonymize_hide_player_names(self) -> str:
+        return self._anonymize_rules._get_value(key="HidePlayerNames", default=False,
+                                                env_name_override="TC_HIDE_PLAYER_NAMES")
+
+    @property
+    def _anonymize_hide_quality(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HideQuality", default=False,
+                                                 env_name_override="TC_HIDE_QUALITY")
+        return _extract_bool(value)
+
+    @property
+    def _anonymize_hide_bandwidth(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HideBandwidth", default=False,
+                                                 env_name_override="TC_HIDE_BANDWIDTH")
+        return _extract_bool(value)
+
+    @property
+    def _anonymize_hide_transcode_decision(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HideTranscode", default=False,
+                                                 env_name_override="TC_HIDE_TRANSCODE")
+        return _extract_bool(value)
+
+    @property
+    def _anonymize_hide_progress(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HideProgress", default=False,
+                                                 env_name_override="TC_HIDE_PROGRESS")
+        return _extract_bool(value)
+
+    @property
+    def _anonymize_hide_eta(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HideETA", default=False,
+                                                 env_name_override="TC_HIDE_ETA")
+        return _extract_bool(value)
+
+    @property
+    def text_manager(self) -> TextManager:
+        anonymous_rules = {
+            statics.KEY_HIDE_USERNAMES: self._anonymize_hide_usernames,
+            statics.KEY_HIDE_PLAYER_NAMES: self._anonymize_hide_player_names,
+            statics.KEY_HIDE_PLATFORMS: self._anonymize_hide_platforms,
+            statics.KEY_HIDE_QUALITY: self._anonymize_hide_quality,
+            statics.KEY_HIDE_BANDWIDTH: self._anonymize_hide_bandwidth,
+            statics.KEY_HIDE_TRANSCODING: self._anonymize_hide_transcode_decision,
+            statics.KEY_HIDE_PROGRESS: self._anonymize_hide_progress,
+            statics.KEY_HIDE_ETA: self._anonymize_hide_eta,
+        }
+        return TextManager(anon_rules=anonymous_rules)
 
 
 class DiscordConfig(ConfigSection):
@@ -270,7 +336,8 @@ class DiscordConfig(ConfigSection):
 
     @property
     def channel_name(self) -> str:
-        return self._connection._get_value(key="ChannelName", default="tauticord", env_name_override="TC_DISCORD_CHANNEL_NAME")
+        return self._connection._get_value(key="ChannelName", default="tauticord",
+                                           env_name_override="TC_DISCORD_CHANNEL_NAME")
 
     @property
     def _customization(self) -> ConfigSection:

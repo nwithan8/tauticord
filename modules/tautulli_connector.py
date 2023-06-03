@@ -4,10 +4,10 @@ import discord
 import tautulli
 
 import modules.logs as logging
-import modules.statics as statics
 from modules import utils
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
+from modules.text_manager import TextManager
 
 session_ids = {}
 
@@ -126,32 +126,6 @@ class Session:
     def stream_container_decision(self) -> str:
         return self._data['stream_container_decision']
 
-    def get_session_title(self, session_number: int, emoji_manager: EmojiManager) -> str:
-        emoji = emoji_manager.emoji_from_stream_number(number=session_number)
-        return statics.session_title_message.format(emoji=emoji,
-                                                    icon=self.get_status_icon(emoji_manager=emoji_manager),
-                                                    media_type_icon=self.get_type_icon(emoji_manager=emoji_manager),
-                                                    title=self.title)
-
-    def get_session_user(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
-        emoji = emoji_manager.get_emoji(key="person")
-        return statics.session_user_message.format(emoji=emoji, username="Anonymous" if anon_users else self.username)
-
-    def get_session_player(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
-        emoji = emoji_manager.get_emoji(key="device")
-        return statics.session_player_message.format(emoji=emoji, product=self.product, player="Anonymous" if anon_users else self.player)
-
-    def get_session_details(self, emoji_manager: EmojiManager) -> str:
-        emoji = emoji_manager.get_emoji(key="resolution")
-        return statics.session_details_message.format(emoji=emoji, quality_profile=self.quality_profile,
-                                                      bandwidth=self.bandwidth,
-                                                      transcoding=self.transcoding_stub)
-
-    def get_session_progress(self, emoji_manager: EmojiManager) -> str:
-        emoji = emoji_manager.get_emoji(key="progress")
-        return statics.session_progress_message.format(emoji=emoji, progress=self.progress_marker, eta=self.eta)
-
-
 class Activity:
     def __init__(self, activity_data, time_settings: dict, emoji_manager: EmojiManager):
         self._data = activity_data
@@ -200,24 +174,6 @@ class Activity:
         except:
             return None
 
-    def get_message(self) -> str:
-        overview_message = ""
-        if self.stream_count > 0:
-            overview_message += statics.sessions_message.format(stream_count=self.stream_count,
-                                                                word=utils.make_plural(word='stream',
-                                                                                       count=self.stream_count))
-            if self.transcode_count > 0:
-                overview_message += f" ({statics.transcodes_message.format(transcode_count=self.transcode_count, word=utils.make_plural(word='transcode', count=self.transcode_count))})"
-
-        if self.total_bandwidth:
-            bandwidth_emoji = self._emoji_manager.get_emoji(key='bandwidth')
-            overview_message += f" @ {statics.bandwidth_message.format(emoji=bandwidth_emoji, bandwidth=self.total_bandwidth)}"
-            if self.lan_bandwidth:
-                lan_bandwidth_emoji = self._emoji_manager.get_emoji(key='home')
-                overview_message += f" {statics.lan_bandwidth_message.format(emoji=lan_bandwidth_emoji, bandwidth=self.lan_bandwidth)}"
-
-        return overview_message
-
     @property
     def sessions(self) -> List[Session]:
         return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in
@@ -229,27 +185,15 @@ class TautulliStreamInfo:
         self._session = session
         self._session_number = session_number
 
-    def get_title(self, emoji_manager: EmojiManager) -> str:
+    def get_title(self, emoji_manager: EmojiManager, text_manager: TextManager) -> str:
         try:
-            return self._session.get_session_title(session_number=self._session_number, emoji_manager=emoji_manager)
+            return text_manager.session_title(session=self._session, session_number=self._session_number, emoji_manager=emoji_manager)
         except Exception as title_exception:
             return "Unknown"
 
-    def get_player(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
-        return self._session.get_session_player(emoji_manager=emoji_manager, anon_users=anon_users)
-
-    def get_user(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
-        return self._session.get_session_user(emoji_manager=emoji_manager, anon_users=anon_users)
-
-    def get_details(self, emoji_manager: EmojiManager) -> str:
-        return self._session.get_session_details(emoji_manager=emoji_manager)
-
-    def get_progress(self, emoji_manager: EmojiManager) -> str:
-        return self._session.get_session_progress(emoji_manager=emoji_manager)
-
-    def get_body(self, emoji_manager: EmojiManager, anon_users: bool) -> str:
+    def get_body(self, emoji_manager: EmojiManager, text_manager: TextManager) -> str:
         try:
-            return f"{self.get_user(emoji_manager=emoji_manager, anon_users=anon_users)}\n{self.get_player(emoji_manager=emoji_manager, anon_users=anon_users)}\n{self.get_details(emoji_manager=emoji_manager)}\n{self.get_progress(emoji_manager=emoji_manager)}"
+            return text_manager.session_body(session=self._session, emoji_manager=emoji_manager)
         except Exception as body_exception:
             logging.error(str(body_exception))
             return f"Could not display data for session {self._session_number}"
@@ -257,20 +201,20 @@ class TautulliStreamInfo:
 
 class TautulliDataResponse:
     def __init__(self,
-                 overview_message: str,
+                 activity: Union[Activity, None],
                  server_name: str,
                  emoji_manager: EmojiManager,
+                 text_manager: TextManager,
                  streams_info: List[TautulliStreamInfo] = None,
                  plex_pass: bool = False,
-                 error_occurred: bool = False,
-                 anon_users: bool = False):
-        self._overview_message = overview_message
+                 error_occurred: bool = False):
+        self._activity = activity
         self._streams = streams_info or []
         self.plex_pass = plex_pass
         self.error = error_occurred
         self._emoji_manager = emoji_manager
         self._server_name = server_name
-        self.anon_users = anon_users
+        self._text_manager = text_manager
 
     @property
     def embed(self) -> discord.Embed:
@@ -278,11 +222,13 @@ class TautulliDataResponse:
             return discord.Embed(title="No current activity")
         embed = discord.Embed(title=f"Current activity on {self._server_name}")
         for stream in self._streams:
-            embed.add_field(name=stream.get_title(emoji_manager=self._emoji_manager),
-                            value=stream.get_body(emoji_manager=self._emoji_manager, anon_users=self.anon_users), inline=False)
-        footer_text = self._overview_message
-        if self.plex_pass:
-            footer_text += f"\n\nTo terminate a stream, react with the stream number."
+            embed.add_field(name=stream.get_title(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
+                            value=stream.get_body(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
+                            inline=False)
+        footer_text = self._text_manager.overview_footer(no_connection=self.error,
+                                                         activity=self._activity,
+                                                         emoji_manager=self._emoji_manager,
+                                                         add_termination_tip=self.plex_pass)
         embed.set_footer(text=footer_text)
         return embed
 
@@ -295,11 +241,11 @@ class TautulliConnector:
                  analytics,
                  plex_pass: bool,
                  time_settings: dict,
+                 text_manager: TextManager,
                  server_name: str = None,
-                 anon_users: bool = False,
                  ):
         self.base_url = base_url
-        self.anon_users = anon_users
+        self.text_manager = text_manager
         self.api_key = api_key
         try:
             self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key)
@@ -343,15 +289,17 @@ class TautulliConnector:
                         self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
                         pass
                 logging.debug(f"Count: {count}")
-                return TautulliDataResponse(overview_message=activity.get_message(),
+                return TautulliDataResponse(activity=activity,
                                             emoji_manager=emoji_manager,
+                                            text_manager=self.text_manager,
                                             streams_info=session_details,
                                             plex_pass=self.plex_pass,
-                                            server_name=self.server_name,
-                                            anon_users=self.anon_users), count, activity, self.is_plex_server_online()
+                                            server_name=self.server_name), count, activity, self.is_plex_server_online()
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
-        return TautulliDataResponse(overview_message="**Connection lost.**", emoji_manager=emoji_manager,
+        return TautulliDataResponse(activity=None,
+                                    emoji_manager=emoji_manager,
+                                    text_manager=self.text_manager,
                                     error_occurred=True,
                                     server_name=self.server_name), 0, None, False  # If Tautulli is offline, assume Plex is offline
 

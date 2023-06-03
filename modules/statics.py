@@ -4,17 +4,6 @@ from typing import Optional
 STANDARD_EMOJIS_FOLDER = "resources/emojis/standard"
 NITRO_EMOJIS_FOLDER = "resources/emojis/nitro"
 
-sessions_message = """{stream_count} {word}"""
-transcodes_message = """{transcode_count} {word}"""
-bandwidth_message = """{emoji} {bandwidth}"""
-lan_bandwidth_message = """({emoji} {bandwidth})"""
-
-session_title_message = """{emoji} | {icon} {media_type_icon} *{title}*"""
-session_user_message = """{emoji} **{username}**"""
-session_player_message = """{emoji} **{product}** ({player})"""
-session_details_message = """{emoji} **{quality_profile}** ({bandwidth}){transcoding}"""
-session_progress_message = """{emoji} **{progress}** (ETA: {eta})"""
-
 voice_channel_order = {
     'count': 1,
     'transcodes': 2,
@@ -39,5 +28,17 @@ KEY_SHOW_TV_EPISODES = "show_tv_episodes"
 KEY_SHOW_TV_SERIES = "show_tv_series"
 KEY_SHOW_MUSIC_ARTISTS = "show_music_artists"
 KEY_SHOW_MUSIC_TRACKS = "show_music_tracks"
+
+KEY_ANONYMOUS_SETTINGS = "anonymous_settings"
+KEY_HIDE_USERNAMES = "hide_usernames"
+KEY_HIDE_PLATFORMS = "hide_platforms"
+KEY_HIDE_PLAYER_NAMES = "anonymize_players"
+KEY_HIDE_QUALITY = "hide_quality"
+KEY_HIDE_BANDWIDTH = "hide_bandwidth"
+KEY_HIDE_TRANSCODING = "hide_transcoding"
+KEY_HIDE_PROGRESS = "hide_progress"
+KEY_HIDE_ETA = "hide_eta"
+KEY_DISABLE_TERMINATION = "hide_termination"
+
 
 MAX_STREAM_COUNT = 36
