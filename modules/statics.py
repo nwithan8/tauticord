@@ -29,7 +29,6 @@ KEY_SHOW_TV_SERIES = "show_tv_series"
 KEY_SHOW_MUSIC_ARTISTS = "show_music_artists"
 KEY_SHOW_MUSIC_TRACKS = "show_music_tracks"
 
-KEY_ANONYMOUS_SETTINGS = "anonymous_settings"
 KEY_HIDE_USERNAMES = "hide_usernames"
 KEY_HIDE_PLATFORMS = "hide_platforms"
 KEY_HIDE_PLAYER_NAMES = "anonymize_players"
@@ -38,7 +37,10 @@ KEY_HIDE_BANDWIDTH = "hide_bandwidth"
 KEY_HIDE_TRANSCODING = "hide_transcoding"
 KEY_HIDE_PROGRESS = "hide_progress"
 KEY_HIDE_ETA = "hide_eta"
-KEY_DISABLE_TERMINATION = "hide_termination"
+
+KEY_PERFORMANCE_CATEGORY_NAME = "performance_category_name"
+KEY_PERFORMANCE_MONITOR_CPU = "performance_monitor_cpu"
+KEY_PERFORMANCE_MONITOR_MEMORY = "performance_monitor_memory"
 
 
 MAX_STREAM_COUNT = 36

@@ -7,6 +7,7 @@ from discord import Emoji
 import modules.logs as logging
 import modules.statics as statics
 import modules.tautulli_connector
+import modules.system_stats as system_stats
 from modules import emojis
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
@@ -186,6 +187,7 @@ class DiscordConnector:
                  display_live_stats: bool,
                  display_library_stats: bool,
                  nitro: bool,
+                 performance_monitoring: dict,
                  analytics):
         self.token = token
         self.guild_id = guild_id
@@ -201,6 +203,11 @@ class DiscordConnector:
         self.tautulli_stats_voice_category: discord.CategoryChannel = None
         self.tautulli_libraries_voice_category: discord.CategoryChannel = None
         self.tautulli = tautulli_connector
+        self.performance_monitoring = performance_monitoring
+        self.enable_performance_monitoring = performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU,
+                                                                        False) or performance_monitoring.get(
+            statics.KEY_PERFORMANCE_MONITOR_MEMORY, False)
+        self.performance_voice_category: discord.CategoryChannel = None
         self.analytics = analytics
 
         intents = discord.Intents.default()
@@ -225,6 +232,10 @@ class DiscordConnector:
     @property
     def libraries_voice_category_name(self) -> str:
         return self.voice_channel_settings.get(statics.KEY_LIBRARIES_CATEGORY_NAME, "Tautulli Libraries")
+
+    @property
+    def performance_category_name(self) -> str:
+        return self.performance_monitoring.get(statics.KEY_PERFORMANCE_CATEGORY_NAME, "Performance")
 
     async def on_ready(self) -> None:
         logging.info('Connected to Discord.')
@@ -252,6 +263,9 @@ class DiscordConnector:
         if self.display_library_stats:
             self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
                 category_name=self.libraries_voice_category_name)
+        if self.enable_performance_monitoring:
+            self.performance_voice_category = await self.collect_discord_voice_category(
+                category_name=self.performance_category_name)
 
         logging.info("Loading Tautulli summary message service...")
         # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
@@ -261,6 +275,11 @@ class DiscordConnector:
         logging.info("Starting Tautulli library stats service...")
         # minimum 5-minute sleep time hard-coded, trust me, don't DDoS your server
         asyncio.create_task(self.run_library_stats_service(refresh_time=max([5 * 60, self.library_refresh_time])))
+
+        if self.enable_performance_monitoring:
+            logging.info("Starting performance monitoring service...")
+            asyncio.create_task(
+                self.run_performance_monitoring_service(refresh_time=5 * 60))  # Hard-coded 5-minute refresh time
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         emoji = payload.emoji
@@ -324,6 +343,16 @@ class DiscordConnector:
         while True:
             try:
                 await self.update_library_stats_voice_channels()
+                await asyncio.sleep(refresh_time)
+            except Exception:
+                exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
+
+    async def run_performance_monitoring_service(self, refresh_time: int):
+        if not self.performance_voice_category:
+            return # No performance voice category set, so don't bother
+        while True:
+            try:
+                await self.update_performance_voice_channels()
                 await asyncio.sleep(refresh_time)
             except Exception:
                 exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
@@ -536,3 +565,21 @@ class DiscordConnector:
                     await self.edit_stat_voice_channel(channel_name=channel_name,
                                                        stat=stat_value,
                                                        category=self.tautulli_libraries_voice_category)
+
+    async def update_performance_voice_channels(self) -> None:
+        logging.info("Updating performance stats...")
+        if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU, False):
+            cpu_percent = "{:0.2f}%".format(system_stats.cpu_usage())
+            logging.info(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
+            await self.edit_stat_voice_channel(channel_name="CPU",
+                                               stat=cpu_percent,
+                                               category=self.performance_voice_category)
+
+        if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_MEMORY, False):
+            memory_percent = "{:0.2f} GB".format(system_stats.ram_usage())
+            logging.info(f"Updating Memory voice channel with new Memory percent: {memory_percent}")
+            await self.edit_stat_voice_channel(channel_name="Memory",
+                                               stat=memory_percent,
+                                               category=self.performance_voice_category)
+
+
