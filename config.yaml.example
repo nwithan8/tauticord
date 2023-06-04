@@ -37,7 +37,7 @@ Tautulli:
         MusicArtistCount: true
         MusicTrackCount: true
       Performance:
-        CategoryName: "Tautulli Performance"
+        CategoryName: "Performance"
     Anonymize:
       HideUsernames: false
       HidePlayerNames: false
