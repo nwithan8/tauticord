@@ -1,0 +1,19 @@
+name: Pull Request checks
+on:
+  pull_request: ~
+  workflow_dispatch: ~
+
+jobs:
+  check_env_vars:
+    name: Check all defined environment variables are documented
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Run ci/env_vars_check.py
+        run: |
+          python3 ci/env_vars_check.py
