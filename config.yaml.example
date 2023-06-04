@@ -36,6 +36,8 @@ Tautulli:
         TVEpisodeCount: true
         MusicArtistCount: true
         MusicTrackCount: true
+      Performance:
+        CategoryName: "Performance"
     Anonymize:
       HideUsernames: false
       HidePlayerNames: false
@@ -62,3 +64,6 @@ Discord:
 Extras:
   # See README.md for details
   Analytics: true
+  Performance:
+    CPU: true
+    Memory: true

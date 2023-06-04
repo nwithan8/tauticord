@@ -290,6 +290,15 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def _performance_voice_channel_settings(self) -> ConfigSection:
+        return self._voice_channels._get_subsection(key="Performance")
+
+    @property
+    def _performance_voice_channel_name(self) -> str:
+        return self._performance_voice_channel_settings._get_value(key="CategoryName", default="Performance",
+                                                                   env_name_override="TC_VC_PERFORMANCE_CATEGORY_NAME")
+
+    @property
     def text_manager(self) -> TextManager:
         anonymous_rules = {
             statics.KEY_HIDE_USERNAMES: self._anonymize_hide_usernames,
@@ -354,6 +363,22 @@ class ExtrasConfig(ConfigSection):
                                 env_name_override="TC_ALLOW_ANALYTICS")
         return _extract_bool(value)
 
+    @property
+    def _performance(self) -> ConfigSection:
+        return self._get_subsection(key="Performance")
+
+    @property
+    def _performance_monitor_cpu(self) -> bool:
+        value = self._performance._get_value(key="CPU", default=False,
+                                             env_name_override="TC_MONITOR_CPU")
+        return _extract_bool(value)
+
+    @property
+    def _performance_monitor_memory(self) -> bool:
+        value = self._performance._get_value(key="Memory", default=False,
+                                             env_name_override="TC_MONITOR_MEMORY")
+        return _extract_bool(value)
+
 
 class Config:
     def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True):
@@ -372,6 +397,11 @@ class Config:
         self.tautulli = TautulliConfig(self.config, self.pull_from_env)
         self.discord = DiscordConfig(self.config, self.pull_from_env)
         self.extras = ExtrasConfig(self.config, self.pull_from_env)
+        self.performance = {
+            statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_name,
+            statics.KEY_PERFORMANCE_MONITOR_CPU: self.extras._performance_monitor_cpu,
+            statics.KEY_PERFORMANCE_MONITOR_MEMORY: self.extras._performance_monitor_memory,
+        }
 
     def __repr__(self) -> str:
         raw_yaml_data = self.config.dump()

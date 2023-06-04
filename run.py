@@ -74,6 +74,7 @@ if __name__ == '__main__':
             display_live_stats=config.tautulli.any_live_stats_channels_enabled,
             display_library_stats=config.tautulli.any_library_stats_channels_enabled,
             nitro=config.discord.has_discord_nitro,
+            performance_monitoring=config.performance,
             analytics=analytics,
         )
 
