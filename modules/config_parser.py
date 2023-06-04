@@ -296,7 +296,7 @@ class TautulliConfig(ConfigSection):
     @property
     def _performance_voice_channel_name(self) -> str:
         return self._performance_voice_channel_settings._get_value(key="CategoryName", default="Performance",
-                                                                   env_name_override="TC_PERFORMANCE_VOICE_CHANNEL_NAME")
+                                                                   env_name_override="TC_VC_PERFORMANCE_CATEGORY_NAME")
 
     @property
     def text_manager(self) -> TextManager:
