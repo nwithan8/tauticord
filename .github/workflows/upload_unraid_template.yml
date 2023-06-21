@@ -21,15 +21,21 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=today::$(date +'%Y-%m-%d')
 
-      - name: Open PR with template changes to unraid_templates
-        uses: paygoc6/action-pull-request-another-repo@v1.0.1
+      - name: Clone unraid_templates
         env:
-          API_TOKEN_GITHUB: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
-        with:
-          # Will mirror folder structure (copying "templates" folder to "templates" folder in destination repo)
-          source_folder: 'templates'
-          destination_repo: 'nwithan8/unraid_templates'
-          destination_base_branch: 'main'
-          destination_head_branch: tauticord-${{ steps.vars.outputs.version }}
-          user_email: 'nwithan8@users.noreply.github.com'
-          user_name: 'nwithan8'
+          GITHUB_TOKEN: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
+        run: |
+          gh repo clone nwithan8/unraid_templates ../unraid_templates
+
+      - name: Copy template(s) to unraid_templates
+        run: |
+          cp ../tauticord/templates/* ../unraid_templates/templates/
+          cd ../unraid_templates
+          git add .
+          git commit -m "Update Tauticord template for version ${{ steps.vars.outputs.version }} (${{ steps.vars.outputs.today }})"
+
+      - name: Open PR to unraid_templates
+        env:
+          GITHUB_TOKEN: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
+        run: |
+          gh pr create --title "Update Tauticord template for version ${{ steps.vars.outputs.version }} (${{ steps.vars.outputs.today }})" --body "This PR was automatically opened by the \`upload_unraid_template.yml\` workflow." --assignee @nwithan8
