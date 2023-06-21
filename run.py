@@ -68,6 +68,7 @@ if __name__ == '__main__':
             admin_ids=config.discord.admin_ids,
             refresh_time=config.tautulli.refresh_interval,
             library_refresh_time=config.tautulli.library_refresh_interval,
+            tautulli_use_summary_message=config.discord.use_summary_text_message,
             tautulli_channel_name=config.discord.channel_name,
             tautulli_connector=tautulli_connector,
             voice_channel_settings=config.tautulli.voice_channel_settings,

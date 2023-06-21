@@ -181,6 +181,7 @@ class DiscordConnector:
                  admin_ids: List[str],
                  refresh_time: int,
                  library_refresh_time: int,
+                 tautulli_use_summary_message: bool,
                  tautulli_channel_name: str,
                  tautulli_connector: TautulliConnector,
                  voice_channel_settings: dict,
@@ -195,6 +196,7 @@ class DiscordConnector:
         self.admin_ids = admin_ids
         self.refresh_time = refresh_time
         self.library_refresh_time = library_refresh_time
+        self.use_summary_message = tautulli_use_summary_message
         self.tautulli_channel_name = tautulli_channel_name
         self.voice_channel_settings = voice_channel_settings
         self.display_live_stats = display_live_stats
@@ -251,9 +253,10 @@ class DiscordConnector:
             await self.emoji_manager.load_emojis(source_folder=statics.NITRO_EMOJIS_FOLDER, client=self.client,
                                                  guild_id=self.guild_id)
 
-        logging.info("Loading Tautulli text settings...")
-        await self.collect_discord_text_channel()
-        await self.collect_old_message_in_tautulli_channel()
+        if self.use_summary_message:
+            logging.info("Loading Tautulli text settings...")
+            await self.collect_discord_text_channel()
+            await self.collect_old_message_in_tautulli_channel()
 
         logging.info("Loading Tautulli voice settings...")
         # Only grab the voice category (make it) if we're going to use it
@@ -267,10 +270,10 @@ class DiscordConnector:
             self.performance_voice_category = await self.collect_discord_voice_category(
                 category_name=self.performance_category_name)
 
-        logging.info("Loading Tautulli summary message service...")
+        logging.info("Loading Tautulli summary service...")
         # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
-        asyncio.create_task(self.run_live_summary_message_service(message=self.current_message,
-                                                                  refresh_time=max([5, self.refresh_time])))
+        asyncio.create_task(self.run_live_summary_service(message=self.current_message,
+                                                          refresh_time=max([5, self.refresh_time])))
 
         logging.info("Starting Tautulli library stats service...")
         # minimum 5-minute sleep time hard-coded, trust me, don't DDoS your server
@@ -329,10 +332,10 @@ class DiscordConnector:
             logging.error(f"Failed to upload emoji {name} to server: {e}. Will use default emoji instead.")
             return None
 
-    async def run_live_summary_message_service(self, message: discord.Message, refresh_time: int):
+    async def run_live_summary_service(self, message: discord.Message, refresh_time: int):
         while True:
             try:
-                message = await self.edit_summary_message(previous_message=message)
+                message = await self.edit_summary_data(previous_message=message)
                 await asyncio.sleep(refresh_time)
             except Exception:
                 exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
@@ -372,9 +375,9 @@ class DiscordConnector:
         await message.clear_reaction(str(emoji))
         return end_notification
 
-    async def edit_summary_message(self, previous_message) -> discord.Message:
+    async def edit_summary_data(self, previous_message) -> discord.Message:
         """
-        Collect new summary info, replace old message with new one
+        Collect new summary info, replace old message with new one (if enabled), update stats voice channels (if enabled)
         :param previous_message: discord.Message to replace
         :return: new discord.Message
         """
@@ -385,6 +388,10 @@ class DiscordConnector:
             await self.update_live_voice_channels(activity=activity,
                                                   plex_online=plex_online,
                                                   category=self.tautulli_stats_voice_category)
+
+        # Skip updating the summary message if the setting is disabled
+        if not self.use_summary_message:
+            return self.current_message
 
         """
         For performance and aesthetics, edit the old message if:

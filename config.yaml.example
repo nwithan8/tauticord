@@ -57,7 +57,9 @@ Discord:
     # Right-click on your profile picture -> "Copy ID"
     AdminIDs:
       - 00000000000
-    # Where the live stats will be posted
+    # Whether to post a live stats summary message
+    PostSummaryMessage: true
+    # Where the live stats summary message will be posted
     ChannelName: "tautulli"
   Customization:
     Nitro: true
