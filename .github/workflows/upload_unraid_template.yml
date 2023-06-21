@@ -21,6 +21,11 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=today::$(date +'%Y-%m-%d')
 
+      - name: Prepare git environment
+        run: |
+          git config --global user.name "nwithan8"
+          git config --global user.email "nwithan8@users.noreply.github.com"
+
       - name: Clone unraid_templates
         env:
           GITHUB_TOKEN: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
