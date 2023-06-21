@@ -184,6 +184,12 @@ class TautulliConfig(ConfigSection):
         return names
 
     @property
+    def use_emojis_with_library_names(self) -> bool:
+        value = self._libraries_voice_channels._get_value(key="UseEmojis", default=True,
+                                                          env_name_override="TC_VC_LIBRARY_USE_EMOJIS")
+        return _extract_bool(value)
+
+    @property
     def show_tv_series_count(self) -> bool:
         value = self._libraries_voice_channels._get_value(key="TVSeriesCount", default=True,
                                                           env_name_override="TC_VC_TV_SERIES_COUNT")
@@ -221,6 +227,7 @@ class TautulliConfig(ConfigSection):
             statics.KEY_REFRESH_TIME: self.library_refresh_interval,
             statics.KEY_LIBRARIES_CATEGORY_NAME: self.libraries_voice_channel_category_name,
             statics.KEY_LIBRARIES: self.library_names,
+            statics.KEY_USE_EMOJIS: self.use_emojis_with_library_names,
             statics.KEY_SHOW_TV_EPISODES: self.show_tv_episode_count,
             statics.KEY_SHOW_TV_SERIES: self.show_tv_series_count,
             statics.KEY_SHOW_MUSIC_ARTISTS: self.show_music_artist_count,
