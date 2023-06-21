@@ -345,6 +345,12 @@ class DiscordConfig(ConfigSection):
         return [str(i) for i in ids]
 
     @property
+    def use_summary_text_message(self) -> bool:
+        value = self._connection._get_value(key="PostSummaryMessage", default=True,
+                                            env_name_override="TC_DISCORD_POST_SUMMARY_MESSAGE")
+        return _extract_bool(value)
+
+    @property
     def channel_name(self) -> str:
         return self._connection._get_value(key="ChannelName", default="tauticord",
                                            env_name_override="TC_DISCORD_CHANNEL_NAME")
