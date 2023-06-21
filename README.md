@@ -117,6 +117,7 @@ You will need to set the following environment variables:
 | TC_VC_LIBRARY_STATS             | No       | Whether to display library statistics in voice channels                                                                                                                     | "False"                                 |
 | TC_VC_LIBRARY_NAMES             | No       | Comma-separated list of libraries to display statistics of                                                                                                                  | "Movies,TV Shows,Music"                 |       
 | TC_VC_LIBRARY_REFRESH_SECONDS   | No       | Seconds between updates (5-minute minimum built-in)                                                                                                                         | 3600                                    |
+| TC_VC_LIBRARY_USE_EMOJIS        | No       | Whether to use emojis to symbolize library types                                                                                                                            | "True"                                  |
 | TC_VC_TV_SERIES_COUNT           | No       | Display series counts for all selected "TV Shows" libraries                                                                                                                 | "True"                                  |
 | TC_VC_TV_EPISODE_COUNT          | No       | Display episode counts for all selected "TV Shows" libraries                                                                                                                | "True"                                  |
 | TC_VC_MUSIC_ARTIST_COUNT        | No       | Display artist counts for all selected "Music" libraries                                                                                                                    | "True"                                  |
@@ -125,9 +126,9 @@ You will need to set the following environment variables:
 | TC_DISCORD_CHANNEL_NAME         | No       | Channel name for updates                                                                                                                                                    | "Tautulli Status"                       |
 | TC_DISCORD_NITRO                | No       | Whether the Discord server has a Nitro subscription (bot will upload custom emojis)                                                                                         | "False"                                 |
 | TC_ALLOW_ANALYTICS              | No       | Allow Anonymous Crash Analytics?                                                                                                                                            | "True"                                  |                
-| TC_VC_PERFORMANCE_CATEGORY_NAME | No       | Name of the performance voice channel category                                                                                                                              | "Performance"                  |
+| TC_VC_PERFORMANCE_CATEGORY_NAME | No       | Name of the performance voice channel category                                                                                                                              | "Performance"                           |
 | TC_MONITOR_CPU                  | No       | Whether to monitor CPU performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                 |
-| TC_MONITOR_MEMORY               | No       | Whether to monitor RAM performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                  |
+| TC_MONITOR_MEMORY               | No       | Whether to monitor RAM performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                 |
 | TZ                              | No       | Timezone that your server is in                                                                                                                                             | "America/New_York"                      |
 
 You can also set these variables via a configuration file:
@@ -185,11 +186,14 @@ Tauticord uses Google Analytics to collect statistics such as common errors that
 
 Tauticord will attempt to query the system it is running on for CPU and RAM usage every 5 minutes.
 
-Tautulli does not currently offer a way to query performance statistics from its API. As a result, this data is **not Tautulli-specific performance data**, but rather **the performance of the system that Tauticord is running on**. 
+Tautulli does not currently offer a way to query performance statistics from its API. As a result, this data is **not
+Tautulli-specific performance data**, but rather **the performance of the system that Tauticord is running on**.
 
-If Tauticord is running on the same system as Tautulli, then this data may reflect the performance of Tautulli (+ Tauticord and all other processes running on the system).
+If Tauticord is running on the same system as Tautulli, then this data may reflect the performance of Tautulli (+
+Tauticord and all other processes running on the system).
 
-If Tauticord is running on a different system than Tautulli, or is running isolated in a Docker container, then this data will not reflect the performance of Tautulli.
+If Tauticord is running on a different system than Tautulli, or is running isolated in a Docker container, then this
+data will not reflect the performance of Tautulli.
 
 # Development
 

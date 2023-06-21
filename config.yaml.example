@@ -31,6 +31,7 @@ Tautulli:
           - Movies
           - TV Shows
           - Music
+        UseEmojis: true
         # Which stats to show for each type of library
         TVSeriesCount: true
         TVEpisodeCount: true

@@ -556,7 +556,7 @@ class DiscordConnector:
                                                                                     emoji_manager=self.emoji_manager,
                                                                                     visibility_settings=visibility_settings)
                 for stat in stats:
-                    stat_emoji = stat[0]
+                    stat_emoji = stat[0] if self.voice_channel_settings.get(statics.KEY_USE_EMOJIS, True) else None
                     stat_value = stat[1]
                     channel_name = f"{library_name}"
                     if stat_emoji:
