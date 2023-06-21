@@ -43,4 +43,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
         run: |
-          gh pr create --title "Update Tauticord template for version ${{ steps.vars.outputs.version }} (${{ steps.vars.outputs.today }})" --body "This PR was automatically opened by the \`upload_unraid_template.yml\` workflow." --assignee @nwithan8
+          gh pr create --title "Update Tauticord template for version ${{ steps.vars.outputs.version }} (${{ steps.vars.outputs.today }})" --body "This PR was automatically opened by the \`upload_unraid_template.yml\` workflow." --assignee nwithan8
