@@ -22,7 +22,7 @@ jobs:
           echo ::set-output name=today::$(date +'%Y-%m-%d')
 
       - name: Open PR with template changes to unraid_templates
-        uses: paygoc6/action-pull-request-another-repo@v1.0.1
+        uses: nwithan8/action-pull-request-another-repo@v1.1.0
         env:
           API_TOKEN_GITHUB: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
         with:
@@ -33,3 +33,4 @@ jobs:
           destination_head_branch: tauticord-${{ steps.vars.outputs.version }}
           user_email: 'nwithan8@users.noreply.github.com'
           user_name: 'nwithan8'
+          pull_request_assignees: 'nwithan8'
