@@ -38,6 +38,7 @@ KEY_HIDE_BANDWIDTH = "hide_bandwidth"
 KEY_HIDE_TRANSCODING = "hide_transcoding"
 KEY_HIDE_PROGRESS = "hide_progress"
 KEY_HIDE_ETA = "hide_eta"
+KEY_USE_FRIENDLY_NAMES = "use_friendly_names"
 
 KEY_PERFORMANCE_CATEGORY_NAME = "performance_category_name"
 KEY_PERFORMANCE_MONITOR_CPU = "performance_monitor_cpu"

@@ -94,6 +94,10 @@ class Session:
         return self._data['username']
 
     @property
+    def friendly_name(self) -> str:
+        return self._data['friendly_name']
+
+    @property
     def product(self) -> str:
         return self._data['product']
 
@@ -311,7 +315,7 @@ class TautulliConnector:
         :return: Success/failure message
         """
         if stream_number not in session_ids.keys():
-            return "**Invalid stream number.**"
+            return utils.bold("Invalid stream number.")
         logging.info(f"User attempting to stop session {emoji}, id {session_ids[stream_number]}")
         try:
             if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):
