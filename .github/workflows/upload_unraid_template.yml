@@ -22,7 +22,7 @@ jobs:
           echo ::set-output name=today::$(date +'%Y-%m-%d')
 
       - name: Open PR with template changes to unraid_templates
-        uses: nwithan8/action-pull-request-another-repo@v1.1.0
+        uses: nwithan8/action-pull-request-another-repo@v1.1.1
         env:
           API_TOKEN_GITHUB: ${{ secrets.PR_OPEN_GITHUB_TOKEN }}
         with:
