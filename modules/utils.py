@@ -94,3 +94,258 @@ def datetime_to_string(datetime_object: datetime, template: str = "%Y-%m-%dT%H:%
     :rtype: str
     """
     return datetime_object.strftime(template)
+
+def bold(string: str) -> str:
+    """
+    Return a string wrapped in bold markdown
+
+    :param string: string to wrap in bold markdown
+    :type string: str
+    :return: string wrapped in bold markdown
+    :rtype: str
+    """
+    return f"**{string}**"
+
+def italic(string: str) -> str:
+    """
+    Return a string wrapped in italic markdown
+
+    :param string: string to wrap in italic markdown
+    :type string: str
+    :return: string wrapped in italic markdown
+    :rtype: str
+    """
+    return f"*{string}*"
+
+def underline(string: str) -> str:
+    """
+    Return a string wrapped in underline markdown
+
+    :param string: string to wrap in underline markdown
+    :type string: str
+    :return: string wrapped in underline markdown
+    :rtype: str
+    """
+    return f"__{string}__"
+
+def strikethrough(string: str) -> str:
+    """
+    Return a string wrapped in strikethrough markdown
+
+    :param string: string to wrap in strikethrough markdown
+    :type string: str
+    :return: string wrapped in strikethrough markdown
+    :rtype: str
+    """
+    return f"~~{string}~~"
+
+def code(string: str) -> str:
+    """
+    Return a string wrapped in code markdown
+
+    :param string: string to wrap in code markdown
+    :type string: str
+    :return: string wrapped in code markdown
+    :rtype: str
+    """
+    return f"`{string}`"
+
+def code_block(string: str, language: str = "") -> str:
+    """
+    Return a string wrapped in code block markdown
+
+    :param string: string to wrap in code block markdown
+    :type string: str
+    :param language: (Optional) language to use for syntax highlighting
+    :type language: str, optional
+    :return: string wrapped in code block markdown
+    :rtype: str
+    """
+    return f"```{language}\n{string}```"
+
+def inline_code_block(string: str) -> str:
+    """
+    Return a string wrapped in inline code block markdown
+
+    :param string: string to wrap in inline code block markdown
+    :type string: str
+    :return: string wrapped in inline code block markdown
+    :rtype: str
+    """
+    return f"`{string}`"
+
+def block_quote(string: str) -> str:
+    """
+    Return a string wrapped in block quote markdown
+
+    :param string: string to wrap in block quote markdown
+    :type string: str
+    :return: string wrapped in block quote markdown
+    :rtype: str
+    """
+    return f"> {string}"
+
+def inline_quote(string: str) -> str:
+    """
+    Return a string wrapped in inline quote markdown
+
+    :param string: string to wrap in inline quote markdown
+    :type string: str
+    :return: string wrapped in inline quote markdown
+    :rtype: str
+    """
+    return f">> {string}"
+
+def spoiler(string: str) -> str:
+    """
+    Return a string wrapped in spoiler markdown
+
+    :param string: string to wrap in spoiler markdown
+    :type string: str
+    :return: string wrapped in spoiler markdown
+    :rtype: str
+    """
+    return f"||{string}||"
+
+def link(string: str, url: str) -> str:
+    """
+    Return a string wrapped in link markdown
+
+    :param string: string to wrap in link markdown
+    :type string: str
+    :param url: url to link to
+    :type url: str
+    :return: string wrapped in link markdown
+    :rtype: str
+    """
+    return f"[{string}]({url})"
+
+def mention(string: str, user_id: str) -> str:
+    """
+    Return a string wrapped in mention markdown
+
+    :param string: string to wrap in mention markdown
+    :type string: str
+    :param user_id: user id to mention
+    :type user_id: str
+    :return: string wrapped in mention markdown
+    :rtype: str
+    """
+    return f"<@{user_id}>"
+
+def channel_mention(string: str, channel_id: str) -> str:
+    """
+    Return a string wrapped in channel mention markdown
+
+    :param string: string to wrap in channel mention markdown
+    :type string: str
+    :param channel_id: channel id to mention
+    :type channel_id: str
+    :return: string wrapped in channel mention markdown
+    :rtype: str
+    """
+    return f"<#{channel_id}>"
+
+def role_mention(string: str, role_id: str) -> str:
+    """
+    Return a string wrapped in role mention markdown
+
+    :param string: string to wrap in role mention markdown
+    :type string: str
+    :param role_id: role id to mention
+    :type role_id: str
+    :return: string wrapped in role mention markdown
+    :rtype: str
+    """
+    return f"<@&{role_id}>"
+
+def emoji(string: str, emoji_id: str) -> str:
+    """
+    Return a string wrapped in emoji markdown
+
+    :param string: string to wrap in emoji markdown
+    :type string: str
+    :param emoji_id: emoji id to use
+    :type emoji_id: str
+    :return: string wrapped in emoji markdown
+    :rtype: str
+    """
+    return f"<:{string}:{emoji_id}>"
+
+def custom_emoji(string: str, emoji_id: str) -> str:
+    """
+    Return a string wrapped in custom emoji markdown
+
+    :param string: string to wrap in custom emoji markdown
+    :type string: str
+    :param emoji_id: emoji id to use
+    :type emoji_id: str
+    :return: string wrapped in custom emoji markdown
+    :rtype: str
+    """
+    return f"<:{string}:{emoji_id}>"
+
+def custom_emoji_animated(string: str, emoji_id: str) -> str:
+    """
+    Return a string wrapped in animated custom emoji markdown
+
+    :param string: string to wrap in animated custom emoji markdown
+    :type string: str
+    :param emoji_id: emoji id to use
+    :type emoji_id: str
+    :return: string wrapped in animated custom emoji markdown
+    :rtype: str
+    """
+    return f"<a:{string}:{emoji_id}>"
+
+def custom_emoji_url(string: str, emoji_id: str) -> str:
+    """
+    Return a string wrapped in custom emoji markdown
+
+    :param string: string to wrap in custom emoji markdown
+    :type string: str
+    :param emoji_id: emoji id to use
+    :type emoji_id: str
+    :return: string wrapped in custom emoji markdown
+    :rtype: str
+    """
+    return f"[{string}](https://cdn.discordapp.com/emojis/{emoji_id})"
+
+def custom_emoji_animated_url(string: str, emoji_id: str) -> str:
+    """
+    Return a string wrapped in animated custom emoji markdown
+
+    :param string: string to wrap in animated custom emoji markdown
+    :type string: str
+    :param emoji_id: emoji id to use
+    :type emoji_id: str
+    :return: string wrapped in animated custom emoji markdown
+    :rtype: str
+    """
+    return f"[{string}](https://cdn.discordapp.com/emojis/{emoji_id}.gif)"
+
+def custom_emoji_name(string: str, emoji_id: str) -> str:
+    """
+    Return a string wrapped in custom emoji markdown
+
+    :param string: string to wrap in custom emoji markdown
+    :type string: str
+    :param emoji_id: emoji id to use
+    :type emoji_id: str
+    :return: string wrapped in custom emoji markdown
+    :rtype: str
+    """
+    return f":{string}:"
+
+def custom_emoji_animated_name(string: str, emoji_id: str) -> str:
+    """
+    Return a string wrapped in animated custom emoji markdown
+
+    :param string: string to wrap in animated custom emoji markdown
+    :type string: str
+    :param emoji_id: emoji id to use
+    :type emoji_id: str
+    :return: string wrapped in animated custom emoji markdown
+    :rtype: str
+    """
+    return f":{string}:"

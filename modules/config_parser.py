@@ -297,6 +297,11 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def _use_friendly_names(self) -> str:
+        return self._customization._get_value(key='UseFriendlyNames', default=False,
+                                              env_name_override="TC_USE_FRIENDLY_NAMES")
+
+    @property
     def _performance_voice_channel_settings(self) -> ConfigSection:
         return self._voice_channels._get_subsection(key="Performance")
 
@@ -307,7 +312,7 @@ class TautulliConfig(ConfigSection):
 
     @property
     def text_manager(self) -> TextManager:
-        anonymous_rules = {
+        rules = {
             statics.KEY_HIDE_USERNAMES: self._anonymize_hide_usernames,
             statics.KEY_HIDE_PLAYER_NAMES: self._anonymize_hide_player_names,
             statics.KEY_HIDE_PLATFORMS: self._anonymize_hide_platforms,
@@ -316,8 +321,9 @@ class TautulliConfig(ConfigSection):
             statics.KEY_HIDE_TRANSCODING: self._anonymize_hide_transcode_decision,
             statics.KEY_HIDE_PROGRESS: self._anonymize_hide_progress,
             statics.KEY_HIDE_ETA: self._anonymize_hide_eta,
+            statics.KEY_USE_FRIENDLY_NAMES: self._use_friendly_names,
         }
-        return TextManager(anon_rules=anonymous_rules)
+        return TextManager(rules=rules)
 
 
 class DiscordConfig(ConfigSection):

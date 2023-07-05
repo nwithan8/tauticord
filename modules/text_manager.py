@@ -2,34 +2,36 @@ from typing import Dict, Any, Union
 
 from modules import statics, utils
 from modules.emojis import EmojiManager
+from modules.tautulli_connector import Session
 
 
 class TextManager:
     """
     Manages text formatting and anonymization.
     """
-    def __init__(self, anon_rules: Dict[str, Any]) -> None:
-        self._anon_rules: dict = anon_rules
-        self._anon_hide_usernames: bool = anon_rules.get(statics.KEY_HIDE_USERNAMES, False)
-        self._anon_hide_player_names: bool = anon_rules.get(statics.KEY_HIDE_PLAYER_NAMES, False)
-        self._anon_hide_platforms: bool = anon_rules.get(statics.KEY_HIDE_PLATFORMS, False)
-        self._anon_hide_quality: bool = anon_rules.get(statics.KEY_HIDE_QUALITY, False)
-        self._anon_hide_bandwidth: bool = anon_rules.get(statics.KEY_HIDE_BANDWIDTH, False)
-        self._anon_hide_transcoding: bool = anon_rules.get(statics.KEY_HIDE_TRANSCODING, False)
-        self._anon_hide_progress: bool = anon_rules.get(statics.KEY_HIDE_PROGRESS, False)
-        self._anon_hide_eta: bool = anon_rules.get(statics.KEY_HIDE_ETA, False)
+    def __init__(self, rules: Dict[str, Any]) -> None:
+        self._rules: dict = rules
+        self._anon_hide_usernames: bool = rules.get(statics.KEY_HIDE_USERNAMES, False)
+        self._anon_hide_player_names: bool = rules.get(statics.KEY_HIDE_PLAYER_NAMES, False)
+        self._anon_hide_platforms: bool = rules.get(statics.KEY_HIDE_PLATFORMS, False)
+        self._anon_hide_quality: bool = rules.get(statics.KEY_HIDE_QUALITY, False)
+        self._anon_hide_bandwidth: bool = rules.get(statics.KEY_HIDE_BANDWIDTH, False)
+        self._anon_hide_transcoding: bool = rules.get(statics.KEY_HIDE_TRANSCODING, False)
+        self._anon_hide_progress: bool = rules.get(statics.KEY_HIDE_PROGRESS, False)
+        self._anon_hide_eta: bool = rules.get(statics.KEY_HIDE_ETA, False)
+        self._use_friendly_names: bool = rules.get(statics.KEY_USE_FRIENDLY_NAMES, False)
 
-    def _session_user_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
+    def _session_user_message(self, session: Session, emoji_manager: EmojiManager) -> Union[str, None]:
         if self._anon_hide_usernames:
             return None
 
         emoji = emoji_manager.get_emoji(key="person")
-        username = session.username
-        stub = f"""{emoji} **{username}**"""
+        username = session.friendly_name if self._use_friendly_names else session.username
+        stub = f"""{emoji} {utils.bold(username)}"""
 
         return stub
 
-    def _session_player_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
+    def _session_player_message(self, session: Session, emoji_manager: EmojiManager) -> Union[str, None]:
         if self._anon_hide_platforms and self._anon_hide_player_names:
             return None
 
@@ -39,14 +41,14 @@ class TextManager:
 
         stub = f"""{emoji}"""
         if player is not None:
-            stub += f""" **{player}**"""
+            stub += f""" {utils.bold(player)}"""
             # Only optionally show product if player is shown.
             if product is not None:
                 stub += f""" ({product})"""
 
         return stub
 
-    def _session_details_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
+    def _session_details_message(self, session: Session, emoji_manager: EmojiManager) -> Union[str, None]:
         if self._anon_hide_quality and self._anon_hide_bandwidth and self._anon_hide_transcoding:
             return None
 
@@ -57,7 +59,7 @@ class TextManager:
         emoji = emoji_manager.get_emoji(key="resolution")
         stub = f"""{emoji}"""
         if quality_profile is not None:
-            stub += f""" **{quality_profile}**"""
+            stub += f""" {utils.bold(quality_profile)}"""
             # Only optionally show bandwidth if quality profile is shown.
             if bandwidth is not None:
                 stub += f""" ({bandwidth})"""
@@ -66,27 +68,27 @@ class TextManager:
 
         return stub
 
-    def _session_progress_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
+    def _session_progress_message(self, session: Session, emoji_manager: EmojiManager) -> Union[str, None]:
         if self._anon_hide_progress:
             return None
 
         emoji = emoji_manager.get_emoji(key="progress")
         progress = session.progress_marker
-        stub = f"""{emoji} **{progress}**"""
+        stub = f"""{emoji} {utils.bold(progress)}"""
         if not self._anon_hide_eta:
             eta = session.eta
             stub += f""" (ETA: {eta})"""
 
         return stub
 
-    def session_title(self, session, session_number: int, emoji_manager: EmojiManager) -> str:
+    def session_title(self, session: Session, session_number: int, emoji_manager: EmojiManager) -> str:
         emoji = emoji_manager.emoji_from_stream_number(number=session_number)
         icon = session.get_status_icon(emoji_manager=emoji_manager)
         media_type_icon = session.get_type_icon(emoji_manager=emoji_manager)
         title = session.title
         return f"""{emoji} | {icon} {media_type_icon} *{title}*"""
 
-    def session_body(self, session, emoji_manager: EmojiManager) -> str:
+    def session_body(self, session: Session, emoji_manager: EmojiManager) -> str:
         user_message = self._session_user_message(session=session, emoji_manager=emoji_manager)
         player_message = self._session_player_message(session=session, emoji_manager=emoji_manager)
         details_message = self._session_details_message(session=session, emoji_manager=emoji_manager)
@@ -98,10 +100,10 @@ class TextManager:
 
     def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager, add_termination_tip: bool) -> str:
         if no_connection or activity is None:
-            return "**Connection lost.**"
+            return utils.bold("Connection lost.")
 
         if activity.stream_count == 0:
-            return "**No active sessions.**"
+            return utils.bold("No active streams.")
 
         stream_count = activity.stream_count
         stream_count_word = utils.make_plural(word='stream', count=stream_count)

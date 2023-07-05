@@ -41,7 +41,7 @@ services:
       TC_VC_MUSIC_TRACK_COUNT: "True"
       TC_DISCORD_ADMIN_IDS: my_user_id,my_second_user_id
       TC_DISCORD_POST_SUMMARY_MESSAGE: "True"
-      TC_DISCORD_CHANNEL_NAME: "Tautulli Status"
+      TC_DISCORD_CHANNEL_NAME: "tautulli"
       TC_DISCORD_NITRO: "False"
       TC_ALLOW_ANALYTICS: "True"
       TC_VC_PERFORMANCE_CATEGORY_NAME: "Performance"
