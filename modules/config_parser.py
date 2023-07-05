@@ -131,10 +131,22 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def stream_count_channel_id(self) -> int:
+        value = self._stats_voice_channels._get_value(key="StreamCountChannelID", default=0,
+                                                      env_name_override="TC_VC_STREAM_COUNT_CHANNEL_ID")
+        return int(value)
+
+    @property
     def display_transcode_count(self) -> bool:
         value = self._stats_voice_channels._get_value(key="TranscodeCount", default=False,
                                                       env_name_override="TC_VC_TRANSCODE_COUNT")
         return _extract_bool(value)
+
+    @property
+    def transcode_count_channel_id(self) -> int:
+        value = self._stats_voice_channels._get_value(key="TranscodeCountChannelID", default=0,
+                                                      env_name_override="TC_VC_TRANSCODE_COUNT_CHANNEL_ID")
+        return int(value)
 
     @property
     def display_bandwidth(self) -> bool:
@@ -143,10 +155,22 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def bandwidth_channel_id(self) -> int:
+        value = self._stats_voice_channels._get_value(key="BandwidthChannelID", default=0,
+                                                      env_name_override="TC_VC_BANDWIDTH_CHANNEL_ID")
+        return int(value)
+
+    @property
     def display_local_bandwidth(self) -> bool:
         value = self._stats_voice_channels._get_value(key="LocalBandwidth", default=False,
                                                       env_name_override="TC_VC_LOCAL_BANDWIDTH")
         return _extract_bool(value)
+
+    @property
+    def local_bandwidth_channel_id(self) -> int:
+        value = self._stats_voice_channels._get_value(key="LocalBandwidthChannelID", default=0,
+                                                      env_name_override="TC_VC_LOCAL_BANDWIDTH_CHANNEL_ID")
+        return int(value)
 
     @property
     def display_remote_bandwidth(self) -> bool:
@@ -155,10 +179,38 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def remote_bandwidth_channel_id(self) -> int:
+        value = self._stats_voice_channels._get_value(key="RemoteBandwidthChannelID", default=0,
+                                                      env_name_override="TC_VC_REMOTE_BANDWIDTH_CHANNEL_ID")
+        return int(value)
+
+    @property
     def display_plex_status(self) -> bool:
         value = self._stats_voice_channels._get_value(key="PlexStatus", default=False,
                                                       env_name_override="TC_VC_PLEX_STATUS")
         return _extract_bool(value)
+
+    @property
+    def plex_status_channel_id(self) -> int:
+        value = self._stats_voice_channels._get_value(key="PlexStatusChannelID", default=0,
+                                                      env_name_override="TC_VC_PLEX_STATUS_CHANNEL_ID")
+        return int(value)
+
+    @property
+    def stats_voice_channels_ids(self) -> dict:
+        return {
+            statics.KEY_STREAM_COUNT_CHANNEL_ID: self.stream_count_channel_id,
+            statics.KEY_TRANSCODE_COUNT_CHANNEL_ID: self.transcode_count_channel_id,
+            statics.KEY_BANDWIDTH_CHANNEL_ID: self.bandwidth_channel_id,
+            statics.KEY_LAN_BANDWIDTH_CHANNEL_ID: self.local_bandwidth_channel_id,
+            statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID: self.remote_bandwidth_channel_id,
+            statics.KEY_PLEX_STATUS_CHANNEL_ID: self.plex_status_channel_id
+        }
+
+    @property
+    def _use_stats_voice_channel_ids(self) -> bool:
+        # If any of the stats voice channel IDs are not 0, then we are using them all.
+        return any(channel_id != 0 for channel_id in self.stats_voice_channels_ids.values())
 
     @property
     def _libraries_voice_channels(self) -> ConfigSection:
@@ -237,7 +289,9 @@ class TautulliConfig(ConfigSection):
             statics.KEY_SHOW_TV_EPISODES: self.show_tv_episode_count,
             statics.KEY_SHOW_TV_SERIES: self.show_tv_series_count,
             statics.KEY_SHOW_MUSIC_ARTISTS: self.show_music_artist_count,
-            statics.KEY_SHOW_MUSIC_TRACKS: self.show_music_track_count
+            statics.KEY_SHOW_MUSIC_TRACKS: self.show_music_track_count,
+            statics.KEY_STATS_CHANNEL_IDS: self.stats_voice_channels_ids,
+            statics.KEY_USE_STATS_CHANNEL_IDS: self._use_stats_voice_channel_ids,
         }
 
     @property

@@ -264,8 +264,10 @@ class DiscordConnector:
         logging.info("Loading Tautulli voice settings...")
         # Only grab the voice category (make it) if we're going to use it
         if self.display_live_stats:
-            self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
-                category_name=self.stats_voice_category_name)
+            # only grab the stats voice category (make it) if stats channel IDs are not manually set
+            if not self.voice_channel_settings.get(statics.KEY_USE_STATS_CHANNEL_IDS, False):
+                self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
+                    category_name=self.stats_voice_category_name)
         if self.display_library_stats:
             self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
                 category_name=self.libraries_voice_category_name)
@@ -495,10 +497,10 @@ class DiscordConnector:
         self.current_message = starter_message
         return
 
-    async def edit_stat_voice_channel(self,
-                                      channel_name: str,
-                                      stat: Union[int, float, str],
-                                      category: discord.CategoryChannel = None) -> None:
+    async def edit_stat_voice_channel_by_name(self,
+                                              stat: Union[int, float, str],
+                                              channel_name: str = None,
+                                              category: discord.CategoryChannel = None) -> None:
         channel = await get_discord_channel_by_starting_name(client=self.client,
                                                              guild_id=self.guild_id,
                                                              starting_channel_name=f"{channel_name}:",
@@ -513,6 +515,29 @@ class DiscordConnector:
             except Exception as voice_channel_edit_error:
                 logging.error(f"Error editing {channel_name} voice channel: {voice_channel_edit_error}")
 
+    async def edit_stat_voice_channel_by_id(self,
+                                            stat: Union[int, float, str],
+                                            channel_name: str,
+                                            channel_id: int):
+        channel = await self.client.fetch_channel(channel_id)
+        if not channel:
+            logging.error(f"Could not load channel with ID {channel_id}")
+        else:
+            try:
+                await channel.edit(name=f"{channel_name}: {stat}")
+            except Exception as voice_channel_edit_error:
+                logging.error(f"Error editing {channel_name} voice channel: {voice_channel_edit_error}")
+
+    async def edit_stat_voice_channel(self,
+                                      channel_name: str,
+                                      stat: Union[int, float, str],
+                                      channel_id: int = 0,
+                                      category: discord.CategoryChannel = None) -> None:
+        if channel_id != 0:
+            await self.edit_stat_voice_channel_by_id(stat=stat, channel_name=channel_name, channel_id=channel_id)
+        else:
+            await self.edit_stat_voice_channel_by_name(stat=stat, channel_name=channel_name, category=category)
+
     async def update_live_voice_channels(self,
                                          activity: modules.tautulli_connector.Activity,
                                          plex_online: bool,
@@ -522,6 +547,8 @@ class DiscordConnector:
             status = "Online" if plex_online else "Offline"
             logging.info(f"Updating Plex Status voice channel with new status: {status}")
             await self.edit_stat_voice_channel(channel_name="Plex Status",
+                                               channel_id=self.voice_channel_settings.get(
+                                                   statics.KEY_PLEX_STATUS_CHANNEL_ID, 0),
                                                stat=status,
                                                category=category)
 
@@ -530,30 +557,40 @@ class DiscordConnector:
                 count = activity.stream_count
                 logging.info(f"Updating Streams voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Streams",
+                                                   channel_id=self.voice_channel_settings.get(
+                                                       statics.KEY_STREAM_COUNT_CHANNEL_ID, 0),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_TRANSCODE_COUNT, False):
                 count = activity.transcode_count
                 logging.info(f"Updating Transcodes voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Transcodes",
+                                                   channel_id=self.voice_channel_settings.get(
+                                                       statics.KEY_TRANSCODE_COUNT_CHANNEL_ID, 0),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_BANDWIDTH, False):
                 bandwidth = activity.total_bandwidth
                 logging.info(f"Updating Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Bandwidth",
+                                                   channel_id=self.voice_channel_settings.get(
+                                                       statics.KEY_BANDWIDTH_CHANNEL_ID, 0),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
                 bandwidth = activity.lan_bandwidth
                 logging.info(f"Updating Local Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Local Bandwidth",
+                                                   channel_id=self.voice_channel_settings.get(
+                                                       statics.KEY_LAN_BANDWIDTH_CHANNEL_ID, 0),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
                 bandwidth = activity.wan_bandwidth
                 logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Remote Bandwidth",
+                                                   channel_id=self.voice_channel_settings.get(
+                                                       statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID, 0),
                                                    stat=bandwidth,
                                                    category=category)
 
