@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print("Found the following environment variables:")
     print(env_name_overrides)
 
-    to_check = [File("README.md", prefix="| "), File("templates/tauticord.xml", prefix="Target=\"")]
+    to_check = [File("README.md", prefix="| "), File("templates/tauticord.xml", prefix="Target=\""), File("docker-compose.yml")]
     results = {}
     for file in to_check:
         results[file.file_name] = []
