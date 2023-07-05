@@ -23,6 +23,7 @@ services:
       TC_HIDE_TRANSCODE: "False"
       TC_HIDE_PROGRESS: "False"
       TC_HIDE_ETA: "False"
+      TC_USE_FRIENDLY_NAMES: "False"
       TC_VC_STATS_CATEGORY_NAME: "Plex Stream Stats"
       TC_VC_STREAM_COUNT: "False"
       TC_VC_TRANSCODE_COUNT: "False"
