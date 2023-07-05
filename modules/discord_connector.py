@@ -6,8 +6,8 @@ from discord import Emoji
 
 import modules.logs as logging
 import modules.statics as statics
-import modules.tautulli_connector
 import modules.system_stats as system_stats
+import modules.tautulli_connector
 from modules import emojis
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
@@ -96,16 +96,17 @@ async def send_message(content: TautulliDataResponse, message: discord.Message =
 
 
 async def create_discord_channel(client: discord.Client, guild_id: str, channel_name: str,
-                                 channel_type: discord.ChannelType = discord.ChannelType.text) -> \
+                                 channel_type: discord.ChannelType = discord.ChannelType.text,
+                                 category: discord.CategoryChannel = None) -> \
         Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]:
     try:
         # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
         guild = client.get_guild(int(guild_id))  # stupid positional-only parameters
         match channel_type:
             case discord.ChannelType.voice:
-                return await guild.create_voice_channel(name=channel_name)
+                return await guild.create_voice_channel(name=channel_name, category=category)
             case discord.ChannelType.text:
-                return await guild.create_text_channel(name=channel_name)
+                return await guild.create_text_channel(name=channel_name, category=category)
             case discord.ChannelType.category:
                 return await guild.create_category(name=channel_name)
     except:
@@ -126,7 +127,8 @@ async def get_discord_channel_by_starting_name(client: discord.Client,
     return await create_discord_channel(client=client,
                                         guild_id=guild_id,
                                         channel_name=starting_channel_name,
-                                        channel_type=channel_type)
+                                        channel_type=channel_type,
+                                        category=category)
 
 
 async def get_discord_channel_by_name(client: discord.Client,
@@ -145,7 +147,8 @@ async def get_discord_channel_by_name(client: discord.Client,
     return await create_discord_channel(client=client,
                                         guild_id=guild_id,
                                         channel_name=channel_name,
-                                        channel_type=channel_type)
+                                        channel_type=channel_type,
+                                        category=category)
 
 
 def valid_reaction(reaction_emoji: discord.PartialEmoji,
@@ -352,7 +355,7 @@ class DiscordConnector:
 
     async def run_performance_monitoring_service(self, refresh_time: int):
         if not self.performance_voice_category:
-            return # No performance voice category set, so don't bother
+            return  # No performance voice category set, so don't bother
         while True:
             try:
                 await self.update_performance_voice_channels()
@@ -588,5 +591,3 @@ class DiscordConnector:
             await self.edit_stat_voice_channel(channel_name="Memory",
                                                stat=memory_percent,
                                                category=self.performance_voice_category)
-
-
