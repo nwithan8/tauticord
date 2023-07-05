@@ -60,6 +60,7 @@ if __name__ == '__main__':
             time_settings=config.tautulli.time_settings,
             server_name=config.tautulli.server_name,
             text_manager=config.tautulli.text_manager,
+            disable_ssl_verification=config.tautulli.disable_ssl_verification,
         )
 
         discord_connector = discord.DiscordConnector(

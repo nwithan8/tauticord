@@ -2,6 +2,7 @@ Tautulli:
   Connection:
     URL: ""
     APIKey: ""
+    UseSelfSignedCert: false
   Customization:
     ServerName: "Plex"
     TerminateMessage: "Your stream has been terminated. Please contact the admin in the Discord."

@@ -72,6 +72,12 @@ class TautulliConfig(ConfigSection):
         return self._connection._get_value(key="URL", env_name_override="TC_TAUTULLI_URL")
 
     @property
+    def disable_ssl_verification(self) -> bool:
+        value = self._connection._get_value(key="UseSelfSignedCert", default=False,
+                                           env_name_override="TC_USE_SELF_SIGNED_CERT")
+        return _extract_bool(value)
+
+    @property
     def _customization(self) -> ConfigSection:
         return self._get_subsection(key="Customization")
 
