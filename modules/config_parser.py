@@ -8,6 +8,7 @@ import yaml
 import modules.logs as logging
 from modules import statics
 from modules.text_manager import TextManager
+from modules.time_manager import TimeManager
 
 
 def _extract_bool(value):
@@ -104,12 +105,11 @@ class TautulliConfig(ConfigSection):
                                               env_name_override="TC_TERMINATE_MESSAGE")
 
     @property
-    def time_settings(self) -> dict:
+    def time_manager(self) -> TimeManager:
         timezone = self._customization._get_value(key='ServerTimeZone', default=None, env_name_override="TZ")
         mil_time = self._customization._get_value(key='Use24HourTime', default=False,
                                                   env_name_override="TC_USE_24_HOUR_TIME")
-        return {'timezone': timezone,
-                'mil_time': mil_time}
+        return TimeManager(timezone=timezone, military_time=mil_time)
 
     @property
     def _voice_channels(self) -> ConfigSection:
@@ -382,6 +382,7 @@ class TautulliConfig(ConfigSection):
             statics.KEY_HIDE_PROGRESS: self._anonymize_hide_progress,
             statics.KEY_HIDE_ETA: self._anonymize_hide_eta,
             statics.KEY_USE_FRIENDLY_NAMES: self._use_friendly_names,
+            statics.KEY_TIME_MANAGER: self.time_manager,
         }
         return TextManager(rules=rules)
 
