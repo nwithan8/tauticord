@@ -8,7 +8,7 @@ import modules.logs as logging
 import modules.statics as statics
 import modules.system_stats as system_stats
 import modules.tautulli_connector
-from modules import emojis
+from modules import emojis, utils
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
@@ -616,14 +616,14 @@ class DiscordConnector:
     async def update_performance_voice_channels(self) -> None:
         logging.info("Updating performance stats...")
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU, False):
-            cpu_percent = "{:0.1f}%".format(system_stats.cpu_usage())
+            cpu_percent = f"{utils.format_number(system_stats.cpu_usage())}%"
             logging.info(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
             await self.edit_stat_voice_channel(channel_name="CPU",
                                                stat=cpu_percent,
                                                category=self.performance_voice_category)
 
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_MEMORY, False):
-            memory_percent = "{:0.1f} GB ({:0.1f}%)".format(system_stats.ram_usage(), system_stats.ram_usage_percentage())
+            memory_percent = f"{utils.format_number(system_stats.ram_usage())} GB ({utils.format_number(system_stats.ram_usage_percentage())}%)"
             logging.info(f"Updating Memory voice channel with new Memory percent: {memory_percent}")
             await self.edit_stat_voice_channel(channel_name="Memory",
                                                stat=memory_percent,

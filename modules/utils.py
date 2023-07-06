@@ -11,15 +11,13 @@ def make_plural(word, count: int, suffix_override: str = 's') -> str:
 def quote(string: str) -> str:
     return f"\"{string}\""
 
-
-def _human_bitrate(number, denominator: int = 1, letter: str = "", d: int = 1) -> str:
-    if d <= 0:
-        return f'{int(number / denominator):d} {letter}bps'
+def format_number(number: float, denominator: int = 1, decimal_places: int = 1) -> str:
+    if decimal_places <= 0:
+        return f'{int(number / denominator):d}'
     else:
-        return f'{float(number / denominator):.{d}f} {letter}bps'
+        return f'{float(number / denominator):.{decimal_places}f}'
 
-
-def human_bitrate(_bytes, d: int = 1) -> str:
+def human_bitrate(_bytes, decimal_places: int = 1) -> str:
     # Return the given bitrate as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
 
     KB = float(1024)
@@ -44,7 +42,8 @@ def human_bitrate(_bytes, d: int = 1) -> str:
         denominator = TB
         letter = "T"
 
-    return _human_bitrate(_bytes, denominator=denominator, letter=letter, d=d)
+    value = format_number(number=_bytes, denominator=denominator, decimal_places=decimal_places)
+    return f"{value} {letter}bps"
 
 
 def milliseconds_to_minutes_seconds(milliseconds: int) -> str:
