@@ -2,6 +2,7 @@ from typing import Dict, Any, Union
 
 from modules import statics, utils
 from modules.emojis import EmojiManager
+from modules.time_manager import TimeManager
 
 
 class TextManager:
@@ -19,6 +20,7 @@ class TextManager:
         self._anon_hide_progress: bool = rules.get(statics.KEY_HIDE_PROGRESS, False)
         self._anon_hide_eta: bool = rules.get(statics.KEY_HIDE_ETA, False)
         self._use_friendly_names: bool = rules.get(statics.KEY_USE_FRIENDLY_NAMES, False)
+        self._time_manager: TimeManager = rules.get(statics.KEY_TIME_MANAGER, TimeManager(timezone="UTC", military_time=False)) # fallback should not be needed
 
     def _session_user_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
         if self._anon_hide_usernames:
@@ -98,11 +100,13 @@ class TextManager:
         return "\n".join(stubs)
 
     def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager, add_termination_tip: bool) -> str:
+        timestamp = f"\n\nUpdated {self._time_manager.now_string()}"
+
         if no_connection or activity is None:
-            return utils.bold("Connection lost.")
+            return f"{utils.bold('Connection lost.')}\n\n{timestamp}"
 
         if activity.stream_count == 0:
-            return utils.bold("No active streams.")
+            return timestamp
 
         stream_count = activity.stream_count
         stream_count_word = utils.make_plural(word='stream', count=stream_count)
@@ -121,6 +125,8 @@ class TextManager:
                 lan_bandwidth_emoji = emoji_manager.get_emoji(key='home')
                 lan_bandwidth = activity.lan_bandwidth
                 overview_message += f""" {lan_bandwidth_emoji} {lan_bandwidth}"""
+
+        overview_message += f"\n\n{timestamp}"
 
         if add_termination_tip:
             overview_message += f"\n\nTo terminate a stream, react with the stream number."

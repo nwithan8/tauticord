@@ -56,6 +56,10 @@ def milliseconds_to_minutes_seconds(milliseconds: int) -> str:
         seconds = f"0{seconds}"
     return f"{minutes}:{seconds}"
 
+def now(timezone_code: str = None) -> datetime:
+    if timezone_code:
+        return datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
+    return datetime.now()
 
 def now_plus_milliseconds(milliseconds: int, timezone_code: str = None) -> datetime:
     if timezone_code:

@@ -8,14 +8,15 @@ from modules import utils
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.text_manager import TextManager
+from modules.time_manager import TimeManager
 
 session_ids = {}
 
 
 class Session:
-    def __init__(self, session_data, time_settings: dict):
+    def __init__(self, session_data, time_manager: TimeManager):
         self._data = session_data
-        self._time_settings = time_settings
+        self._time_manager = time_manager
 
     @property
     def duration_milliseconds(self) -> int:
@@ -52,11 +53,7 @@ class Session:
         if not self.duration_milliseconds or not self.location_milliseconds:
             return "Unknown"
         milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
-        eta_datetime = utils.now_plus_milliseconds(milliseconds=milliseconds_remaining,
-                                                   timezone_code=self._time_settings['timezone'])
-        eta_string = utils.datetime_to_string(datetime_object=eta_datetime,
-                                              template=("%H:%M" if self._time_settings['mil_time'] else "%I:%M %p"))
-        return eta_string
+        return self._time_manager.now_plus_milliseconds_string(milliseconds=milliseconds_remaining)
 
     @property
     def title(self) -> str:
@@ -131,9 +128,9 @@ class Session:
         return self._data['stream_container_decision']
 
 class Activity:
-    def __init__(self, activity_data, time_settings: dict, emoji_manager: EmojiManager):
+    def __init__(self, activity_data, time_manager: TimeManager, emoji_manager: EmojiManager):
         self._data = activity_data
-        self._time_settings = time_settings
+        self._time_manager = time_manager
         self._emoji_manager = emoji_manager
 
     @property
@@ -180,7 +177,7 @@ class Activity:
 
     @property
     def sessions(self) -> List[Session]:
-        return [Session(session_data=session_data, time_settings=self._time_settings) for session_data in
+        return [Session(session_data=session_data, time_manager=self._time_manager) for session_data in
                 self._data.get('sessions', [])]
 
 
@@ -222,18 +219,23 @@ class TautulliDataResponse:
 
     @property
     def embed(self) -> discord.Embed:
+        title = f"Current activity on {self._server_name}"
         if len(self._streams) <= 0:
-            return discord.Embed(title="No current activity")
-        embed = discord.Embed(title=f"Current activity on {self._server_name}")
+            title = "No current activity"
+
+        embed = discord.Embed(title=title)
+
         for stream in self._streams:
             embed.add_field(name=stream.get_title(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
                             value=stream.get_body(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
                             inline=False)
+
         footer_text = self._text_manager.overview_footer(no_connection=self.error,
                                                          activity=self._activity,
                                                          emoji_manager=self._emoji_manager,
                                                          add_termination_tip=self.plex_pass)
         embed.set_footer(text=footer_text)
+
         return embed
 
 
@@ -244,7 +246,7 @@ class TautulliConnector:
                  terminate_message: str,
                  analytics,
                  plex_pass: bool,
-                 time_settings: dict,
+                 time_manager: TimeManager,
                  text_manager: TextManager,
                  server_name: str = None,
                  disable_ssl_verification: bool = False
@@ -260,7 +262,7 @@ class TautulliConnector:
         self.terminate_message = terminate_message
         self.analytics = analytics
         self.plex_pass = plex_pass
-        self.time_settings = time_settings
+        self.time_manager = time_manager
 
         tautulli_version = self.api.shortcuts.api_version
         logging.debug(f"Connected to Tautulli version: {tautulli_version}")
@@ -280,7 +282,7 @@ class TautulliConnector:
         if data:
             logging.debug(f"JSON returned by GET request: {data}")
             try:
-                activity = Activity(activity_data=data, time_settings=self.time_settings, emoji_manager=emoji_manager)
+                activity = Activity(activity_data=data, time_manager=self.time_manager, emoji_manager=emoji_manager)
                 sessions = activity.sessions
                 count = 0
                 session_ids = {}

@@ -57,7 +57,7 @@ if __name__ == '__main__':
             terminate_message=config.tautulli.terminate_message,
             analytics=analytics,
             plex_pass=config.tautulli.has_plex_pass,
-            time_settings=config.tautulli.time_settings,
+            time_manager=config.tautulli.time_manager,
             server_name=config.tautulli.server_name,
             text_manager=config.tautulli.text_manager,
             disable_ssl_verification=config.tautulli.disable_ssl_verification,
