@@ -8,7 +8,7 @@ import modules.logs as logging
 import modules.statics as statics
 import modules.system_stats as system_stats
 import modules.tautulli_connector
-from modules import emojis
+from modules import emojis, utils
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
@@ -580,7 +580,7 @@ class DiscordConnector:
             if self.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
                 bandwidth = activity.lan_bandwidth
                 logging.info(f"Updating Local Bandwidth voice channel with new bandwidth: {bandwidth}")
-                await self.edit_stat_voice_channel(channel_name="Local Bandwidth",
+                await self.edit_stat_voice_channel(channel_name="Local BW",
                                                    channel_id=self.voice_channel_settings.get(
                                                        statics.KEY_LAN_BANDWIDTH_CHANNEL_ID, 0),
                                                    stat=bandwidth,
@@ -588,7 +588,7 @@ class DiscordConnector:
             if self.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
                 bandwidth = activity.wan_bandwidth
                 logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth: {bandwidth}")
-                await self.edit_stat_voice_channel(channel_name="Remote Bandwidth",
+                await self.edit_stat_voice_channel(channel_name="Remote BW",
                                                    channel_id=self.voice_channel_settings.get(
                                                        statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID, 0),
                                                    stat=bandwidth,
@@ -616,14 +616,14 @@ class DiscordConnector:
     async def update_performance_voice_channels(self) -> None:
         logging.info("Updating performance stats...")
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU, False):
-            cpu_percent = "{:0.2f}%".format(system_stats.cpu_usage())
+            cpu_percent = f"{utils.format_number(system_stats.cpu_usage())}%"
             logging.info(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
             await self.edit_stat_voice_channel(channel_name="CPU",
                                                stat=cpu_percent,
                                                category=self.performance_voice_category)
 
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_MEMORY, False):
-            memory_percent = "{:0.2f} GB".format(system_stats.ram_usage())
+            memory_percent = f"{utils.format_number(system_stats.ram_usage())} GB ({utils.format_number(system_stats.ram_usage_percentage())}%)"
             logging.info(f"Updating Memory voice channel with new Memory percent: {memory_percent}")
             await self.edit_stat_voice_channel(channel_name="Memory",
                                                stat=memory_percent,
