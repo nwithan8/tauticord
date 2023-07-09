@@ -352,3 +352,16 @@ def custom_emoji_animated_name(string: str, emoji_id: str) -> str:
     :rtype: str
     """
     return f":{string}:"
+
+def discord_text_channel_name_format(string: str) -> str:
+    """
+    Return a string formatted as a discord text channel name
+
+    :param string: string to format
+    :type string: str
+    :return: string formatted as a discord text channel name
+    :rtype: str
+    """
+    # lowercase and replace spaces with dashes
+    string = string.lower().replace(" ", "-")
+    return string

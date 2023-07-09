@@ -6,7 +6,7 @@ import confuse
 import yaml
 
 import modules.logs as logging
-from modules import statics
+from modules import statics, utils
 from modules.text_manager import TextManager
 from modules.time_manager import TimeManager
 
@@ -419,8 +419,10 @@ class DiscordConfig(ConfigSection):
 
     @property
     def channel_name(self) -> str:
-        return self._connection._get_value(key="ChannelName", default="tauticord",
+        value = self._connection._get_value(key="ChannelName", default="tauticord",
                                            env_name_override="TC_DISCORD_CHANNEL_NAME")
+        value = utils.discord_text_channel_name_format(string=value)
+        return value
 
     @property
     def _customization(self) -> ConfigSection:
