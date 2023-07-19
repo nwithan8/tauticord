@@ -21,3 +21,9 @@ class TimeManager:
     def now_plus_milliseconds_string(self, milliseconds: int) -> str:
         _datetime = self.now_plus_milliseconds(milliseconds)
         return utils.datetime_to_string(datetime_object=_datetime, template=("%H:%M" if self._military_time else "%I:%M %p"))
+
+    def __repr__(self):
+        return f"TimeManager(timezone={self._timezone}, military_time={self._military_time})"
+
+    def __str__(self):
+        return f"TimeManager(timezone={self._timezone}, military_time={self._military_time})"
