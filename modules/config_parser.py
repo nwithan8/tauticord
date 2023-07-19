@@ -55,7 +55,6 @@ class ConfigSection:
         except confuse.NotFoundError:
             return default
 
-
 class TautulliConfig(ConfigSection):
     def __init__(self, data, pull_from_env: bool = True):
         super().__init__(section_key="Tautulli", data=data, pull_from_env=pull_from_env)
@@ -75,7 +74,7 @@ class TautulliConfig(ConfigSection):
     @property
     def disable_ssl_verification(self) -> bool:
         value = self._connection._get_value(key="UseSelfSignedCert", default=False,
-                                           env_name_override="TC_USE_SELF_SIGNED_CERT")
+                                            env_name_override="TC_USE_SELF_SIGNED_CERT")
         return _extract_bool(value)
 
     @property
@@ -420,7 +419,7 @@ class DiscordConfig(ConfigSection):
     @property
     def channel_name(self) -> str:
         value = self._connection._get_value(key="ChannelName", default="tauticord",
-                                           env_name_override="TC_DISCORD_CHANNEL_NAME")
+                                            env_name_override="TC_DISCORD_CHANNEL_NAME")
         value = utils.discord_text_channel_name_format(string=value)
         return value
 
@@ -485,7 +484,66 @@ class Config:
             statics.KEY_PERFORMANCE_MONITOR_MEMORY: self.extras._performance_monitor_memory,
         }
 
+        logging.debug(f"Using configuration:\n{self.log()}")
+
     def __repr__(self) -> str:
         raw_yaml_data = self.config.dump()
         json_data = yaml.load(raw_yaml_data, Loader=yaml.FullLoader)
         return json.dumps(json_data, indent=4)
+
+    @property
+    def all(self) -> dict:
+        return {
+            "Tautulli - Connection - API Key": "Exists" if self.tautulli.api_key else "Not Set",
+            "Tautulli - Connection - URL": self.tautulli.url,
+            "Tautulli - Connection - Use Self-Signed Cert": self.tautulli.disable_ssl_verification,
+            "Tautulli - Customization - Has Plex Pass": self.tautulli.has_plex_pass,
+            "Tautulli - Customization - Refresh Interval": self.tautulli.refresh_interval,
+            "Tautulli - Customization - Server Name": self.tautulli.server_name,
+            "Tautulli - Customization - Terminate Message": self.tautulli.terminate_message,
+            "Tautulli - Customization - Time Manager": self.tautulli.time_manager,
+            "Tautulli - Customization - Voice Channels - Stats - Voice Channel Category Name": self.tautulli.stats_voice_channel_category_name,
+            "Tautulli - Customization - Voice Channels - Stats - Display Stream Count": self.tautulli.display_stream_count,
+            "Tautulli - Customization - Voice Channels - Stats - Stream Count Channel ID": self.tautulli.stream_count_channel_id,
+            "Tautulli - Customization - Voice Channels - Stats - Display Transcode Count": self.tautulli.display_transcode_count,
+            "Tautulli - Customization - Voice Channels - Stats - Transcode Count Channel ID": self.tautulli.transcode_count_channel_id,
+            "Tautulli - Customization - Voice Channels - Stats - Display Bandwidth": self.tautulli.display_bandwidth,
+            "Tautulli - Customization - Voice Channels - Stats - Bandwidth Channel ID": self.tautulli.bandwidth_channel_id,
+            "Tautulli - Customization - Voice Channels - Stats - Display Local Bandwidth": self.tautulli.display_local_bandwidth,
+            "Tautulli - Customization - Voice Channels - Stats - Local Bandwidth Channel ID": self.tautulli.local_bandwidth_channel_id,
+            "Tautulli - Customization - Voice Channels - Stats - Display Remote Bandwidth": self.tautulli.display_remote_bandwidth,
+            "Tautulli - Customization - Voice Channels - Stats - Remote Bandwidth Channel ID": self.tautulli.remote_bandwidth_channel_id,
+            "Tautulli - Customization - Voice Channels - Stats - Display Plex Status": self.tautulli.display_plex_status,
+            "Tautulli - Customization - Voice Channels - Stats - Plex Status Channel ID": self.tautulli.plex_status_channel_id,
+            "Tautulli - Customization - Voice Channels - Libraries - Voice Channel Category Name": self.tautulli.libraries_voice_channel_category_name,
+            "Tautulli - Customization - Voice Channels - Libraries - Display Library Stats": self.tautulli.display_library_stats,
+            "Tautulli - Customization - Voice Channels - Libraries - Library Refresh Interval": self.tautulli.library_refresh_interval,
+            "Tautulli - Customization - Voice Channels - Libraries - Library Names": self.tautulli.library_names,
+            "Tautulli - Customization - Voice Channels - Libraries - Use Emojis With Library Names": self.tautulli.use_emojis_with_library_names,
+            "Tautulli - Customization - Voice Channels - Libraries - Show TV Series Count": self.tautulli.show_tv_series_count,
+            "Tautulli - Customization - Voice Channels - Libraries - Show TV Episode Count": self.tautulli.show_tv_episode_count,
+            "Tautulli - Customization - Voice Channels - Libraries - Show Music Artist Count": self.tautulli.show_music_artist_count,
+            "Tautulli - Customization - Voice Channels - Libraries - Show Music Track Count": self.tautulli.show_music_track_count,
+            "Tautulli - Customization - Anonymize - Hide Usernames": self.tautulli._anonymize_hide_usernames,
+            "Tautulli - Customization - Anonymize - Hide Platforms": self.tautulli._anonymize_hide_platforms,
+            "Tautulli - Customization - Anonymize - Hide Player Names": self.tautulli._anonymize_hide_player_names,
+            "Tautulli - Customization - Anonymize - Hide Quality": self.tautulli._anonymize_hide_quality,
+            "Tautulli - Customization - Anonymize - Hide Bandwidth": self.tautulli._anonymize_hide_bandwidth,
+            "Tautulli - Customization - Anonymize - Hide Transcode Decision": self.tautulli._anonymize_hide_transcode_decision,
+            "Tautulli - Customization - Anonymize - Hide Progress": self.tautulli._anonymize_hide_progress,
+            "Tautulli - Customization - Anonymize - Hide ETA": self.tautulli._anonymize_hide_eta,
+            "Tautulli - Customization - Use Friendly Names": self.tautulli._use_friendly_names,
+            "Tautulli - Customization - Voice Channels - Performance - Voice Channel Category Name": self.tautulli._performance_voice_channel_name,
+            "Discord - Connection - Bot Token": "Exists" if self.discord.bot_token else "Not Set",
+            "Discord - Connection - Server ID": self.discord.server_id,
+            "Discord - Connection - Admin IDs": self.discord.admin_ids,
+            "Discord - Connection - Use Summary Text Message": self.discord.use_summary_text_message,
+            "Discord - Connection - Summary Text Channel Name": self.discord.channel_name,
+            "Discord - Customization - Has Nitro": self.discord.has_discord_nitro,
+            "Extras - Allow Analytics": self.extras.allow_analytics,
+            "Extras - Performance - Monitor CPU Performance": self.extras._performance_monitor_cpu,
+            "Extras - Performance - Monitor Memory Performance": self.extras._performance_monitor_memory,
+        }
+
+    def log(self) -> str:
+        return "\n".join([f"{key}: {value}" for key, value in self.all.items()])
