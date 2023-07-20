@@ -18,9 +18,6 @@ jobs:
     name: Build & Publish to DockerHub and GitHub Packages
     runs-on: ubuntu-latest
     if: contains(github.event.head_commit.message, '[no build]') == false
-    strategy:
-      matrix:
-        platform: [ linux/amd64, linux/armhf, linux/arm64 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -31,11 +28,9 @@ jobs:
         id: vars
         run: |
           VERSION=${{ github.event.inputs.version || github.ref_name }}
-          ARCH=${{ matrix.platform }}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=today::$(date +'%Y-%m-%d')
           echo "::set-output name=year::$(date +'%Y')"
-          echo "::set-output name=arch::$(echo $ARCH | cut -d'/' -f2)"
 
       - name: Update version number
         uses: jacobtomlinson/gha-find-replace@2.0.0
@@ -78,13 +73,13 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          platforms: ${{ matrix.platform }}
+          platforms: linux/amd64,linux/armhf,linux/arm64
           tags: |
-            nwithan8/tauticord:latest-${{ steps.vars.outputs.arch }}
-            nwithan8/tauticord:${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.arch }}
-            ghcr.io/nwithan8/tauticord:latest-${{ steps.vars.outputs.arch }}
-            ghcr.io/nwithan8/tauticord:${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.arch }}
+            nwithan8/tauticord:latest
+            nwithan8/tauticord:${{ steps.vars.outputs.version }}
+            ghcr.io/nwithan8/tauticord:latest
+            ghcr.io/nwithan8/tauticord:${{ steps.vars.outputs.version }}
           labels: |
             org.opencontainers.image.title=tauticord
-            org.opencontainers.image.version=${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.arch }}
+            org.opencontainers.image.version=${{ steps.vars.outputs.version }}
             org.opencontainers.image.created=${{ steps.vars.outputs.today }}
