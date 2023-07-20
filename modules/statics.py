@@ -1,5 +1,9 @@
 # Number 1-9, and A-Z
+import sys
 from typing import Optional
+
+VERSION = "VERSIONADDEDBYGITHUB"
+COPYRIGHT = "Copyright © YEARADDEDBYGITHUB Nate Harris. All rights reserved."
 
 STANDARD_EMOJIS_FOLDER = "resources/emojis/standard"
 NITRO_EMOJIS_FOLDER = "resources/emojis/nitro"
@@ -56,3 +60,18 @@ KEY_PERFORMANCE_MONITOR_MEMORY = "performance_monitor_memory"
 
 
 MAX_STREAM_COUNT = 36
+
+ASCII_ART = """___________________  ______________________________________________ 
+___  __/__    |_  / / /__  __/___  _/_  ____/_  __ \__  __ \__  __ \\
+__  /  __  /| |  / / /__  /   __  / _  /    _  / / /_  /_/ /_  / / /
+_  /   _  ___ / /_/ / _  /   __/ /  / /___  / /_/ /_  _, _/_  /_/ / 
+/_/    /_/  |_\____/  /_/    /___/  \____/  \____/ /_/ |_| /_____/  
+"""
+
+def splash_logo() -> str:
+    return f"""
+{ASCII_ART}
+Version {VERSION}, Python {sys.version}
+
+{COPYRIGHT}
+"""

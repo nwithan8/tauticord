@@ -30,6 +30,21 @@ jobs:
           VERSION=${{ github.event.inputs.version || github.ref_name }}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=today::$(date +'%Y-%m-%d')
+          echo "::set-output name=year::$(date +'%Y')"
+
+      - name: Update version number
+        uses: jacobtomlinson/gha-find-replace@2.0.0
+        with:
+          find: "VERSIONADDEDBYGITHUB"
+          replace: "${{ steps.vars.outputs.version }}"
+          regex: false
+
+      - name: Update copyright year
+        uses: jacobtomlinson/gha-find-replace@2.0.0
+        with:
+          find: "YEARADDEDBYGITHUB"
+          replace: "${{ steps.vars.outputs.year }}"
+          regex: false
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

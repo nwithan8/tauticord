@@ -17,6 +17,7 @@ from consts import (
 )
 from modules.analytics import GoogleAnalytics
 from modules.config_parser import Config
+from modules.statics import VERSION, COPYRIGHT, splash_logo
 
 # Parse arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
@@ -47,6 +48,7 @@ analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
                             do_not_track=not config.extras.allow_analytics)
 
 if __name__ == '__main__':
+    logging.info(splash_logo())
     logging.info("Starting Tauticord...")
 
     # noinspection PyBroadException
