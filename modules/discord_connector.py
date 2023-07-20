@@ -242,6 +242,9 @@ class DiscordConnector:
     def performance_category_name(self) -> str:
         return self.performance_monitoring.get(statics.KEY_PERFORMANCE_CATEGORY_NAME, "Performance")
 
+    def get_voice_channel_id(self, key: str) -> int:
+        return self.voice_channel_settings.get(statics.KEY_STATS_CHANNEL_IDS, {}).get(key, 0)
+
     async def on_ready(self) -> None:
         logging.info('Connected to Discord.')
         await self.client.change_presence(
@@ -388,11 +391,9 @@ class DiscordConnector:
         """
         data_wrapper, count, activity, plex_online = self.tautulli.refresh_data(emoji_manager=self.emoji_manager)
 
-        # Update the stats voice channels if the category is set
-        if self.tautulli_stats_voice_category:
-            await self.update_live_voice_channels(activity=activity,
-                                                  plex_online=plex_online,
-                                                  category=self.tautulli_stats_voice_category)
+        await self.update_live_voice_channels(activity=activity,
+                                              plex_online=plex_online,
+                                              category=self.tautulli_stats_voice_category)
 
         # Skip updating the summary message if the setting is disabled
         if not self.use_summary_message:
@@ -533,6 +534,7 @@ class DiscordConnector:
                                       stat: Union[int, float, str],
                                       channel_id: int = 0,
                                       category: discord.CategoryChannel = None) -> None:
+        # NOTE: category can be None if user is providing Channel IDs manually
         if channel_id != 0:
             await self.edit_stat_voice_channel_by_id(stat=stat, channel_name=channel_name, channel_id=channel_id)
         else:
@@ -547,8 +549,7 @@ class DiscordConnector:
             status = "Online" if plex_online else "Offline"
             logging.info(f"Updating Plex Status voice channel with new status: {status}")
             await self.edit_stat_voice_channel(channel_name="Plex Status",
-                                               channel_id=self.voice_channel_settings.get(
-                                                   statics.KEY_PLEX_STATUS_CHANNEL_ID, 0),
+                                               channel_id=self.get_voice_channel_id(key=statics.KEY_PLEX_STATUS_CHANNEL_ID),
                                                stat=status,
                                                category=category)
 
@@ -557,40 +558,35 @@ class DiscordConnector:
                 count = activity.stream_count
                 logging.info(f"Updating Streams voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Streams",
-                                                   channel_id=self.voice_channel_settings.get(
-                                                       statics.KEY_STREAM_COUNT_CHANNEL_ID, 0),
+                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_STREAM_COUNT_CHANNEL_ID),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_TRANSCODE_COUNT, False):
                 count = activity.transcode_count
                 logging.info(f"Updating Transcodes voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Transcodes",
-                                                   channel_id=self.voice_channel_settings.get(
-                                                       statics.KEY_TRANSCODE_COUNT_CHANNEL_ID, 0),
+                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_TRANSCODE_COUNT_CHANNEL_ID),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_BANDWIDTH, False):
                 bandwidth = activity.total_bandwidth
                 logging.info(f"Updating Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Bandwidth",
-                                                   channel_id=self.voice_channel_settings.get(
-                                                       statics.KEY_BANDWIDTH_CHANNEL_ID, 0),
+                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
                 bandwidth = activity.lan_bandwidth
                 logging.info(f"Updating Local Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Local BW",
-                                                   channel_id=self.voice_channel_settings.get(
-                                                       statics.KEY_LAN_BANDWIDTH_CHANNEL_ID, 0),
+                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_LAN_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
                 bandwidth = activity.wan_bandwidth
                 logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Remote BW",
-                                                   channel_id=self.voice_channel_settings.get(
-                                                       statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID, 0),
+                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
 
