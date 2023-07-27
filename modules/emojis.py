@@ -113,9 +113,9 @@ class EmojiManager:
             number = emoji.name.replace(f"{self._emoji_prefix}_", "")
             return int(number)
         # Not using the Tauticord custom emojis, so we need to check the emoji itself
-        for i, e in enumerate(self._emojis):
+        for num, e in self._emojis.items():
             if e == str(emoji):
-                return i + 1  # emoji 1 at index 0, etc.
+                return int(num)
         return None
 
     def emoji_from_stream_number(self, number: int) -> str:
