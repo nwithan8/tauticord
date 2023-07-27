@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union, List
 
 import discord
-from discord import Emoji
+from discord import Emoji, PartialEmoji
 
 from modules import statics
 
@@ -107,10 +107,15 @@ class EmojiManager:
             number_emojis.append(self.emoji_from_stream_number(i))
         return number_emojis
 
-    def stream_number_from_emoji(self, emoji) -> Union[int, None]:
+    def stream_number_from_emoji(self, emoji: PartialEmoji) -> Union[int, None]:
+        # If using the Tauticord custom emojis, name corresponds to the stream number (e.g. tc_1 is 1, tc_2 is 2, etc.)
+        if emoji.name.startswith(self._emoji_prefix):
+            number = emoji.name.replace(f"{self._emoji_prefix}_", "")
+            return int(number)
+        # Not using the Tauticord custom emojis, so we need to check the emoji itself
         for i, e in enumerate(self._emojis):
             if e == str(emoji):
-                return i + 1
+                return i + 1  # emoji 1 at index 0, etc.
         return None
 
     def emoji_from_stream_number(self, number: int) -> str:

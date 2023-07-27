@@ -310,7 +310,7 @@ class TautulliConnector:
                                     error_occurred=True,
                                     server_name=self.server_name), 0, None, False  # If Tautulli is offline, assume Plex is offline
 
-    def stop_stream(self, emoji, stream_number) -> str:
+    def stop_stream(self, emoji, stream_number: int) -> str:
         """
         Stop a Plex stream
         :param emoji: Emoji used to stop the stream
@@ -318,7 +318,7 @@ class TautulliConnector:
         :return: Success/failure message
         """
         if stream_number not in session_ids.keys():
-            return utils.bold("Invalid stream number.")
+            return utils.bold(f"Invalid stream number: {stream_number}. Valid stream numbers: {', '.join([str(x) for x in session_ids.keys()])}")
         logging.info(f"User attempting to stop session {emoji}, id {session_ids[stream_number]}")
         try:
             if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):

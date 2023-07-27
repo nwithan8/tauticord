@@ -373,8 +373,7 @@ class DiscordConnector:
 
     async def stop_tautulli_stream_via_reaction_emoji(self, emoji: discord.PartialEmoji, message: discord.Message) -> \
             discord.Message:
-        # remember to shift by 1 to convert index to human-readable
-        stream_number = self.emoji_manager.stream_number_from_emoji(emoji=emoji)
+        stream_number: int = self.emoji_manager.stream_number_from_emoji(emoji=emoji)
 
         logging.debug(f"Stopping stream {emoji}...")
         stopped_message = self.tautulli.stop_stream(emoji=emoji, stream_number=stream_number)
