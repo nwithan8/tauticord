@@ -17,7 +17,7 @@ from consts import (
 )
 from modules.analytics import GoogleAnalytics
 from modules.config_parser import Config
-from modules.statics import VERSION, COPYRIGHT, splash_logo
+from modules.statics import splash_logo
 
 # Parse arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
