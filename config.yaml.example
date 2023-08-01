@@ -16,17 +16,17 @@ Tautulli:
       Stats:
         CategoryName: "Tautulli Stats"
         StreamCount: true
-        StreamCountChannelId: 0
+        StreamCountChannelID: 0
         TranscodeCount: true
-        TranscodeCountChannelId: 0
+        TranscodeCountChannelID: 0
         Bandwidth: false
-        BandwidthChannelId: 0
+        BandwidthChannelID: 0
         LocalBandwidth: false
-        LocalBandwidthChannelId: 0
+        LocalBandwidthChannelID: 0
         RemoteBandwidth: false
-        RemoteBandwidthChannelId: 0
+        RemoteBandwidthChannelID: 0
         PlexStatus: true
-        PlexStatusChannelId: 0
+        PlexStatusChannelID: 0
       Libraries:
         CategoryName: "Tautulli Libraries"
         Enable: false
