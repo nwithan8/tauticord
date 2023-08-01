@@ -11,6 +11,7 @@ import modules.tautulli_connector
 from modules import emojis, utils
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
+from modules.stat_library import StatLibrary
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
 from modules.utils import quote
 
@@ -272,8 +273,10 @@ class DiscordConnector:
                 self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
                     category_name=self.stats_voice_category_name)
         if self.display_library_stats:
-            self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
-                category_name=self.libraries_voice_category_name)
+            # only grab the library voice category (make it) if library channel IDs are not manually set
+            if not self.voice_channel_settings.get(statics.KEY_USE_LIBRARY_CHANNEL_IDS, False):
+                self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
+                    category_name=self.libraries_voice_category_name)
         if self.enable_performance_monitoring:
             self.performance_voice_category = await self.collect_discord_voice_category(
                 category_name=self.performance_category_name)
@@ -548,7 +551,8 @@ class DiscordConnector:
             status = "Online" if plex_online else "Offline"
             logging.info(f"Updating Plex Status voice channel with new status: {status}")
             await self.edit_stat_voice_channel(channel_name="Plex Status",
-                                               channel_id=self.get_voice_channel_id(key=statics.KEY_PLEX_STATUS_CHANNEL_ID),
+                                               channel_id=self.get_voice_channel_id(
+                                                   key=statics.KEY_PLEX_STATUS_CHANNEL_ID),
                                                stat=status,
                                                category=category)
 
@@ -557,35 +561,40 @@ class DiscordConnector:
                 count = activity.stream_count
                 logging.info(f"Updating Streams voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Streams",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_STREAM_COUNT_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_STREAM_COUNT_CHANNEL_ID),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_TRANSCODE_COUNT, False):
                 count = activity.transcode_count
                 logging.info(f"Updating Transcodes voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Transcodes",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_TRANSCODE_COUNT_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_TRANSCODE_COUNT_CHANNEL_ID),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_BANDWIDTH, False):
                 bandwidth = activity.total_bandwidth
                 logging.info(f"Updating Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Bandwidth",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_BANDWIDTH_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
                 bandwidth = activity.lan_bandwidth
                 logging.info(f"Updating Local Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Local BW",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_LAN_BANDWIDTH_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_LAN_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
                 bandwidth = activity.wan_bandwidth
                 logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Remote BW",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
 
@@ -593,7 +602,9 @@ class DiscordConnector:
         logging.info("Updating library stats...")
         if self.voice_channel_settings.get(statics.KEY_STATS, False):
             visibility_settings = LibraryVoiceChannelsVisibilities(settings=self.voice_channel_settings)
-            for library_name in self.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
+            for stat_library in self.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
+                stat_library: StatLibrary = stat_library
+                library_name = stat_library.library_name
                 stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name,
                                                                                     emoji_manager=self.emoji_manager,
                                                                                     visibility_settings=visibility_settings)
@@ -605,6 +616,7 @@ class DiscordConnector:
                         channel_name = f"{stat_emoji} {channel_name}"
                     logging.info(f"Updating {library_name} voice channel with new library size: {stat_value}")
                     await self.edit_stat_voice_channel(channel_name=channel_name,
+                                                       channel_id=stat_library.voice_channel_id,
                                                        stat=stat_value,
                                                        category=self.tautulli_libraries_voice_category)
 

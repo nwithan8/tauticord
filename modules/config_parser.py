@@ -7,6 +7,7 @@ import yaml
 
 import modules.logs as logging
 from modules import statics, utils
+from modules.stat_library import StatLibrary
 from modules.text_manager import TextManager
 from modules.time_manager import TimeManager
 
@@ -233,12 +234,45 @@ class TautulliConfig(ConfigSection):
         return int(value)
 
     @property
+    def libraries(self) -> List[StatLibrary]:
+        names: list[str] = self.library_names
+        channel_ids: list[int] = self.library_channel_ids
+
+        # In case the user did not provide a list of channel IDs or provided a list of all 0s that's just accidentally not as long as the list of names.
+        if not channel_ids or all(_id == 0 for _id in channel_ids):
+            channel_ids: list[int] = [0] * len(names)
+
+        # Could only be triggered at this point if the user has provided a list with at least one non-zero channel ID.
+        if len(names) != len(channel_ids):
+            raise ValueError("Library names and channel IDs do not match.")
+
+        if any(_id == 0 for _id in channel_ids) and any(_id != 0 for _id in channel_ids):
+            raise ValueError("All library channel IDs must be specified if any are specified.")
+
+        return [StatLibrary(library_name=name, voice_channel_id=channel_id) for name, channel_id in zip(names, channel_ids)]
+
+    @property
     def library_names(self) -> List[str]:
         names = self._libraries_voice_channels._get_value(key="LibraryNames", default=[],
                                                           env_name_override="TC_VC_LIBRARY_NAMES")
         if isinstance(names, str):
-            return names.split(",")
+            names = names.split(",")
         return names
+
+    @property
+    def library_channel_ids(self) -> List[int]:
+        ids = []
+        if isinstance(ids, str):
+            ids = ids.split(",")
+        return [int(_id) for _id in ids]
+
+    @property
+    def _use_library_voice_channel_ids(self) -> bool:
+        if not self.library_channel_ids:
+            return False
+
+        # If any of the library voice channel IDs are not 0, then we are using them all.
+        return any(channel_id != 0 for channel_id in self.library_channel_ids)
 
     @property
     def use_emojis_with_library_names(self) -> bool:
@@ -283,7 +317,7 @@ class TautulliConfig(ConfigSection):
             statics.KEY_PLEX_STATUS: self.display_plex_status,
             statics.KEY_REFRESH_TIME: self.library_refresh_interval,
             statics.KEY_LIBRARIES_CATEGORY_NAME: self.libraries_voice_channel_category_name,
-            statics.KEY_LIBRARIES: self.library_names,
+            statics.KEY_LIBRARIES: self.libraries,
             statics.KEY_USE_EMOJIS: self.use_emojis_with_library_names,
             statics.KEY_SHOW_TV_EPISODES: self.show_tv_episode_count,
             statics.KEY_SHOW_TV_SERIES: self.show_tv_series_count,
@@ -291,6 +325,7 @@ class TautulliConfig(ConfigSection):
             statics.KEY_SHOW_MUSIC_TRACKS: self.show_music_track_count,
             statics.KEY_STATS_CHANNEL_IDS: self.stats_voice_channels_ids,
             statics.KEY_USE_STATS_CHANNEL_IDS: self._use_stats_voice_channel_ids,
+            statics.KEY_USE_LIBRARY_CHANNEL_IDS: self._use_library_voice_channel_ids,
         }
 
     @property
