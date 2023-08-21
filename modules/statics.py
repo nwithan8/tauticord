@@ -1,4 +1,5 @@
 # Number 1-9, and A-Z
+import subprocess
 import sys
 from typing import Optional
 
@@ -69,9 +70,13 @@ _  /   _  ___ / /_/ / _  /   __/ /  / /___  / /_/ /_  _, _/_  /_/ /
 """
 
 def splash_logo() -> str:
+    version = VERSION
+    if version == "VERSIONADDEDBYGITHUB":
+        last_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
+        version = f"git-{last_commit[:7]}"
     return f"""
 {ASCII_ART}
-Version {VERSION}, Python {sys.version}
+Version {version}, Python {sys.version}
 
 {COPYRIGHT}
 """
