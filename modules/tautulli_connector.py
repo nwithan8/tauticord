@@ -255,7 +255,7 @@ class TautulliConnector:
         self.text_manager = text_manager
         self.api_key = api_key
         try:
-            self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key, ssl_verify=not disable_ssl_verification)  # Disable SSL verification because of self-signed certs
+            self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key, verify=True, ssl_verify=not disable_ssl_verification)  # Disable SSL verification because of self-signed certs
         except Exception as e: # common issue - `base_url` is empty because config was not parsed properly, causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
             raise Exception(f"Could not begin a Tautulli connection. Please check that your configuration is complete and reachable. Exception: {e}")
         self.server_name = server_name or self.api.server_friendly_name
