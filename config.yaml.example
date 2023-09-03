@@ -54,6 +54,7 @@ Tautulli:
       HideProgress: false
       HideETA: false
     UseFriendlyNames: false
+    ThousandsSeparator: ""
 
 Discord:
   Connection:

@@ -11,11 +11,16 @@ def make_plural(word, count: int, suffix_override: str = 's') -> str:
 def quote(string: str) -> str:
     return f"\"{string}\""
 
-def format_number(number: float, denominator: int = 1, decimal_places: int = 1) -> str:
+def format_fraction(number: float, denominator: int = 1, decimal_places: int = 1) -> str:
     if decimal_places <= 0:
         return f'{int(number / denominator):d}'
     else:
         return f'{float(number / denominator):.{decimal_places}f}'
+
+def format_thousands(number: int, delimiter: str = "") -> str:
+    if number < 1000:
+        return str(number)
+    return f"{format_thousands(number // 1000, delimiter)}{delimiter}{number % 1000:03d}"
 
 def human_bitrate(_bytes, decimal_places: int = 1) -> str:
     # Return the given bitrate as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
@@ -42,7 +47,7 @@ def human_bitrate(_bytes, decimal_places: int = 1) -> str:
         denominator = TB
         letter = "T"
 
-    value = format_number(number=_bytes, denominator=denominator, decimal_places=decimal_places)
+    value = format_fraction(number=_bytes, denominator=denominator, decimal_places=decimal_places)
     return f"{value} {letter}bps"
 
 
