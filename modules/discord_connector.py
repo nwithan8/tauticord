@@ -12,7 +12,7 @@ from modules import emojis, utils
 from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
-from modules.utils import quote
+from modules.utils import quote, format_thousands
 
 
 async def add_emoji_reactions(message: discord.Message, count: int, emoji_manager: EmojiManager):
@@ -192,7 +192,8 @@ class DiscordConnector:
                  display_library_stats: bool,
                  nitro: bool,
                  performance_monitoring: dict,
-                 analytics):
+                 analytics,
+                 thousands_separator: str = ""):
         self.token = token
         self.guild_id = guild_id
         self.nitro: bool = nitro
@@ -204,6 +205,7 @@ class DiscordConnector:
         self.voice_channel_settings = voice_channel_settings
         self.display_live_stats = display_live_stats
         self.display_library_stats = display_library_stats
+        self.thousands_separator = thousands_separator
         self.tautulli_channel: discord.TextChannel = None
         self.tautulli_stats_voice_category: discord.CategoryChannel = None
         self.tautulli_libraries_voice_category: discord.CategoryChannel = None
@@ -600,6 +602,7 @@ class DiscordConnector:
                 for stat in stats:
                     stat_emoji = stat[0] if self.voice_channel_settings.get(statics.KEY_USE_EMOJIS, True) else None
                     stat_value = stat[1]
+                    stat_value = format_thousands(number=stat_value, delimiter=self.thousands_separator)
                     channel_name = f"{library_name}"
                     if stat_emoji:
                         channel_name = f"{stat_emoji} {channel_name}"
@@ -611,14 +614,14 @@ class DiscordConnector:
     async def update_performance_voice_channels(self) -> None:
         logging.info("Updating performance stats...")
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU, False):
-            cpu_percent = f"{utils.format_number(system_stats.cpu_usage())}%"
+            cpu_percent = f"{utils.format_fraction(system_stats.cpu_usage())}%"
             logging.info(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
             await self.edit_stat_voice_channel(channel_name="CPU",
                                                stat=cpu_percent,
                                                category=self.performance_voice_category)
 
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_MEMORY, False):
-            memory_percent = f"{utils.format_number(system_stats.ram_usage())} GB ({utils.format_number(system_stats.ram_usage_percentage())}%)"
+            memory_percent = f"{utils.format_fraction(system_stats.ram_usage())} GB ({utils.format_fraction(system_stats.ram_usage_percentage())}%)"
             logging.info(f"Updating Memory voice channel with new Memory percent: {memory_percent}")
             await self.edit_stat_voice_channel(channel_name="Memory",
                                                stat=memory_percent,

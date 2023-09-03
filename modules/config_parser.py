@@ -361,6 +361,11 @@ class TautulliConfig(ConfigSection):
                                               env_name_override="TC_USE_FRIENDLY_NAMES")
 
     @property
+    def thousands_separator(self) -> str:
+        return self._customization._get_value(key='ThousandsSeparator', default="",
+                                              env_name_override="TC_THOUSANDS_SEPARATOR")
+
+    @property
     def _performance_voice_channel_settings(self) -> ConfigSection:
         return self._voice_channels._get_subsection(key="Performance")
 
@@ -475,9 +480,9 @@ class Config:
             self.pull_from_env = True
             logging.debug(f"Config file not found: {config_path}, falling back to environment variables")
 
-        self.tautulli = TautulliConfig(self.config, self.pull_from_env)
-        self.discord = DiscordConfig(self.config, self.pull_from_env)
-        self.extras = ExtrasConfig(self.config, self.pull_from_env)
+        self.tautulli = TautulliConfig(self.config, pull_from_env=self.pull_from_env)
+        self.discord = DiscordConfig(self.config, pull_from_env=self.pull_from_env)
+        self.extras = ExtrasConfig(self.config, pull_from_env=self.pull_from_env)
         self.performance = {
             statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_name,
             statics.KEY_PERFORMANCE_MONITOR_CPU: self.extras._performance_monitor_cpu,
@@ -533,6 +538,7 @@ class Config:
             "Tautulli - Customization - Anonymize - Hide Progress": self.tautulli._anonymize_hide_progress,
             "Tautulli - Customization - Anonymize - Hide ETA": self.tautulli._anonymize_hide_eta,
             "Tautulli - Customization - Use Friendly Names": self.tautulli._use_friendly_names,
+            "Tautulli - Customization - Thousands Separator": self.tautulli.thousands_separator,
             "Tautulli - Customization - Voice Channels - Performance - Voice Channel Category Name": self.tautulli._performance_voice_channel_name,
             "Discord - Connection - Bot Token": "Exists" if self.discord.bot_token else "Not Set",
             "Discord - Connection - Server ID": self.discord.server_id,
