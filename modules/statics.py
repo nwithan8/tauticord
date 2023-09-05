@@ -72,8 +72,11 @@ _  /   _  ___ / /_/ / _  /   __/ /  / /___  / /_/ /_  _, _/_  /_/ /
 def splash_logo() -> str:
     version = VERSION
     if "GITHUB" in version:
-        last_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
-        version = f"git-{last_commit[:7]}"
+        try:
+            last_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
+            version = f"git-{last_commit[:7]}"
+        except subprocess.SubprocessError:
+            version = "git-unknown-commit"
     return f"""
 {ASCII_ART}
 Version {version}, Python {sys.version}
