@@ -82,12 +82,6 @@ class TautulliConfig(ConfigSection):
         return self._get_subsection(key="Customization")
 
     @property
-    def has_plex_pass(self) -> bool:
-        value = self._customization._get_value(key="PlexPass", env_name_override="TC_PLEX_PASS",
-                                               default=False)
-        return _extract_bool(value)
-
-    @property
     def refresh_interval(self) -> int:
         value = self._customization._get_value(key='RefreshSeconds', default=15,
                                                env_name_override="TC_REFRESH_SECONDS")
@@ -502,7 +496,6 @@ class Config:
             "Tautulli - Connection - API Key": "Exists" if self.tautulli.api_key else "Not Set",
             "Tautulli - Connection - URL": self.tautulli.url,
             "Tautulli - Connection - Use Self-Signed Cert": self.tautulli.disable_ssl_verification,
-            "Tautulli - Customization - Has Plex Pass": self.tautulli.has_plex_pass,
             "Tautulli - Customization - Refresh Interval": self.tautulli.refresh_interval,
             "Tautulli - Customization - Server Name": self.tautulli.server_name,
             "Tautulli - Customization - Terminate Message": self.tautulli.terminate_message,

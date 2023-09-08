@@ -11,6 +11,9 @@ def make_plural(word, count: int, suffix_override: str = 's') -> str:
 def quote(string: str) -> str:
     return f"\"{string}\""
 
+def status_code_is_success(status_code: int) -> bool:
+    return 200 <= status_code < 300
+
 def format_fraction(number: float, denominator: int = 1, decimal_places: int = 1) -> str:
     if decimal_places <= 0:
         return f'{int(number / denominator):d}'

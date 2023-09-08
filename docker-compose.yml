@@ -11,7 +11,6 @@ services:
       TC_TAUTULLI_KEY: my_secret_api_key
       TC_TAUTULLI_URL: http://localhost:8181
       TC_USE_SELF_SIGNED_CERT: "False"
-      TC_PLEX_PASS: "False"
       TC_REFRESH_SECONDS: 15
       TC_TERMINATE_MESSAGE: "Your stream has ended."
       TC_SERVER_NAME: "My Plex Server"

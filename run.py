@@ -58,7 +58,6 @@ if __name__ == '__main__':
             api_key=config.tautulli.api_key,
             terminate_message=config.tautulli.terminate_message,
             analytics=analytics,
-            plex_pass=config.tautulli.has_plex_pass,
             time_manager=config.tautulli.time_manager,
             server_name=config.tautulli.server_name,
             text_manager=config.tautulli.text_manager,
