@@ -1,6 +1,7 @@
 from typing import List, Tuple, Union
 
 import discord
+import objectrest
 import tautulli
 
 import modules.logs as logging
@@ -9,6 +10,7 @@ from modules.emojis import EmojiManager
 from modules.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.text_manager import TextManager
 from modules.time_manager import TimeManager
+from modules.utils import status_code_is_success
 
 session_ids = {}
 
@@ -245,7 +247,6 @@ class TautulliConnector:
                  api_key: str,
                  terminate_message: str,
                  analytics,
-                 plex_pass: bool,
                  time_manager: TimeManager,
                  text_manager: TextManager,
                  server_name: str = None,
@@ -261,8 +262,10 @@ class TautulliConnector:
         self.server_name = server_name or self.api.server_friendly_name
         self.terminate_message = terminate_message
         self.analytics = analytics
-        self.plex_pass = plex_pass
         self.time_manager = time_manager
+
+        self.plex_details = self.api.server_info
+        self.plex_pass = False if not self.plex_details else self.plex_details.get('pms_plexpass', 0) == 1
 
         tautulli_version = self.api.shortcuts.api_version
         logging.debug(f"Connected to Tautulli version: {tautulli_version}")
@@ -279,6 +282,8 @@ class TautulliConnector:
         """
         global session_ids
         data = self.api.activity()
+
+        # Tautulli returned data (is online)
         if data:
             logging.debug(f"JSON returned by GET request: {data}")
             try:
@@ -304,11 +309,35 @@ class TautulliConnector:
                                             server_name=self.server_name), count, activity, self.is_plex_server_online()
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
+
+        # Tautulli did not return data (is offline)
+        is_plex_online = self.ping_pms_server_directly() # Check directly if Plex is online
         return TautulliDataResponse(activity=None,
                                     emoji_manager=emoji_manager,
                                     text_manager=self.text_manager,
                                     error_occurred=True,
-                                    server_name=self.server_name), 0, None, False  # If Tautulli is offline, assume Plex is offline
+                                    server_name=self.server_name), 0, None, is_plex_online
+
+    def ping_pms_server_directly(self) -> bool:
+        """
+        Ping Plex Media Server directly
+        :return: True if successfully reached, False otherwise
+        :rtype: bool
+        """
+        if not self.plex_details:
+            logging.error("Could not ping Plex Media Server directly: Plex details not found")
+            return False
+
+        try:
+            pms_url = self.plex_details.get('pms_url')
+            if not pms_url:
+                return False
+            status_code = objectrest.get(url=pms_url, verify=False).status_code
+            return status_code_is_success(status_code=status_code) or status_code == 401 # 401 is a success because it means we got a response
+        except Exception as e:
+            logging.error(f"Could not ping Plex Media Server directly: {e}")
+            return False
+
 
     def stop_stream(self, emoji, stream_number: int) -> str:
         """
