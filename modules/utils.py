@@ -76,6 +76,13 @@ def now_plus_milliseconds(milliseconds: int, timezone_code: str = None) -> datet
         now = datetime.now()
     return now + timedelta(milliseconds=milliseconds)
 
+def limit_text_length(text: str, limit: int, suffix: str = "...") -> str:
+    if len(text) <= limit:
+        return text
+
+    suffix_length = len(suffix)
+    return f"{text[:limit - suffix_length]}{suffix}"
+
 
 def string_to_datetime(date_string: str, template: str = "%Y-%m-%dT%H:%M:%S") -> datetime:
     """

@@ -17,6 +17,8 @@ voice_channel_order = {
     'remoteBandwidth': 5
 }
 
+MAX_EMBED_FIELD_NAME_LENGTH = 200 # 256 - estimated emojis + flairs + safety margin
+
 
 KEY_STATS_CATEGORY_NAME = "stats_category_name"
 KEY_COUNT = "count"
