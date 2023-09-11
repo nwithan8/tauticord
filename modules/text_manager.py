@@ -3,6 +3,7 @@ from typing import Dict, Any, Union
 from modules import statics, utils
 from modules.emojis import EmojiManager
 from modules.time_manager import TimeManager
+from modules.utils import limit_text_length
 
 
 class TextManager:
@@ -87,6 +88,7 @@ class TextManager:
         icon = session.get_status_icon(emoji_manager=emoji_manager)
         media_type_icon = session.get_type_icon(emoji_manager=emoji_manager)
         title = session.title
+        title = limit_text_length(text=title, limit=statics.MAX_EMBED_FIELD_NAME_LENGTH)
         return f"""{emoji} | {icon} {media_type_icon} *{title}*"""
 
     def session_body(self, session, emoji_manager: EmojiManager) -> str:
