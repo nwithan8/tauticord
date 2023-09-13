@@ -150,6 +150,36 @@ You can also set these variables via a configuration file:
 Please note, if the `config.yaml` file is present, the application will ONLY use this file for
 configuration. If you are going to use it, you need to fill it out in its entirety.
 
+### Run Command
+
+With Docker installed, run the following command to start Tauticord:
+
+Using environmental variables:
+```shell
+docker run -d \
+  --name tauticord \
+  -v /path/to/logs/folder:/logs \
+  -e TC_DISCORD_BOT_TOKEN=YOUR_DISCORD_BOT_TOKEN \
+  -e TC_DISCORD_SERVER_ID=YOUR_DISCORD_SERVER_ID \
+  -e TC_TAUTULLI_URL=YOUR_TAUTULLI_URL \
+  -e TC_TAUTULLI_KEY=YOUR_TAUTULLI_KEY \
+  nwithan8/tauticord:latest
+```
+
+Using a configuration file:
+```shell
+docker run -d \
+  --name tauticord \
+  -v /path/to/logs/folder:/logs \
+  -v /path/to/config/folder:/config \
+  nwithan8/tauticord:latest
+```
+
+Using Docker Compose:
+```shell
+docker-compose -f /path/to/your/docker-compose.yml up -d
+```
+
 ## Run without Docker
 
 You can run Tauticord outside of Docker by cloning this repository and either:
