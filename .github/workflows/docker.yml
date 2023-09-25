@@ -31,11 +31,11 @@ jobs:
         id: vars
         run: |
           VERSION=${{ github.event.inputs.version || github.ref_name }}
-          ARCH=${{ matrix.platform | sed 's/linux\///g' }}
+          ARCH=${{ matrix.platform }}
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=today::$(date +'%Y-%m-%d')
           echo "::set-output name=year::$(date +'%Y')"
-          echo "::set-output name=arch::${ARCH}"
+          echo "::set-output name=arch::$(echo $ARCH | cut -d'/' -f2)"
 
       - name: Update version number
         uses: jacobtomlinson/gha-find-replace@2.0.0
