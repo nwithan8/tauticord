@@ -29,8 +29,6 @@ Bot will use config, in order:
 3. Environmental variables
 """
 parser.add_argument("-c", "--config", help="Path to config file", default=DEFAULT_CONFIG_PATH)
-
-# Should include trailing backslash
 parser.add_argument("-l", "--log", help="Log file directory", default=DEFAULT_LOG_DIR)
 
 args = parser.parse_args()
