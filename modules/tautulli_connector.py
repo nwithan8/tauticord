@@ -375,6 +375,7 @@ class TautulliConnector:
 
     def get_library_item_count(self, library_name: str, emoji_manager: EmojiManager, visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
         library_info = self.get_library_info(library_name=library_name)
+        logging.debug(f"JSON returned by GET request: {library_info}")
         if not library_info:
             return [('', 0)]
         library_type = library_info.get('section_type')
