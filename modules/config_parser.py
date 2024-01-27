@@ -184,6 +184,12 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def plex_status_use_emoji(self) -> bool:
+        value = self._stats_voice_channels._get_value(key="PlexStatusUseEmoji", default=False,
+                                                      env_name_override="TC_VC_PLEX_STATUS_USE_EMOJI")
+        return _extract_bool(value)
+
+    @property
     def plex_status_channel_id(self) -> int:
         value = self._stats_voice_channels._get_value(key="PlexStatusChannelID", default=0,
                                                       env_name_override="TC_VC_PLEX_STATUS_CHANNEL_ID")
@@ -275,6 +281,7 @@ class TautulliConfig(ConfigSection):
             statics.KEY_REMOTE_BANDWIDTH: self.display_remote_bandwidth,
             statics.KEY_STATS: self.display_library_stats,
             statics.KEY_PLEX_STATUS: self.display_plex_status,
+            statics.KEY_PLEX_STATUS_USE_EMOJI: self.plex_status_use_emoji,
             statics.KEY_REFRESH_TIME: self.library_refresh_interval,
             statics.KEY_LIBRARIES_CATEGORY_NAME: self.libraries_voice_channel_category_name,
             statics.KEY_LIBRARIES: self.library_names,

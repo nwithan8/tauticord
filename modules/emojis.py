@@ -98,6 +98,14 @@ class EmojiManager:
             "track": "🎵",
             "tracks": "🎵",
             "unknown": "❓",
+            "status": "⏱️",
+            "status_online": "🟢",
+            "status_offline": "🔴",
+            "current_streams": "🌊",
+            "current_transcodes": "💦",
+            "local_bandwidth": "🏠",
+            "remote_bandwidth": "🌐",
+            "total_bandwidth": "📶",
         }
 
     @property

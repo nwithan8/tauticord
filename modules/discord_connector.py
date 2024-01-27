@@ -394,7 +394,8 @@ class DiscordConnector:
 
         await self.update_live_voice_channels(activity=activity,
                                               plex_online=plex_online,
-                                              category=self.tautulli_stats_voice_category)
+                                              category=self.tautulli_stats_voice_category,
+                                              use_status_emoji=True)
 
         # Skip updating the summary message if the setting is disabled
         if not self.use_summary_message:
@@ -549,6 +550,8 @@ class DiscordConnector:
         if self.voice_channel_settings.get(statics.KEY_PLEX_STATUS, False):
             status = "Online" if plex_online else "Offline"
             logging.info(f"Updating Plex Status voice channel with new status: {status}")
+            if self.voice_channel_settings.get(statics.KEY_PLEX_STATUS_USE_EMOJI, False):
+                status = self.emoji_manager.get_emoji(key=f'plex_{status.lower()}')
             await self.edit_stat_voice_channel(channel_name="Plex Status",
                                                channel_id=self.get_voice_channel_id(key=statics.KEY_PLEX_STATUS_CHANNEL_ID),
                                                stat=status,

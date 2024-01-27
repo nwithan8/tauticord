@@ -120,6 +120,7 @@ You will need to set the following environment variables:
 | TC_VC_REMOTE_BANDWIDTH            | No       | Whether to display current remote bandwidth in a voice channel                                                                                                              | "False"                                 |
 | TC_VC_REMOTE_BANDWIDTH_CHANNEL_ID | No       | Optional ID of the Discord voice channel to display remote bandwidth (see [Voice Channels](#voice-channels))                                                                | 0                                       |
 | TC_VC_PLEX_STATUS                 | No       | Whether to display Plex online status in a voice channel                                                                                                                    | "False"                                 |
+| TC_VC_PLEX_STATUS_USE_EMOJI       | No       | Whether to use emojis to symbolize Plex online status                                                                                                                       | "False"                                 |
 | TC_VC_PLEX_STATUS_CHANNEL_ID      | No       | Optional ID of the Discord voice channel to display Plex online status (see [Voice Channels](#voice-channels))                                                              | 0                                       |
 | TC_VC_LIBRARIES_CATEGORY_NAME     | No       | Name of the libraries voice channel category                                                                                                                                | "Tautulli Libraries"                    |                                  
 | TC_VC_LIBRARY_STATS               | No       | Whether to display library statistics in voice channels                                                                                                                     | "False"                                 |
@@ -155,6 +156,7 @@ configuration. If you are going to use it, you need to fill it out in its entire
 With Docker installed, run the following command to start Tauticord:
 
 Using environmental variables:
+
 ```shell
 docker run -d \
   --name tauticord \
@@ -167,6 +169,7 @@ docker run -d \
 ```
 
 Using a configuration file:
+
 ```shell
 docker run -d \
   --name tauticord \
@@ -176,6 +179,7 @@ docker run -d \
 ```
 
 Using Docker Compose:
+
 ```shell
 docker-compose -f /path/to/your/docker-compose.yml up -d
 ```
