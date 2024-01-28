@@ -394,8 +394,7 @@ class DiscordConnector:
 
         await self.update_live_voice_channels(activity=activity,
                                               plex_online=plex_online,
-                                              category=self.tautulli_stats_voice_category,
-                                              use_status_emoji=True)
+                                              category=self.tautulli_stats_voice_category)
 
         # Skip updating the summary message if the setting is disabled
         if not self.use_summary_message:
