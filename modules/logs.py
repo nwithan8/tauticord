@@ -1,7 +1,9 @@
 import logging
 import os
+from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from typing import Optional
+from pytz import timezone
 
 _nameToLevel = {
     'CRITICAL': logging.CRITICAL,
@@ -32,6 +34,8 @@ def init(app_name: str,
     logger.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('%(asctime)s - [%(levelname)s]: %(message)s')
+    timezone_abbr = os.getenv('TZ', 'UTC')  # Due to chicken-egg issue, we can't parse the timezone from config, only from env
+    formatter.converter = lambda *args: datetime.now(tz=timezone(timezone_abbr)).timetuple()
 
     # Console logging
     console_logger = logging.StreamHandler()
