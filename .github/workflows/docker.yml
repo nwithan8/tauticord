@@ -31,6 +31,12 @@ jobs:
           echo "today=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
           echo "year=$(date +'%Y')" >> "$GITHUB_OUTPUT"
 
+      - name: Display variables
+        run: |
+          echo "Version: ${{ steps.vars.outputs.version }}"
+          echo "Today: ${{ steps.vars.outputs.today }}"
+          echo "Year: ${{ steps.vars.outputs.year }}"
+
       - name: Update version number
         uses: jacobtomlinson/gha-find-replace@2.0.0
         with:

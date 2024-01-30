@@ -21,6 +21,12 @@ jobs:
           echo "today=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
           echo "year=$(date +'%Y')" >> "$GITHUB_OUTPUT"
 
+      - name: Display variables
+        run: |
+          echo "Version: ${{ steps.vars.outputs.version }}"
+          echo "Today: ${{ steps.vars.outputs.today }}"
+          echo "Year: ${{ steps.vars.outputs.year }}"
+
       - name: Open PR with template changes to unraid_templates
         uses: nwithan8/action-pull-request-another-repo@v1.1.1
         env:
