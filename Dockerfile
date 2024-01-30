@@ -1,9 +1,14 @@
-# Python 3.10 and Node 18 pre-installed on Alpine Linux
-FROM nikolaik/python-nodejs:python3.10-nodejs18-alpine
+# Python 3.10 pre-installed on Alpine Linux
+FROM python:3.10-alpine3.18
 WORKDIR /app
 
 # Install Python utilities
 RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc bash linux-headers
+
+# Install latest Node.js and npm
+RUN apk add --no-cache nodejs npm
+# Downgrade Node.js to v18 due to arm v7 architecture incompatibility: https://github.com/parse-community/parse-server/pull/8905
+RUN npm install -g node@18
 
 # Install pm2
 RUN npm install pm2 -g
