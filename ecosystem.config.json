@@ -2,7 +2,7 @@
   "apps": [
     {
       "name": "keepalive",
-      "interpreter": "python",
+      "interpreter": "/app/venv/bin/python",
       "script": "pm2_keepalive.py",
       "autorestart": true,
       "exec_mode": "fork",
