@@ -17,9 +17,9 @@ jobs:
       - name: Establish variables
         id: vars
         run: |
-          VERSION=${{ github.event.inputs.version || github.ref_name }}
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=today::$(date +'%Y-%m-%d')
+          echo "version=${{ github.event.inputs.version || github.ref_name }}" >> "$GITHUB_OUTPUT"
+          echo "today=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+          echo "year=$(date +'%Y')" >> "$GITHUB_OUTPUT"
 
       - name: Open PR with template changes to unraid_templates
         uses: nwithan8/action-pull-request-another-repo@v1.1.1
