@@ -40,7 +40,7 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
-            --tag test/${{ matrix.arch }}:latest \
+            -t test \
             --file Dockerfile \
             .
       - name: Run Docker image
@@ -49,6 +49,5 @@ jobs:
             --rm \
             -w ${{ github.workspace }} \
             --platform linux/${{ matrix.arch }} \
-            test/${{ matrix.arch }}:latest \
-            uname -a
+            test
         # Bot inside will fail because environment variables are not set
