@@ -17,7 +17,7 @@ jobs:
       - name: Establish variables
         id: vars
         run: |
-          echo "version=${{ github.event.inputs.version || github.ref_name }}" >> "$GITHUB_OUTPUT"
+          echo "version=${{ github.event.inputs.version || github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
           echo "today=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
           echo "year=$(date +'%Y')" >> "$GITHUB_OUTPUT"
 
