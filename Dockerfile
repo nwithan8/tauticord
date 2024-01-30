@@ -1,13 +1,16 @@
-FROM keymetrics/pm2:18-alpine
+FROM python:3.10-alpine3.18
 WORKDIR /app
 
-# Install Python and other utilities
-RUN apk add --no-cache --update alpine-sdk git wget python3 python3-dev ca-certificates musl-dev libc-dev gcc bash nano linux-headers && \
+# Install Python utilities
+RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc bash linux-headers && \
     python3 -m ensurepip && \
     pip3 install --no-cache-dir --upgrade pip setuptools
 
-# Install pm2-logrotate
-RUN pm2 install pm2-logrotate
+# Install Node.js
+RUN apk add --update npm
+
+# Install pm2
+RUN npm install pm2 -g
 
 # Copy requirements.txt from build machine to WORKDIR (/app) folder (important we do this BEFORE copying the rest of the files to avoid re-running pip install on every code change)
 COPY requirements.txt requirements.txt
@@ -33,4 +36,4 @@ RUN echo "**** removing unneeded files ****"
 RUN rm -rf /app/requirements.txt
 
 # Run the app
-CMD [ "pm2-runtime", "start", "ecosystem.config.json" ]
+CMD [ "pm2-runtime", "start", "ecosystem.config.json"]

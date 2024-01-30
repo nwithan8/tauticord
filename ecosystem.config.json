@@ -9,13 +9,17 @@
       "instances": 1
     },
     {
-      "name": "monitor",
+      "name": "tauticord",
       "interpreter": "python",
       "script": "run.py",
       "autorestart": true,
-      "watch": false,
+      // Auto restart on config change
+      "watch": ["/config"],
+      "watch_delay": 1000,
       "exec_mode": "fork",
-      "instances": 1
+      "instances": 1,
+      // 101 - Discord login failed
+      "stop_exit_codes": [101]
     }
   ]
 }
