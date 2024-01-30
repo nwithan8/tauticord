@@ -141,3 +141,4 @@ cython_debug/
 config.yaml
 /docker-compose_test.yml
 /scratch.py
+/on_host/

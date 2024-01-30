@@ -18,6 +18,7 @@ from consts import (
 from modules.analytics import GoogleAnalytics
 from modules.config_parser import Config
 from modules.statics import splash_logo
+from modules.errors import determine_exit_code
 
 # Parse arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
@@ -83,4 +84,6 @@ if __name__ == '__main__':
         discord_connector.connect()
     except Exception as e:
         logging.fatal(f"Fatal error occurred. Shutting down: {e}")
-        exit(1)  # Exit the script if an error bubbles up (like an internet connection error)
+        exit_code = determine_exit_code(exception=e)
+        logging.fatal(f"Exiting with code {exit_code}")
+        exit(exit_code)  # Exit the script if an error bubbles up (like an internet connection error)
