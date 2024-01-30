@@ -1,13 +1,9 @@
-FROM python:3.10-alpine3.18
+# Python 3.10 and Node 18 pre-installed on Alpine Linux
+FROM nikolaik/python-nodejs:python3.10-nodejs18-alpine
 WORKDIR /app
 
 # Install Python utilities
-RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc bash linux-headers && \
-    python3 -m ensurepip && \
-    pip3 install --no-cache-dir --upgrade pip setuptools
-
-# Install Node.js
-RUN apk add --update npm
+RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc bash linux-headers
 
 # Install pm2
 RUN npm install pm2 -g
