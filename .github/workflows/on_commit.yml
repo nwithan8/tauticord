@@ -39,7 +39,7 @@ jobs:
       - name: Build Docker image
         id: build
         run: |
-          echo "image_id=$(docker buildx build --platform linux/${{ matrix.arch }} --tag 'test' --file Dockerfile -q .)" >> $GITHUB_OUTPUT
+          echo "image_id=$(docker buildx build --platform linux/${{ matrix.arch }} --push --tag 'test' --file Dockerfile -q .)" >> $GITHUB_OUTPUT
       - name: Run Docker image
         run: |
           docker run \
