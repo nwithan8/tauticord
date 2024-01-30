@@ -39,3 +39,5 @@ jobs:
       - name: Build and Run Docker image
         run: docker run --rm --platform linux/${{ matrix.arch }} -e "TC_DOCKER_KILL_SWITCH=True" $(docker buildx build --platform linux/${{ matrix.arch }} --load --file Dockerfile -q .)
         # Bot inside will fail because environment variables are not set
+      - name: Stop all Docker containers
+        run: docker stop $(docker ps -a -q)
