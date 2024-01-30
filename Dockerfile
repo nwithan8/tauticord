@@ -1,14 +1,9 @@
-# Python 3.10 pre-installed on Alpine Linux
-FROM python:3.10-alpine3.18
+# Node.js 18.19 pre-installed on Alpine Linux 3.19
+FROM node:18.19.0-alpine3.19
 WORKDIR /app
 
 # Install Python utilities
-RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc bash linux-headers
-
-# Install latest Node.js and npm
-RUN apk add --no-cache nodejs npm
-# Downgrade Node.js to v18 due to arm v7 architecture incompatibility: https://github.com/parse-community/parse-server/pull/8905
-RUN npm install -g node@18
+RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip
 
 # Install pm2
 RUN npm install pm2 -g
@@ -16,8 +11,12 @@ RUN npm install pm2 -g
 # Copy requirements.txt from build machine to WORKDIR (/app) folder (important we do this BEFORE copying the rest of the files to avoid re-running pip install on every code change)
 COPY requirements.txt requirements.txt
 
+# Create virtual environment for Python
+RUN python3 -m venv /app/venv
+RUN . /app/venv/bin/activate
+
 # Install Python requirements
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Make Docker /config volume for optional config file
 VOLUME /config
