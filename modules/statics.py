@@ -62,6 +62,8 @@ KEY_PERFORMANCE_CATEGORY_NAME = "performance_category_name"
 KEY_PERFORMANCE_MONITOR_CPU = "performance_monitor_cpu"
 KEY_PERFORMANCE_MONITOR_MEMORY = "performance_monitor_memory"
 
+KEY_DOCKER_KILL_SWITCH = "docker_kill_switch"
+
 
 MAX_STREAM_COUNT = 36
 

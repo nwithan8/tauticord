@@ -50,6 +50,11 @@ if __name__ == '__main__':
     logging.info(splash_logo())
     logging.info("Starting Tauticord...")
 
+    # Used by GitHub Actions to stop the bot from running during tests
+    if config.extras._docker_kill_switch:
+        logging.info("Docker kill switch is enabled. Exiting...")
+        exit(201)
+
     # noinspection PyBroadException
     try:
         tautulli_connector = tautulli.TautulliConnector(

@@ -466,6 +466,12 @@ class ExtrasConfig(ConfigSection):
                                              env_name_override="TC_MONITOR_MEMORY")
         return _extract_bool(value)
 
+    @property
+    def _docker_kill_switch(self) -> bool:
+        value = self._get_value(key="DockerKillSwitch", default=False,
+                                env_name_override="TC_DOCKER_KILL_SWITCH")
+        return _extract_bool(value)
+
 
 class Config:
     def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True):

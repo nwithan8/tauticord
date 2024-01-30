@@ -37,5 +37,5 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Build and Run Docker image
-        run: docker run --rm --platform linux/${{ matrix.arch }} $(docker buildx build --platform linux/${{ matrix.arch }} --load --file Dockerfile -q .)
+        run: docker run --rm --platform linux/${{ matrix.arch }} -e "TC_DOCKER_KILL_SWITCH=True" $(docker buildx build --platform linux/${{ matrix.arch }} --load --file Dockerfile -q .)
         # Bot inside will fail because environment variables are not set
