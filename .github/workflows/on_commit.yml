@@ -36,15 +36,6 @@ jobs:
           platforms: ${{ matrix.arch }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build Docker image
-        id: build
-        run: |
-          echo "image_id=$(docker buildx build --platform linux/${{ matrix.arch }} --push --tag 'test' --file Dockerfile -q .)" >> $GITHUB_OUTPUT
-      - name: Run Docker image
-        run: |
-          docker run \
-            --rm \
-            -w ${{ github.workspace }} \
-            --platform linux/${{ matrix.arch }} \
-            ${{ steps.build.outputs.image_id }}
+      - name: Build and Run Docker image
+        run: docker run --rm --platform linux/${{ matrix.arch }} $(docker buildx build --platform linux/${{ matrix.arch }} --load --file Dockerfile -q .)
         # Bot inside will fail because environment variables are not set
