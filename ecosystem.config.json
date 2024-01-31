@@ -15,6 +15,8 @@
       "autorestart": true,
       // Auto restart on config change
       "watch": ["/config"],
+      // Ignore specific folders
+      "ignore_watch": ["logs", "/config/logs"],
       "watch_delay": 1000,
       "exec_mode": "fork",
       "instances": 1,
