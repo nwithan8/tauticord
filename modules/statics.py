@@ -86,3 +86,6 @@ Version {version}, Python {sys.version}
 
 {COPYRIGHT}
 """
+
+INFO_SUMMARY = f"""Version: {VERSION}
+"""
