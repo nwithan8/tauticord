@@ -172,6 +172,20 @@ def valid_reaction(reaction_emoji: discord.PartialEmoji,
         return False
     return True
 
+def build_response(message: discord.Message, bot_id: int, admin_ids: List[str]) -> Union[str, None]:
+    # If message does not mention the bot, return None
+    if bot_id not in [user.id for user in message.mentions]:
+        return None
+
+    author_id = str(message.author.id)
+    if author_id == "DISCORDIDADDEDBYGITHUB":
+        return "Hello, creator!"
+
+    if author_id not in admin_ids:
+        return None
+
+    # Message mentions the bot and is from an admin
+    return statics.INFO_SUMMARY
 
 def get_voice_channel_position(stat_type: str) -> int:
     return statics.voice_channel_order.get(stat_type, None)
@@ -222,6 +236,7 @@ class DiscordConnector:
         self.client = discord.Client(intents=intents)
         self.on_ready = self.client.event(self.on_ready)
         self.on_raw_reaction_add = self.client.event(self.on_raw_reaction_add)
+        self.on_message = self.client.event(self.on_message)
 
         self.current_message = None
 
@@ -312,6 +327,12 @@ class DiscordConnector:
             end_notification = await self.stop_tautulli_stream_via_reaction_emoji(emoji=emoji, message=message)
             if end_notification:
                 await end_notification.delete(delay=5)  # delete after 5 seconds
+
+    async def on_message(self, message: discord.Message) -> None:
+        response = build_response(message=message, bot_id=self.client.user.id, admin_ids=self.admin_ids)
+
+        if response:
+            await message.channel.send(response)
 
     async def collect_guild_emojis(self) -> tuple[Emoji, ...]:
         # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
