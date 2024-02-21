@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
+from typing import List
 
 from pytz import timezone
+
+from modules.statics import ENCODING_SEPARATOR_1, ENCODING_SEPARATOR_2
 
 
 def make_plural(word, count: int, suffix_override: str = 's') -> str:
@@ -8,11 +11,14 @@ def make_plural(word, count: int, suffix_override: str = 's') -> str:
         return f"{word}{suffix_override}"
     return word
 
+
 def quote(string: str) -> str:
     return f"\"{string}\""
 
+
 def status_code_is_success(status_code: int) -> bool:
     return 200 <= status_code < 300
+
 
 def format_fraction(number: float, denominator: int = 1, decimal_places: int = 1) -> str:
     if decimal_places <= 0:
@@ -20,10 +26,12 @@ def format_fraction(number: float, denominator: int = 1, decimal_places: int = 1
     else:
         return f'{float(number / denominator):.{decimal_places}f}'
 
+
 def format_thousands(number: int, delimiter: str = "") -> str:
     if number < 1000:
         return str(number)
     return f"{format_thousands(number // 1000, delimiter)}{delimiter}{number % 1000:03d}"
+
 
 def human_bitrate(_bytes, decimal_places: int = 1) -> str:
     # Return the given bitrate as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
@@ -64,10 +72,12 @@ def milliseconds_to_minutes_seconds(milliseconds: int) -> str:
         seconds = f"0{seconds}"
     return f"{minutes}:{seconds}"
 
+
 def now(timezone_code: str = None) -> datetime:
     if timezone_code:
         return datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
     return datetime.now()
+
 
 def now_plus_milliseconds(milliseconds: int, timezone_code: str = None) -> datetime:
     if timezone_code:
@@ -75,6 +85,7 @@ def now_plus_milliseconds(milliseconds: int, timezone_code: str = None) -> datet
     else:
         now = datetime.now()
     return now + timedelta(milliseconds=milliseconds)
+
 
 def limit_text_length(text: str, limit: int, suffix: str = "...") -> str:
     if len(text) <= limit:
@@ -113,6 +124,7 @@ def datetime_to_string(datetime_object: datetime, template: str = "%Y-%m-%dT%H:%
     """
     return datetime_object.strftime(template)
 
+
 def bold(string: str) -> str:
     """
     Return a string wrapped in bold markdown
@@ -123,6 +135,7 @@ def bold(string: str) -> str:
     :rtype: str
     """
     return f"**{string}**"
+
 
 def italic(string: str) -> str:
     """
@@ -135,6 +148,7 @@ def italic(string: str) -> str:
     """
     return f"*{string}*"
 
+
 def underline(string: str) -> str:
     """
     Return a string wrapped in underline markdown
@@ -145,6 +159,7 @@ def underline(string: str) -> str:
     :rtype: str
     """
     return f"__{string}__"
+
 
 def strikethrough(string: str) -> str:
     """
@@ -157,6 +172,7 @@ def strikethrough(string: str) -> str:
     """
     return f"~~{string}~~"
 
+
 def code(string: str) -> str:
     """
     Return a string wrapped in code markdown
@@ -167,6 +183,7 @@ def code(string: str) -> str:
     :rtype: str
     """
     return f"`{string}`"
+
 
 def code_block(string: str, language: str = "") -> str:
     """
@@ -181,6 +198,7 @@ def code_block(string: str, language: str = "") -> str:
     """
     return f"```{language}\n{string}```"
 
+
 def inline_code_block(string: str) -> str:
     """
     Return a string wrapped in inline code block markdown
@@ -191,6 +209,7 @@ def inline_code_block(string: str) -> str:
     :rtype: str
     """
     return f"`{string}`"
+
 
 def block_quote(string: str) -> str:
     """
@@ -203,6 +222,7 @@ def block_quote(string: str) -> str:
     """
     return f"> {string}"
 
+
 def inline_quote(string: str) -> str:
     """
     Return a string wrapped in inline quote markdown
@@ -214,6 +234,7 @@ def inline_quote(string: str) -> str:
     """
     return f">> {string}"
 
+
 def spoiler(string: str) -> str:
     """
     Return a string wrapped in spoiler markdown
@@ -224,6 +245,7 @@ def spoiler(string: str) -> str:
     :rtype: str
     """
     return f"||{string}||"
+
 
 def link(string: str, url: str) -> str:
     """
@@ -238,6 +260,7 @@ def link(string: str, url: str) -> str:
     """
     return f"[{string}]({url})"
 
+
 def mention(string: str, user_id: str) -> str:
     """
     Return a string wrapped in mention markdown
@@ -250,6 +273,7 @@ def mention(string: str, user_id: str) -> str:
     :rtype: str
     """
     return f"<@{user_id}>"
+
 
 def channel_mention(string: str, channel_id: str) -> str:
     """
@@ -264,6 +288,7 @@ def channel_mention(string: str, channel_id: str) -> str:
     """
     return f"<#{channel_id}>"
 
+
 def role_mention(string: str, role_id: str) -> str:
     """
     Return a string wrapped in role mention markdown
@@ -276,6 +301,7 @@ def role_mention(string: str, role_id: str) -> str:
     :rtype: str
     """
     return f"<@&{role_id}>"
+
 
 def emoji(string: str, emoji_id: str) -> str:
     """
@@ -290,6 +316,7 @@ def emoji(string: str, emoji_id: str) -> str:
     """
     return f"<:{string}:{emoji_id}>"
 
+
 def custom_emoji(string: str, emoji_id: str) -> str:
     """
     Return a string wrapped in custom emoji markdown
@@ -302,6 +329,7 @@ def custom_emoji(string: str, emoji_id: str) -> str:
     :rtype: str
     """
     return f"<:{string}:{emoji_id}>"
+
 
 def custom_emoji_animated(string: str, emoji_id: str) -> str:
     """
@@ -316,6 +344,7 @@ def custom_emoji_animated(string: str, emoji_id: str) -> str:
     """
     return f"<a:{string}:{emoji_id}>"
 
+
 def custom_emoji_url(string: str, emoji_id: str) -> str:
     """
     Return a string wrapped in custom emoji markdown
@@ -328,6 +357,7 @@ def custom_emoji_url(string: str, emoji_id: str) -> str:
     :rtype: str
     """
     return f"[{string}](https://cdn.discordapp.com/emojis/{emoji_id})"
+
 
 def custom_emoji_animated_url(string: str, emoji_id: str) -> str:
     """
@@ -342,6 +372,7 @@ def custom_emoji_animated_url(string: str, emoji_id: str) -> str:
     """
     return f"[{string}](https://cdn.discordapp.com/emojis/{emoji_id}.gif)"
 
+
 def custom_emoji_name(string: str, emoji_id: str) -> str:
     """
     Return a string wrapped in custom emoji markdown
@@ -354,6 +385,7 @@ def custom_emoji_name(string: str, emoji_id: str) -> str:
     :rtype: str
     """
     return f":{string}:"
+
 
 def custom_emoji_animated_name(string: str, emoji_id: str) -> str:
     """
@@ -368,6 +400,7 @@ def custom_emoji_animated_name(string: str, emoji_id: str) -> str:
     """
     return f":{string}:"
 
+
 def discord_text_channel_name_format(string: str) -> str:
     """
     Return a string formatted as a discord text channel name
@@ -380,3 +413,30 @@ def discord_text_channel_name_format(string: str) -> str:
     # lowercase and replace spaces with dashes
     string = string.lower().replace(" ", "-")
     return string
+
+
+def encode_combined_tautulli_libraries(name: str, libraries: List[str]) -> str:
+    """
+    Return a string encoded with the given name and libraries
+
+    :param name: name to encode
+    :type name: str
+    :param libraries: list of libraries to encode
+    :type libraries: list
+    :return: string encoded with the given name and libraries
+    :rtype: str
+    """
+    return f"{name}{ENCODING_SEPARATOR_1}{ENCODING_SEPARATOR_2.join(libraries)}"
+
+
+def decode_combined_tautulli_libraries(encoded_string: str) -> tuple[str, List[str]]:
+    """
+    Return a tuple of the name and libraries decoded from the given string
+
+    :param encoded_string: string to decode
+    :type encoded_string: str
+    :return: tuple of the name and libraries decoded from the given string
+    :rtype: tuple
+    """
+    name, libraries = encoded_string.split(ENCODING_SEPARATOR_1)
+    return name, libraries.split(ENCODING_SEPARATOR_2)

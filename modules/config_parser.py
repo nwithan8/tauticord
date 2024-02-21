@@ -241,6 +241,20 @@ class TautulliConfig(ConfigSection):
         return names
 
     @property
+    def combined_library_names(self) ->  List[str]:
+        values = []
+
+        data = self._libraries_voice_channels._get_value(key="CombinedLibraries", default={}, env_name_override="TC_VC_COMBINED_LIBRARIES")
+
+        if isinstance(data, str):
+            return data.split(",")
+
+        for name, libraries in data.items():
+            values.append(utils.encode_combined_tautulli_libraries(name=name, libraries=libraries))
+
+        return values
+
+    @property
     def use_emojis_with_library_names(self) -> bool:
         value = self._libraries_voice_channels._get_value(key="UseEmojis", default=True,
                                                           env_name_override="TC_VC_LIBRARY_USE_EMOJIS")
@@ -285,6 +299,7 @@ class TautulliConfig(ConfigSection):
             statics.KEY_REFRESH_TIME: self.library_refresh_interval,
             statics.KEY_LIBRARIES_CATEGORY_NAME: self.libraries_voice_channel_category_name,
             statics.KEY_LIBRARIES: self.library_names,
+            statics.KEY_COMBINED_LIBRARIES: self.combined_library_names,
             statics.KEY_USE_EMOJIS: self.use_emojis_with_library_names,
             statics.KEY_SHOW_TV_EPISODES: self.show_tv_episode_count,
             statics.KEY_SHOW_TV_SERIES: self.show_tv_series_count,
@@ -524,6 +539,7 @@ class Config:
             "Tautulli - Customization - Voice Channels - Libraries - Display Library Stats": self.tautulli.display_library_stats,
             "Tautulli - Customization - Voice Channels - Libraries - Library Refresh Interval": self.tautulli.library_refresh_interval,
             "Tautulli - Customization - Voice Channels - Libraries - Library Names": self.tautulli.library_names,
+            "Tautulli - Customization - Voice Channels - Libraries - Combined Libraries": self.tautulli.combined_library_names,
             "Tautulli - Customization - Voice Channels - Libraries - Use Emojis With Library Names": self.tautulli.use_emojis_with_library_names,
             "Tautulli - Customization - Voice Channels - Libraries - Show TV Series Count": self.tautulli.show_tv_series_count,
             "Tautulli - Customization - Voice Channels - Libraries - Show TV Episode Count": self.tautulli.show_tv_episode_count,

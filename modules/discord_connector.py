@@ -172,6 +172,7 @@ def valid_reaction(reaction_emoji: discord.PartialEmoji,
         return False
     return True
 
+
 def build_response(message: discord.Message, bot_id: int, admin_ids: List[str]) -> Union[str, None]:
     # If message does not mention the bot, return None
     if bot_id not in [user.id for user in message.mentions]:
@@ -186,6 +187,7 @@ def build_response(message: discord.Message, bot_id: int, admin_ids: List[str]) 
 
     # Message mentions the bot and is from an admin
     return statics.INFO_SUMMARY
+
 
 def get_voice_channel_position(stat_type: str) -> int:
     return statics.voice_channel_order.get(stat_type, None)
@@ -573,7 +575,8 @@ class DiscordConnector:
             if self.voice_channel_settings.get(statics.KEY_PLEX_STATUS_USE_EMOJI, False):
                 status = self.emoji_manager.get_emoji(key=f'plex_{status.lower()}')
             await self.edit_stat_voice_channel(channel_name="Plex Status",
-                                               channel_id=self.get_voice_channel_id(key=statics.KEY_PLEX_STATUS_CHANNEL_ID),
+                                               channel_id=self.get_voice_channel_id(
+                                                   key=statics.KEY_PLEX_STATUS_CHANNEL_ID),
                                                stat=status,
                                                category=category)
 
@@ -582,46 +585,75 @@ class DiscordConnector:
                 count = activity.stream_count
                 logging.info(f"Updating Streams voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Streams",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_STREAM_COUNT_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_STREAM_COUNT_CHANNEL_ID),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_TRANSCODE_COUNT, False):
                 count = activity.transcode_count
                 logging.info(f"Updating Transcodes voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(channel_name="Current Transcodes",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_TRANSCODE_COUNT_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_TRANSCODE_COUNT_CHANNEL_ID),
                                                    stat=count,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_BANDWIDTH, False):
                 bandwidth = activity.total_bandwidth
                 logging.info(f"Updating Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Bandwidth",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_BANDWIDTH_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_LAN_BANDWIDTH, False):
                 bandwidth = activity.lan_bandwidth
                 logging.info(f"Updating Local Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Local BW",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_LAN_BANDWIDTH_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_LAN_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
             if self.voice_channel_settings.get(statics.KEY_REMOTE_BANDWIDTH, False):
                 bandwidth = activity.wan_bandwidth
                 logging.info(f"Updating Remote Bandwidth voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(channel_name="Remote BW",
-                                                   channel_id=self.get_voice_channel_id(key=statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID),
+                                                   channel_id=self.get_voice_channel_id(
+                                                       key=statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID),
                                                    stat=bandwidth,
                                                    category=category)
+
+    async def get_library_stats(self) -> List[Tuple[str, List[Tuple[str, int]]]]:
+        all_stats = []
+        visibility_settings = LibraryVoiceChannelsVisibilities(settings=self.voice_channel_settings)
+
+        for library_name in self.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
+            stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name,
+                                                                                emoji_manager=self.emoji_manager,
+                                                                                visibility_settings=visibility_settings)
+            if not stats:
+                continue
+            all_stats.append((library_name, stats))
+
+        for encoded_value in self.voice_channel_settings.get(statics.KEY_COMBINED_LIBRARIES, []):
+            voice_channel_name, library_names = utils.decode_combined_tautulli_libraries(
+                encoded_string=encoded_value)
+            stats: [List[Tuple[str, int]]] = self.tautulli.get_combined_library_item_count(
+                library_names=library_names,
+                emoji_manager=self.emoji_manager,
+                visibility_settings=visibility_settings)
+            if not stats:
+                continue
+            all_stats.append((voice_channel_name, stats))
+
+        return all_stats
 
     async def update_library_stats_voice_channels(self) -> None:
         logging.info("Updating library stats...")
         if self.voice_channel_settings.get(statics.KEY_STATS, False):
-            visibility_settings = LibraryVoiceChannelsVisibilities(settings=self.voice_channel_settings)
-            for library_name in self.voice_channel_settings.get(statics.KEY_LIBRARIES, []):
-                stats: List[Tuple[str, int]] = self.tautulli.get_library_item_count(library_name=library_name,
-                                                                                    emoji_manager=self.emoji_manager,
-                                                                                    visibility_settings=visibility_settings)
+            all_stats = await self.get_library_stats()
+            for entry in all_stats:
+                library_name = entry[0]
+                stats = entry[1]
                 for stat in stats:
                     stat_emoji = stat[0] if self.voice_channel_settings.get(statics.KEY_USE_EMOJIS, True) else None
                     stat_value = stat[1]

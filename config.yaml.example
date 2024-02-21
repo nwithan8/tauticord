@@ -36,6 +36,17 @@ Tautulli:
           - Movies
           - TV Shows
           - Music
+        CombinedLibraries:
+          # list of names of the libraries you'd like to combine into one voice channel
+          # Voice channels will be made/updated with stats (refreshed every hour)
+          All Movies:
+            - Movies
+            - Movies (Non-English)
+            - Movies (4K)
+          All TV Shows:
+            - TV Shows
+            - TV Shows (Non-English)
+            - TV Shows (4K)
         UseEmojis: true
         # Which stats to show for each type of library
         TVSeriesCount: true
