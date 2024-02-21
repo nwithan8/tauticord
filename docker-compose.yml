@@ -42,6 +42,7 @@ services:
       TC_VC_LIBRARIES_CATEGORY_NAME: "Plex Library Stats"
       TC_VC_LIBRARY_STATS: "False"
       TC_VC_LIBRARY_NAMES: Movies,TV Shows,Music
+      TC_VC_COMBINED_LIBRARIES: "All Movies%Movies#Movies (4K)#Movies (Foreign),All Shows%TV Shows#TV Shows (4K)"
       TC_VC_LIBRARY_REFRESH_SECONDS: 3600
       TC_VC_LIBRARY_USE_EMOJIS: "True"
       TC_VC_TV_SERIES_COUNT: "True"
