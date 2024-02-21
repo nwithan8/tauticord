@@ -32,6 +32,7 @@ KEY_PLEX_STATUS_USE_EMOJI = "plex_status_emoji"
 KEY_REFRESH_TIME = "refresh_time"
 KEY_LIBRARIES_CATEGORY_NAME = "libraries_category_name"
 KEY_LIBRARIES = "libraries"
+KEY_COMBINED_LIBRARIES = "combined_libraries"
 KEY_USE_EMOJIS = "use_emojis"
 KEY_SHOW_TV_EPISODES = "show_tv_episodes"
 KEY_SHOW_TV_SERIES = "show_tv_series"
@@ -64,6 +65,10 @@ KEY_PERFORMANCE_MONITOR_MEMORY = "performance_monitor_memory"
 
 
 MAX_STREAM_COUNT = 36
+
+ENCODING_SEPARATOR_1 = "%"
+ENCODING_SEPARATOR_2 = "#"
+ENCODING_SEPARATOR_3 = "@"
 
 ASCII_ART = """___________________  ______________________________________________ 
 ___  __/__    |_  / / /__  __/___  _/_  ____/_  __ \__  __ \__  __ \\

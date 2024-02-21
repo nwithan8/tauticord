@@ -397,5 +397,46 @@ class TautulliConnector:
                 return [(emoji_manager.get_emoji(key="movies"), library_info.get('count'))]
         return [(emoji_manager.get_emoji(key="unknown"), 0)]
 
+    def get_combined_library_item_count(self, library_names: List[str], emoji_manager: EmojiManager, visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
+        previous_library_name = None
+        running_library_type = None
+        running_total = 0
+        emoji = emoji_manager.get_emoji(key="unknown")
+        for library_name in library_names:
+            library_info = self.get_library_info(library_name=library_name)
+
+            if not library_info:
+                continue
+
+            library_type = library_info.get('section_type')
+            if running_library_type and running_library_type != library_type:
+                logging.error(f"Library types do not match: {library_name} ({library_type}) and {previous_library_name} ({running_library_type}). Cannot combine stats for different types of libraries.")
+                return []
+            running_library_type = library_type
+            previous_library_name = library_name
+
+            match library_type:
+                case 'show':
+                    # Use the lowest child count possible
+                    if visibility_settings.show_tv_episodes:
+                        running_total += library_info.get('child_count')
+                        emoji = emoji_manager.get_emoji(key="episodes")
+                    else:
+                        running_total += library_info.get('count')
+                        emoji = emoji_manager.get_emoji(key="series")
+                case 'artist':
+                    # Use the lowest child count possible
+                    if visibility_settings.show_music_tracks:
+                        running_total += library_info.get('child_count')
+                        emoji = emoji_manager.get_emoji(key="tracks")
+                    else:
+                        running_total += library_info.get('count')
+                        emoji = emoji_manager.get_emoji(key="artists")
+                case 'movie':
+                    running_total += library_info.get('count')
+                    emoji = emoji_manager.get_emoji(key="movies")
+
+        return [(emoji, running_total)]
+
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)
