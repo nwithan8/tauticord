@@ -78,10 +78,11 @@ or [GitHub Packages](https://github.com/nwithan8/tauticord/pkgs/container/tautic
 
 You will need to map the following volumes:
 
-| Host Path              | Container Path | Reason                                                                                            |
-|------------------------|----------------|---------------------------------------------------------------------------------------------------|
-| /path/to/logs/folder   | /logs          | Required, debug log file for bot will be generated here                                           |
-| /path/to/config/folder | /config        | Optional, path to the folder containing the configuration file (override environmental variables) |
+| Host Path                 | Container Path | Reason                                                                                            |
+|---------------------------|----------------|---------------------------------------------------------------------------------------------------|
+| /path/to/logs/folder      | /logs          | Required, debug log file for bot will be generated here                                           |
+| /path/to/config/folder    | /config        | Optional, path to the folder containing the configuration file (override environmental variables) |
+| /path/to/monitored/folder | /monitor       | Optional, path to a folder to monitor for disk usage statistics (e.g. your Plex library)          |
 
 ### Environmental Variables
 
@@ -140,6 +141,7 @@ You will need to set the following environment variables:
 | TC_VC_PERFORMANCE_CATEGORY_NAME   | No       | Name of the performance voice channel category                                                                                                                              | "Performance"                                    |
 | TC_MONITOR_CPU                    | No       | Whether to monitor CPU performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                          |
 | TC_MONITOR_MEMORY                 | No       | Whether to monitor RAM performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                          |
+| TC_MONITOR_DISK_SPACE             | No       | Whether to monitor usage of the [/monitor](#volumes) path (see [Performance Monitoring](#performance-monitoring))                                                           | "False"                                          |
 | TC_MONITOR_TAUTULLI_USER_COUNT    | No       | Whether to monitor how many users have access to the Plex server                                                                                                            | "False"                                          |
 | TZ                                | No       | Timezone that your server is in                                                                                                                                             | "America/New_York"                               |
 
@@ -284,6 +286,11 @@ Tauticord and all other processes running on the system).
 
 If Tauticord is running on a different system than Tautulli, or is running isolated in a Docker container, then this
 data will not reflect the performance of Tautulli.
+
+The same applies to disk space monitoring. Tauticord's disk space monitoring feature will analyze the used and total
+space of the provided folder (default: The path mounted to `/monitor` inside the Docker container). This feature can be
+used, for example, to monitor the disk space of your Plex library, as long as the path to the library is mounted
+to `/monitor`. This will not work if Tauticord is running on a separate system from the Plex library.
 
 # Development
 

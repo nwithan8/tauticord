@@ -674,15 +674,26 @@ class DiscordConnector:
             await self.edit_stat_voice_channel(channel_name="Users",
                                                stat=user_count,
                                                category=self.performance_voice_category)
+        if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE, False):
+            path = self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH, statics.MONITORED_DISK_SPACE_FOLDER)
+            if not system_stats.path_exists(path):
+                logging.error(f"Could not find {quote(path)} to monitor disk space.")
+                stat = "N/A"
+            else:
+                stat = system_stats.disk_usage_display(path)
+            logging.info(f"Updating Disk voice channel with new disk space: {stat}")
+            await self.edit_stat_voice_channel(channel_name="Disk",
+                                               stat=stat,
+                                               category=self.performance_voice_category)
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU, False):
-            cpu_percent = f"{utils.format_fraction(system_stats.cpu_usage())}%"
+            cpu_percent = f"{utils.format_decimal(system_stats.cpu_usage())}%"
             logging.info(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
             await self.edit_stat_voice_channel(channel_name="CPU",
                                                stat=cpu_percent,
                                                category=self.performance_voice_category)
 
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_MEMORY, False):
-            memory_percent = f"{utils.format_fraction(system_stats.ram_usage())} GB ({utils.format_fraction(system_stats.ram_usage_percentage())}%)"
+            memory_percent = f"{utils.format_decimal(system_stats.ram_usage())} GB ({utils.format_decimal(system_stats.ram_usage_percentage())}%)"
             logging.info(f"Updating Memory voice channel with new Memory percent: {memory_percent}")
             await self.edit_stat_voice_channel(channel_name="Memory",
                                                stat=memory_percent,

@@ -87,5 +87,6 @@ Extras:
   Analytics: true
   Performance:
     TautulliUserCount: true
+    DiskSpace: true
     CPU: true
     Memory: true

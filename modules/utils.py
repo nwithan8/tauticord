@@ -20,11 +20,19 @@ def status_code_is_success(status_code: int) -> bool:
     return 200 <= status_code < 300
 
 
-def format_fraction(number: float, denominator: int = 1, decimal_places: int = 1) -> str:
+def format_decimal(number: float, denominator: int = 1, decimal_places: int = 1, no_zeros: bool = False) -> str:
     if decimal_places <= 0:
-        return f'{int(number / denominator):d}'
+        value = f'{int(number / denominator):d}'
     else:
-        return f'{float(number / denominator):.{decimal_places}f}'
+        value = f'{float(number / denominator):.{decimal_places}f}'
+
+    if no_zeros:
+        if value.endswith("."):
+            value = value[:-1]
+        if value.endswith("." + "0" * decimal_places):
+            value = value[:-decimal_places - 1]
+
+    return value
 
 
 def format_thousands(number: int, delimiter: str = "") -> str:
@@ -33,13 +41,13 @@ def format_thousands(number: int, delimiter: str = "") -> str:
     return f"{format_thousands(number // 1000, delimiter)}{delimiter}{number % 1000:03d}"
 
 
-def human_bitrate(_bytes, decimal_places: int = 1) -> str:
-    # Return the given bitrate as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
+def _human_size(_bytes, interval: int = 1000, decimal_places: int = 1, no_zeros: bool = False) -> str:
+    # Return the given byte size as a human friendly string
 
-    KB = float(1024)
-    MB = float(KB ** 2)  # 1,048,576
-    GB = float(KB ** 3)  # 1,073,741,824
-    TB = float(KB ** 4)  # 1,099,511,627,776
+    KB = float(interval)
+    MB = float(interval ** 2)
+    GB = float(interval ** 3)
+    TB = float(interval ** 4)
 
     denominator = 1
     letter = ""
@@ -58,8 +66,20 @@ def human_bitrate(_bytes, decimal_places: int = 1) -> str:
         denominator = TB
         letter = "T"
 
-    value = format_fraction(number=_bytes, denominator=denominator, decimal_places=decimal_places)
-    return f"{value} {letter}bps"
+    value = format_decimal(number=_bytes, denominator=denominator, decimal_places=decimal_places, no_zeros=no_zeros)
+    return f"{value} {letter}"
+
+
+def human_size(_bytes, decimal_places: int = 1, no_zeros: bool = False) -> str:
+    # Return the given byte size as a human friendly string
+    value = _human_size(_bytes, interval=1000, decimal_places=decimal_places, no_zeros=no_zeros)
+    return f"{value}B"
+
+
+def human_bitrate(_bytes, decimal_places: int = 1, no_zeros: bool = False) -> str:
+    # Return the given bitrate as a human friendly bps, Kbps, Mbps, Gbps, or Tbps string
+    value = _human_size(_bytes, interval=1024, decimal_places=decimal_places, no_zeros=no_zeros)
+    return f"{value}bps"
 
 
 def milliseconds_to_minutes_seconds(milliseconds: int) -> str:

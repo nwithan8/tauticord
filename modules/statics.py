@@ -9,6 +9,8 @@ COPYRIGHT = "Copyright © YEARADDEDBYGITHUB Nate Harris. All rights reserved."
 STANDARD_EMOJIS_FOLDER = "resources/emojis/standard"
 NITRO_EMOJIS_FOLDER = "resources/emojis/nitro"
 
+MONITORED_DISK_SPACE_FOLDER = "/monitor"
+
 voice_channel_order = {
     'count': 1,
     'transcodes': 2,
@@ -61,6 +63,8 @@ KEY_USE_FRIENDLY_NAMES = "use_friendly_names"
 
 KEY_PERFORMANCE_CATEGORY_NAME = "performance_category_name"
 KEY_PERFORMANCE_MONITOR_TAUTULLI_USER_COUNT = "performance_monitor_tautulli_user_count"
+KEY_PERFORMANCE_MONITOR_DISK_SPACE = "performance_monitor_disk_space"
+KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH = "performance_monitor_disk_space_path"
 KEY_PERFORMANCE_MONITOR_CPU = "performance_monitor_cpu"
 KEY_PERFORMANCE_MONITOR_MEMORY = "performance_monitor_memory"
 
