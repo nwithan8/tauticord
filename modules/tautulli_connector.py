@@ -129,6 +129,7 @@ class Session:
     def stream_container_decision(self) -> str:
         return self._data['stream_container_decision']
 
+
 class Activity:
     def __init__(self, activity_data, time_manager: TimeManager, emoji_manager: EmojiManager):
         self._data = activity_data
@@ -190,7 +191,8 @@ class TautulliStreamInfo:
 
     def get_title(self, emoji_manager: EmojiManager, text_manager: TextManager) -> str:
         try:
-            return text_manager.session_title(session=self._session, session_number=self._session_number, emoji_manager=emoji_manager)
+            return text_manager.session_title(session=self._session, session_number=self._session_number,
+                                              emoji_manager=emoji_manager)
         except Exception as title_exception:
             return "Unknown"
 
@@ -256,9 +258,11 @@ class TautulliConnector:
         self.text_manager = text_manager
         self.api_key = api_key
         try:
-            self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key, verify=True, ssl_verify=not disable_ssl_verification)  # Disable SSL verification because of self-signed certs
-        except Exception as e: # common issue - `base_url` is empty because config was not parsed properly, causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
-            raise Exception(f"Could not begin a Tautulli connection. Please check that your configuration is complete and reachable. Exception: {e}")
+            self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key, verify=True,
+                                       ssl_verify=not disable_ssl_verification)  # Disable SSL verification because of self-signed certs
+        except Exception as e:  # common issue - `base_url` is empty because config was not parsed properly, causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
+            raise Exception(
+                f"Could not begin a Tautulli connection. Please check that your configuration is complete and reachable. Exception: {e}")
         self.server_name = server_name or self.api.server_friendly_name
         self.terminate_message = terminate_message
         self.analytics = analytics
@@ -311,7 +315,7 @@ class TautulliConnector:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
 
         # Tautulli did not return data (is offline)
-        is_plex_online = self.ping_pms_server_directly() # Check directly if Plex is online
+        is_plex_online = self.ping_pms_server_directly()  # Check directly if Plex is online
         return TautulliDataResponse(activity=None,
                                     emoji_manager=emoji_manager,
                                     text_manager=self.text_manager,
@@ -333,11 +337,11 @@ class TautulliConnector:
             if not pms_url:
                 return False
             status_code = objectrest.get(url=pms_url, verify=False).status_code
-            return status_code_is_success(status_code=status_code) or status_code == 401 # 401 is a success because it means we got a response
+            return status_code_is_success(
+                status_code=status_code) or status_code == 401  # 401 is a success because it means we got a response
         except Exception as e:
             logging.error(f"Could not ping Plex Media Server directly: {e}")
             return False
-
 
     def stop_stream(self, emoji, stream_number: int) -> str:
         """
@@ -347,7 +351,8 @@ class TautulliConnector:
         :return: Success/failure message
         """
         if stream_number not in session_ids.keys():
-            return utils.bold(f"Invalid stream number: {stream_number}. Valid stream numbers: {', '.join([str(x) for x in session_ids.keys()])}")
+            return utils.bold(
+                f"Invalid stream number: {stream_number}. Valid stream numbers: {', '.join([str(x) for x in session_ids.keys()])}")
         logging.info(f"User attempting to stop session {emoji}, id {session_ids[stream_number]}")
         try:
             if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):
@@ -357,6 +362,17 @@ class TautulliConnector:
         except Exception as e:
             self._error_and_analytics(error_message=e, function_name='stop_stream')
         return "Something went wrong."
+
+    def get_user_count(self) -> int:
+        """
+        Get the number of users with access to the Plex server
+        :return: Number of users
+        """
+        users = self.api.users
+        if not users:
+            return 0
+        active_users = [user for user in users if user.get('is_active', False)]
+        return len(active_users)
 
     def get_library_id(self, library_name: str) -> Union[str, None]:
         library_name = library_name.strip()
@@ -373,7 +389,8 @@ class TautulliConnector:
             return None
         return self.api.get_library(section_id=library_id)
 
-    def get_library_item_count(self, library_name: str, emoji_manager: EmojiManager, visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
+    def get_library_item_count(self, library_name: str, emoji_manager: EmojiManager,
+                               visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
         library_info = self.get_library_info(library_name=library_name)
         logging.debug(f"JSON returned by GET request: {library_info}")
         if not library_info:
@@ -397,7 +414,8 @@ class TautulliConnector:
                 return [(emoji_manager.get_emoji(key="movies"), library_info.get('count'))]
         return [(emoji_manager.get_emoji(key="unknown"), 0)]
 
-    def get_combined_library_item_count(self, library_names: List[str], emoji_manager: EmojiManager, visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
+    def get_combined_library_item_count(self, library_names: List[str], emoji_manager: EmojiManager,
+                                        visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
         previous_library_name = None
         running_library_type = None
         running_total = 0
@@ -410,7 +428,8 @@ class TautulliConnector:
 
             library_type = library_info.get('section_type')
             if running_library_type and running_library_type != library_type:
-                logging.error(f"Library types do not match: {library_name} ({library_type}) and {previous_library_name} ({running_library_type}). Cannot combine stats for different types of libraries.")
+                logging.error(
+                    f"Library types do not match: {library_name} ({library_type}) and {previous_library_name} ({running_library_type}). Cannot combine stats for different types of libraries.")
                 return []
             running_library_type = library_type
             previous_library_name = library_name

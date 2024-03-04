@@ -86,5 +86,6 @@ Extras:
   # See README.md for details
   Analytics: true
   Performance:
+    TautulliUserCount: true
     CPU: true
     Memory: true

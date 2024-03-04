@@ -55,6 +55,7 @@ services:
       TC_DISCORD_NITRO: "False"
       TC_ALLOW_ANALYTICS: "True"
       TC_VC_PERFORMANCE_CATEGORY_NAME: "Performance"
+      TC_MONITOR_TAUTULLI_USER_COUNT: "False"
       TC_MONITOR_CPU: "False"
       TC_MONITOR_MEMORY: "False"
       TZ: America/New_York
