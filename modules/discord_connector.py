@@ -99,18 +99,24 @@ async def create_discord_channel(client: discord.Client, guild_id: str, channel_
                                  channel_type: discord.ChannelType = discord.ChannelType.text,
                                  category: discord.CategoryChannel = None) -> \
         Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]:
+    # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
+    guild = client.get_guild(int(guild_id))  # stupid positional-only parameters
+    if not guild:
+        raise Exception(f"Could not load guild with ID {guild_id}")
+    channel_type_string = ""
     try:
-        # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
-        guild = client.get_guild(int(guild_id))  # stupid positional-only parameters
         match channel_type:
             case discord.ChannelType.voice:
+                channel_type_string = "voice"
                 return await guild.create_voice_channel(name=channel_name, category=category)
             case discord.ChannelType.text:
+                channel_type_string = "text"
                 return await guild.create_text_channel(name=channel_name, category=category)
             case discord.ChannelType.category:
+                channel_type_string = "category"
                 return await guild.create_category(name=channel_name)
     except:
-        raise Exception(f"Could not create channel {channel_name}")
+        raise Exception(f"Could not create channel {channel_name} (type: {channel_type_string}) in guild {guild_id}")
 
 
 async def get_discord_channel_by_starting_name(client: discord.Client,
