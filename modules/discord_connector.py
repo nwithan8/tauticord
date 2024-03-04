@@ -668,6 +668,12 @@ class DiscordConnector:
 
     async def update_performance_voice_channels(self) -> None:
         logging.info("Updating performance stats...")
+        if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_TAUTULLI_USER_COUNT, False):
+            user_count = self.tautulli.get_user_count()
+            logging.info(f"Updating Users voice channel with new user count: {user_count}")
+            await self.edit_stat_voice_channel(channel_name="Users",
+                                               stat=user_count,
+                                               category=self.performance_voice_category)
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU, False):
             cpu_percent = f"{utils.format_fraction(system_stats.cpu_usage())}%"
             logging.info(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")

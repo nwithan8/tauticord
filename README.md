@@ -140,6 +140,7 @@ You will need to set the following environment variables:
 | TC_VC_PERFORMANCE_CATEGORY_NAME   | No       | Name of the performance voice channel category                                                                                                                              | "Performance"                                    |
 | TC_MONITOR_CPU                    | No       | Whether to monitor CPU performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                          |
 | TC_MONITOR_MEMORY                 | No       | Whether to monitor RAM performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                          |
+| TC_MONITOR_TAUTULLI_USER_COUNT    | No       | Whether to monitor how many users have access to the Plex server                                                                                                            | "False"                                          |
 | TZ                                | No       | Timezone that your server is in                                                                                                                                             | "America/New_York"                               |
 
 You can also set these variables via a configuration file:
@@ -245,9 +246,11 @@ defined will not be updated).
 
 ## Combined Libraries
 
-You can optionally combine multiple Plex libraries into one for display in the voice channel. This is useful if you have multiple "movies" libraries, for example, and you want to display them all as one in terms of statistics.
+You can optionally combine multiple Plex libraries into one for display in the voice channel. This is useful if you have
+multiple "movies" libraries, for example, and you want to display them all as one in terms of statistics.
 
-To do this, specify all libraries you want to combine under a new library name in the `CombinedLibraries` section of the `config.yaml` file. The key is the new library name, and the value is a list of libraries to combine.
+To do this, specify all libraries you want to combine under a new library name in the `CombinedLibraries` section of
+the `config.yaml` file. The key is the new library name, and the value is a list of libraries to combine.
 
 ```yaml
 CombinedLibraries:
@@ -260,7 +263,8 @@ CombinedLibraries:
     - TV Shows (4K)
 ```
 
-If you are using environmental variables, you can specify the combined libraries as a comma-separated list in the `TC_VC_COMBINED_LIBRARIES` variable using the following pattern:
+If you are using environmental variables, you can specify the combined libraries as a comma-separated list in
+the `TC_VC_COMBINED_LIBRARIES` variable using the following pattern:
 
 ```New Library Name%Library 1#Library 2#Library 3```
 

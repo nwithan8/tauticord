@@ -469,6 +469,11 @@ class ExtrasConfig(ConfigSection):
     def _performance(self) -> ConfigSection:
         return self._get_subsection(key="Performance")
 
+    def _performance_monitor_tautulli_user_count(self) -> bool:
+        value = self._performance._get_value(key="TautulliUserCount", default=False,
+                                             env_name_override="TC_MONITOR_TAUTULLI_USER_COUNT")
+        return _extract_bool(value)
+
     @property
     def _performance_monitor_cpu(self) -> bool:
         value = self._performance._get_value(key="CPU", default=False,
@@ -501,6 +506,7 @@ class Config:
         self.extras = ExtrasConfig(self.config, pull_from_env=self.pull_from_env)
         self.performance = {
             statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_name,
+            statics.KEY_PERFORMANCE_MONITOR_TAUTULLI_USER_COUNT: self.extras._performance_monitor_tautulli_user_count,
             statics.KEY_PERFORMANCE_MONITOR_CPU: self.extras._performance_monitor_cpu,
             statics.KEY_PERFORMANCE_MONITOR_MEMORY: self.extras._performance_monitor_memory,
         }
