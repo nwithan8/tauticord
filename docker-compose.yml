@@ -5,6 +5,7 @@ services:
     volumes:
       - /path/to/config:/config
       - /path/to/logs:/logs
+      - /path/to/monitored/disk:/monitor
     environment:
       TC_DISCORD_BOT_TOKEN: my_secret_bot_token
       TC_DISCORD_SERVER_ID: my_server_id
@@ -58,4 +59,5 @@ services:
       TC_MONITOR_TAUTULLI_USER_COUNT: "False"
       TC_MONITOR_CPU: "False"
       TC_MONITOR_MEMORY: "False"
+      TC_MONITOR_DISK_SPACE: "False"
       TZ: America/New_York

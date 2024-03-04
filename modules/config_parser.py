@@ -475,6 +475,12 @@ class ExtrasConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def _performance_monitor_disk_space(self) -> bool:
+        value = self._performance._get_value(key="DiskSpace", default=False,
+                                             env_name_override="TC_MONITOR_DISK_SPACE")
+        return _extract_bool(value)
+
+    @property
     def _performance_monitor_cpu(self) -> bool:
         value = self._performance._get_value(key="CPU", default=False,
                                              env_name_override="TC_MONITOR_CPU")
@@ -488,7 +494,7 @@ class ExtrasConfig(ConfigSection):
 
 
 class Config:
-    def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True):
+    def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True, **kwargs):
         self.config = confuse.Configuration(app_name)
         self.pull_from_env = False
         # noinspection PyBroadException
@@ -507,6 +513,8 @@ class Config:
         self.performance = {
             statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_name,
             statics.KEY_PERFORMANCE_MONITOR_TAUTULLI_USER_COUNT: self.extras._performance_monitor_tautulli_user_count,
+            statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE: self.extras._performance_monitor_disk_space,
+            statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH: kwargs.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH, statics.MONITORED_DISK_SPACE_FOLDER),
             statics.KEY_PERFORMANCE_MONITOR_CPU: self.extras._performance_monitor_cpu,
             statics.KEY_PERFORMANCE_MONITOR_MEMORY: self.extras._performance_monitor_memory,
         }

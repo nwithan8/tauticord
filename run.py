@@ -17,7 +17,11 @@ from consts import (
 )
 from modules.analytics import GoogleAnalytics
 from modules.config_parser import Config
-from modules.statics import splash_logo
+from modules.statics import (
+    splash_logo,
+    MONITORED_DISK_SPACE_FOLDER,
+    KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH,
+)
 from modules.errors import determine_exit_code
 
 # Parse arguments
@@ -31,6 +35,7 @@ Bot will use config, in order:
 """
 parser.add_argument("-c", "--config", help="Path to config file", default=DEFAULT_CONFIG_PATH)
 parser.add_argument("-l", "--log", help="Log file directory", default=DEFAULT_LOG_DIR)
+parser.add_argument("-u", "--usage", help="Path to directory to monitor for disk usage", default=MONITORED_DISK_SPACE_FOLDER)
 
 args = parser.parse_args()
 
@@ -39,7 +44,10 @@ logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file
              file_log_level=FILE_LOG_LEVEL)
 
 # Set up configuration
-config = Config(app_name=APP_NAME, config_path=f"{args.config}")
+kwargs = {
+    KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH: args.usage,
+}
+config = Config(app_name=APP_NAME, config_path=f"{args.config}", **kwargs)
 
 # Set up analytics
 analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
