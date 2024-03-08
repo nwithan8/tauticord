@@ -1,3 +1,4 @@
+import enum
 from typing import List, Tuple, Union
 
 import discord
@@ -13,6 +14,20 @@ from modules.time_manager import TimeManager
 from modules.utils import status_code_is_success
 
 session_ids = {}
+
+
+class HomeStatType(enum.Enum):
+    TOP_MOVIES = 'top_movies'
+    POPULAR_MOVIES = 'popular_movies'
+    TOP_TV = 'top_tv'
+    POPULAR_TV = 'popular_tv'
+    TOP_MUSIC = 'top_music'
+    POPULAR_MUSIC = 'popular_music'
+    TOP_LIBRARIES = 'top_libraries'
+    TOP_USERS = 'top_users'
+    TOP_PLATFORMS = 'top_platforms'
+    LAST_WATCHED = 'last_watched'
+    MOST_CONCURRENT = 'most_concurrent'
 
 
 class Session:
@@ -257,6 +272,7 @@ class TautulliConnector:
         self.base_url = base_url
         self.text_manager = text_manager
         self.api_key = api_key
+        logging.info(f"Connecting to Tautulli at {base_url}...")
         try:
             self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key, verify=True,
                                        ssl_verify=not disable_ssl_verification)  # Disable SSL verification because of self-signed certs
@@ -459,3 +475,17 @@ class TautulliConnector:
 
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)
+
+    def get_stats_for_x_days(self, stat_type: HomeStatType, days: int, limit: int) -> List[dict]:
+        stats = self.api.get_home_stats(
+            stats_type='plays', # Flaws with both 'plays' and 'duration', but 'plays' is more accurate(?)
+            time_range=days,
+            count=limit,
+            stat_id=stat_type.value,
+        )
+
+        if not stats:
+            return []
+
+        # noinspection PyUnresolvedReferences
+        return stats.get('rows', [])  # TODO: Only one stat returns a dict, not a list of dicts, flaw in the library

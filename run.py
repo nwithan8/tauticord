@@ -54,7 +54,7 @@ analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
                             anonymous_ip=True,
                             do_not_track=not config.extras.allow_analytics)
 
-if __name__ == '__main__':
+def start():
     logging.info(splash_logo())
     logging.info("Starting Tauticord...")
 
@@ -88,10 +88,14 @@ if __name__ == '__main__':
             performance_monitoring=config.performance,
             analytics=analytics,
         )
-
+        # asyncio.run(discord_connector.load_commands())
         discord_connector.connect()
     except Exception as e:
         logging.fatal(f"Fatal error occurred. Shutting down: {e}")
         exit_code = determine_exit_code(exception=e)
         logging.fatal(f"Exiting with code {exit_code}")
         exit(exit_code)  # Exit the script if an error bubbles up (like an internet connection error)
+
+
+if __name__ == '__main__':
+    start()
