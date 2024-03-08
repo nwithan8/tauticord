@@ -2,7 +2,11 @@ import discord
 from discord.ext import commands
 
 import modules.logs as logging
-from modules.commands.top import Top
+from modules.commands import (
+    Top,
+    Summary,
+)
+from modules.emojis import EmojiManager
 from modules.tautulli_connector import TautulliConnector
 
 
@@ -11,12 +15,25 @@ class CommandManager:
                  bot: commands.Bot,
                  guild_id: str,
                  tautulli: TautulliConnector,
+                 emoji_manager: EmojiManager,
                  admin_ids: list[str] = None):
         self._bot = bot
         self._guild_id = guild_id
         self._admin_ids = admin_ids or []
         self._tautulli = tautulli
+        self._emoji_manager = emoji_manager
         self._synced = False
+
+    @property
+    def _cogs_to_add(self):
+        return [
+            Top(bot=self._bot, tautulli=self._tautulli),
+            Summary(bot=self._bot, tautulli=self._tautulli, emoji_manager=self._emoji_manager),
+        ]
+
+    @property
+    def _active_cogs(self):
+        return self._bot.cogs
 
     @property
     def _guild(self):
@@ -25,13 +42,12 @@ class CommandManager:
     def is_admin(self, interaction: discord.Interaction) -> bool:
         return str(interaction.user.id) in self._admin_ids
 
+    async def _add_cog(self, cog: commands.Cog):
+        await self._bot.add_cog(cog, guild=self._guild)
+
     async def register_slash_commands(self):
-        await self._bot.add_cog(
-            Top(
-                bot=self._bot, tautulli=self._tautulli
-            ),
-            guild=self._guild
-        )
+        for cog in self._cogs_to_add:
+            await self._add_cog(cog)
 
         logging.info("Slash commands registered.")
 

@@ -255,13 +255,15 @@ class DiscordConnector:
 
         self.current_message = None
 
+        self.emoji_manager: EmojiManager = EmojiManager()
+
         self.command_manager: CommandManager = CommandManager(
             bot=self.client,
             guild_id=self.guild_id,
             tautulli=self.tautulli,
+            emoji_manager=self.emoji_manager,
             admin_ids=self.admin_ids
         )
-        self.emoji_manager: EmojiManager = EmojiManager()
 
     def connect(self) -> None:
         logging.info('Connecting to Discord...')
