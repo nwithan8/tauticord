@@ -69,6 +69,9 @@ library name with item counts every hour.
         - Manage Emojis
     - **Shortcut**: Use the following link to invite your bot to your server with the above permissions:
       https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot&permissions=1073818704
+      - You will also need to enable "Message Content Intent" [in the bot settings in the Discord Developer Portal]() to allow slash commands to work.
+    
+      <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/message_content_intent.png">
 
 Tauticord runs as a Docker container. The Dockerfile is included in this repository, or can be pulled
 from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord)
