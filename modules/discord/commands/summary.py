@@ -6,23 +6,9 @@ from discord.ext import commands
 
 import modules.logs as logging
 from modules.emojis import EmojiManager
-from modules.tautulli_connector import (
+from modules.tautulli.tautulli_connector import (
     TautulliConnector,
 )
-
-
-def _build_top_media_response_embed(stats: list[dict[str, str]], title: str) -> discord.Embed:
-    embed = discord.Embed(title=title, color=0x00ff00)
-    for stat in stats:
-        embed.add_field(name=stat["title"], value=stat["total_plays"], inline=False)
-    return embed
-
-
-def _build_top_user_response_embed(stats: list[dict[str, str]], title: str) -> discord.Embed:
-    embed = discord.Embed(title=title, color=0x00ff00)
-    for stat in stats:
-        embed.add_field(name=stat["friendly_name"], value=stat["total_plays"], inline=False)
-    return embed
 
 
 class Summary(commands.Cog):

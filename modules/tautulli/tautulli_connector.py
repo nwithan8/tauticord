@@ -1,5 +1,5 @@
 import enum
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 import discord
 import objectrest
@@ -8,12 +8,17 @@ import tautulli
 import modules.logs as logging
 from modules import utils
 from modules.emojis import EmojiManager
-from modules.settings_transports import LibraryVoiceChannelsVisibilities
+from modules.settings.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.text_manager import TextManager
 from modules.time_manager import TimeManager
-from modules.utils import status_code_is_success
+from modules.utils import status_code_is_success, url_encode
 
 session_ids = {}
+
+
+class HomeStatMetricType(enum.Enum):
+    PLAYS = 'plays'
+    DURATION = 'duration'
 
 
 class HomeStatType(enum.Enum):
@@ -28,6 +33,14 @@ class HomeStatType(enum.Enum):
     TOP_PLATFORMS = 'top_platforms'
     LAST_WATCHED = 'last_watched'
     MOST_CONCURRENT = 'most_concurrent'
+
+
+class RecentlyAddedMediaItem:
+    title: str
+    poster_url: str
+    summary: str
+    library: str
+    link: str
 
 
 class Session:
@@ -476,9 +489,9 @@ class TautulliConnector:
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)
 
-    def get_stats_for_x_days(self, stat_type: HomeStatType, days: int, limit: int) -> List[dict]:
+    def get_stats_for_x_days(self, stat_type: HomeStatType, metric: str, days: int, limit: int) -> List[dict]:
         stats = self.api.get_home_stats(
-            stats_type='plays', # Flaws with both 'plays' and 'duration', but 'plays' is more accurate(?)
+            stats_type=metric,
             time_range=days,
             count=limit,
             stat_id=stat_type.value,
@@ -487,5 +500,55 @@ class TautulliConnector:
         if not stats:
             return []
 
+        old_data = stats.get('rows', [])
+        new_data = []
+        for item in old_data:
+            copy = item
+            copy['total'] = item.get('total_plays' if metric == HomeStatMetricType.PLAYS.value else 'total_duration', 0)
+            new_data.append(copy)
+
         # noinspection PyUnresolvedReferences
-        return stats.get('rows', [])  # TODO: Only one stat returns a dict, not a list of dicts, flaw in the library
+        return new_data
+
+    def get_recently_added_media(self, count: int, media_type: Optional[str] = None) -> list[RecentlyAddedMediaItem]:
+        data = self.api.get_recently_added(count=count, media_type=media_type)
+        recently_added = data.get('recently_added', [])
+
+        plex_server_details = self.plex_details
+        pms_url = plex_server_details.get('pms_url')
+        pms_id = plex_server_details.get('pms_identifier')
+
+        def get_link_to_media_on_plex(rating_key: str) -> Union[str, None]:
+            if not pms_url or not pms_id:
+                return None
+
+            media_id = f"/library/metadata/{rating_key}"
+            return f"{pms_url}#!/server/{pms_id}/details?key={url_encode(media_id)}"
+
+        items = []
+        for element in recently_added:
+            item = RecentlyAddedMediaItem()
+
+            # Movies only have one title
+            title = element.get('title', '')
+            # Shows have SHOW - SEASON - EPISODE titles
+            if parent_title := element.get('parent_title', ''):
+                title = f"{parent_title} - {title}"
+            if grandparent_title := element.get('grandparent_title', ''):
+                title = f"{grandparent_title} - {title}"
+            item.title = title
+
+            partial_poster_url = element.get('thumb', '')
+            full_poster_url = self.api.shortcuts.get_plex_image_url_from_proxy(plex_image_path=partial_poster_url)
+            item.poster_url = full_poster_url
+
+            item.summary = element.get('summary', '')
+
+            item.library = element.get('library_name', '')
+
+            rating_key = element.get('rating_key', '')
+            item.link = get_link_to_media_on_plex(rating_key)
+
+            items.append(item)
+
+        return items

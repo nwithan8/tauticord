@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List
+from urllib.parse import quote_plus
 
 from pytz import timezone
 
@@ -14,6 +15,16 @@ def make_plural(word, count: int, suffix_override: str = 's') -> str:
 
 def quote(string: str) -> str:
     return f"\"{string}\""
+
+
+def url_encode(string: str) -> str:
+    return quote_plus(string)
+
+
+def minutes_to_hhmm(seconds: int) -> str:
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours:02d}:{minutes:02d}"
 
 
 def status_code_is_success(status_code: int) -> bool:

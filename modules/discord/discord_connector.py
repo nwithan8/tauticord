@@ -8,12 +8,12 @@ from discord.ext import commands
 import modules.logs as logging
 import modules.statics as statics
 import modules.system_stats as system_stats
-import modules.tautulli_connector
+import modules.tautulli.tautulli_connector
 from modules import emojis, utils
-from modules.command_manager import CommandManager
+from modules.discord.command_manager import CommandManager
 from modules.emojis import EmojiManager
-from modules.settings_transports import LibraryVoiceChannelsVisibilities
-from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
+from modules.settings.settings_transports import LibraryVoiceChannelsVisibilities
+from modules.tautulli.tautulli_connector import TautulliConnector, TautulliDataResponse
 from modules.utils import quote, format_thousands
 
 
@@ -597,7 +597,7 @@ class DiscordConnector:
             await self.edit_stat_voice_channel_by_name(stat=stat, channel_name=channel_name, category=category)
 
     async def update_live_voice_channels(self,
-                                         activity: modules.tautulli_connector.Activity,
+                                         activity: modules.tautulli.tautulli_connector.Activity,
                                          plex_online: bool,
                                          category: discord.CategoryChannel = None) -> None:
 

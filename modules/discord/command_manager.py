@@ -2,12 +2,13 @@ import discord
 from discord.ext import commands
 
 import modules.logs as logging
-from modules.commands import (
-    Top,
+from modules.discord.commands import (
+    Most,
     Summary,
+    Recently,
 )
 from modules.emojis import EmojiManager
-from modules.tautulli_connector import TautulliConnector
+from modules.tautulli.tautulli_connector import TautulliConnector
 
 
 class CommandManager:
@@ -27,8 +28,9 @@ class CommandManager:
     @property
     def _cogs_to_add(self):
         return [
-            Top(bot=self._bot, tautulli=self._tautulli),
+            Most(bot=self._bot, tautulli=self._tautulli),
             Summary(bot=self._bot, tautulli=self._tautulli, emoji_manager=self._emoji_manager),
+            Recently(bot=self._bot, tautulli=self._tautulli),
         ]
 
     @property

@@ -4,9 +4,9 @@
 # Please see the LICENSE file that should have been included as part of this package.
 import argparse
 
-import modules.discord_connector as discord
+import modules.discord.discord_connector as discord
 import modules.logs as logging
-import modules.tautulli_connector as tautulli
+import modules.tautulli.tautulli_connector as tautulli
 from consts import (
     GOOGLE_ANALYTICS_ID,
     APP_NAME,
@@ -16,7 +16,7 @@ from consts import (
     FILE_LOG_LEVEL,
 )
 from modules.analytics import GoogleAnalytics
-from modules.config_parser import Config
+from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
     MONITORED_DISK_SPACE_FOLDER,
