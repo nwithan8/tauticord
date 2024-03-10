@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 
 import discord
 from discord import app_commands
@@ -14,7 +14,8 @@ from modules.tautulli.tautulli_connector import (
 from modules.utils import minutes_to_hhmm
 
 
-def _build_response_embed(stats: list[dict[str, str]], title: str, name_key: str, convert_time: bool = False) -> discord.Embed:
+def _build_response_embed(stats: list[dict[str, str]], title: str, name_key: str,
+                          convert_time: bool = False) -> discord.Embed:
     embed = discord.Embed(title=title, color=EmbedColor.DARK_ORANGE.value)
     for stat in stats:
         value = stat['total']
@@ -25,11 +26,20 @@ def _build_response_embed(stats: list[dict[str, str]], title: str, name_key: str
 
 
 class Most(commands.GroupCog, name="most"):
-    def __init__(self, bot: commands.Bot, tautulli: TautulliConnector):
+    def __init__(self, bot: commands.Bot, tautulli: TautulliConnector,
+                 admin_check: Callable[[discord.Interaction], bool] = None):
         self.bot = bot
         self._tautulli = tautulli
+        self._admin_check = admin_check
         super().__init__()  # This is required for the cog to work.
         logging.info("Most cog loaded.")
+
+    async def check_admin(self, interaction: discord.Interaction) -> bool:
+        if self._admin_check and not self._admin_check(interaction):
+            await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+            return False
+
+        return True
 
     async def _build_and_send_response(self,
                                        interaction: discord.Interaction,
@@ -38,6 +48,10 @@ class Most(commands.GroupCog, name="most"):
                                        days: int,
                                        name_key: str,
                                        share: Optional[bool] = False) -> None:
+        passed_admin_check = await self.check_admin(interaction)
+        if not passed_admin_check:
+            return
+
         limit = 5
         stats = self._tautulli.get_stats_for_x_days(stat_type=stat_type, metric=metric, days=days, limit=limit)
 

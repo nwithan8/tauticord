@@ -22,6 +22,7 @@
     <Config Name="Discord bot token" Target="TC_DISCORD_BOT_TOKEN" Default="" Description="Discord bot token" Type="Variable" Display="always" Required="true" Mask="true" />
     <Config Name="Discord server ID" Target="TC_DISCORD_SERVER_ID" Default="" Description="Discord server ID" Type="Variable" Display="always" Required="true" Mask="false" />
     <Config Name="Discord Nitro" Target="TC_DISCORD_NITRO" Default="" Description="Discord Nitro subscriber" Type="Variable" Display="always" Required="false" Mask="false">False</Config>
+    <Config Name="Enable Discord commands" Target="TC_DISCORD_ENABLE_SLASH_COMMANDS" Default="False" Description="Enable Discord slash commands" Type="Variable" Display="always" Required="false" Mask="false">False</Config>
     <Config Name="URL to Tautulli" Target="TC_TAUTULLI_URL" Default="http://localhost:8181" Description="URL to Tautulli" Type="Variable" Display="always" Required="true" Mask="false">http://localhost:8181</Config>
     <Config Name="Tautulli API key" Target="TC_TAUTULLI_KEY" Default="" Description="Tautulli API key" Type="Variable" Display="always" Required="true" Mask="true" />
     <Config Name="Use self-signed SSL certificate" Target="TC_USE_SELF_SIGNED_CERT" Default="False" Description="Disable SSL verification (if using self-signed cert on server)" Type="Variable" Display="advanced" Required="false" Mask="false">False</Config>

@@ -219,6 +219,7 @@ class DiscordConnector:
                  display_library_stats: bool,
                  nitro: bool,
                  performance_monitoring: dict,
+                 enable_slash_commands: bool,
                  analytics,
                  thousands_separator: str = ""):
         self.token = token
@@ -258,11 +259,12 @@ class DiscordConnector:
         self.emoji_manager: EmojiManager = EmojiManager()
 
         self.command_manager: CommandManager = CommandManager(
+            enable_slash_commands=enable_slash_commands,
             bot=self.client,
             guild_id=self.guild_id,
             tautulli=self.tautulli,
             emoji_manager=self.emoji_manager,
-            admin_ids=self.admin_ids
+            admin_ids=self.admin_ids,
         )
 
     def connect(self) -> None:

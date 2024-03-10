@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 
 import discord
 from discord import app_commands
@@ -60,9 +60,10 @@ class RecentlyAddedMediaItemCard(PaginatedCardViewItem):
 
 
 class Recently(commands.GroupCog, name="recently"):
-    def __init__(self, bot: commands.Bot, tautulli: TautulliConnector):
+    def __init__(self, bot: commands.Bot, tautulli: TautulliConnector, admin_check: Callable[[discord.Interaction], bool] = None):
         self.bot = bot
         self._tautulli = tautulli
+        self._admin_check = admin_check
         super().__init__()  # This is required for the cog to work.
         logging.info("Recently cog loaded.")
 
@@ -81,6 +82,8 @@ class Recently(commands.GroupCog, name="recently"):
     async def added(self, interaction: discord.Interaction,
                     media_type: Optional[discord.app_commands.Choice[str]] = None,
                     share: Optional[bool] = False) -> None:
+        # This command is public, no admin restrictions
+
         # Defer the response to give more than the default 3 seconds to respond.
         await respond_thinking(interaction=interaction, ephemeral=not share)
 

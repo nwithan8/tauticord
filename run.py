@@ -83,6 +83,7 @@ def start():
             voice_channel_settings=config.tautulli.voice_channel_settings,
             display_live_stats=config.tautulli.any_live_stats_channels_enabled,
             display_library_stats=config.tautulli.any_library_stats_channels_enabled,
+            enable_slash_commands=config.discord.enable_slash_commands,
             thousands_separator=config.tautulli.thousands_separator,
             nitro=config.discord.has_discord_nitro,
             performance_monitoring=config.performance,
