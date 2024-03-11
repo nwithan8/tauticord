@@ -310,11 +310,13 @@ a non-exhaustive list of commands that Tauticord supports:
 
 Displays the most recently added media to the Plex server.
 
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/recently_added.png" alt="recently_added">
+
 ### `/most popular-movies`
 
 **This command and its variants are locked to administrators only.**
 
-Displays the most popular movies on the Plex server.
+Displays the most popular movies on the Plex server. This is similar to the "Most X" sections on the Tautulli homepage.
 
 Variants:
 
@@ -327,6 +329,8 @@ Variants:
 - `/most active-users`
 - `/most active-platforms`
 - `/most active-libraries`
+
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/most_active_libraries.png" alt="most_active_libraries">
 
 ### `/summary`
 
