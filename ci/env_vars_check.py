@@ -12,7 +12,7 @@ class File:
         return f"{self.prefix}{element}{self.suffix}"
 
 if __name__ == "__main__":
-    config_parser = open("modules/config_parser.py").read()
+    config_parser = open("modules/settings/config_parser.py").read()
     env_name_overrides = re.findall(r"env_name_override\s?=\s?['\"]([A-Z0-9_]*)['\"]\)", config_parser)
     print("Found the following environment variables:")
     print(env_name_overrides)
