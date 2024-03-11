@@ -2,7 +2,7 @@
 FROM node:18.19.0-alpine3.19
 WORKDIR /app
 
-# Install Python utilities
+# Install Python utilities (always installs the latest version of Python 3)
 RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip
 
 # Install pm2

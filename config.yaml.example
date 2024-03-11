@@ -79,6 +79,7 @@ Discord:
     PostSummaryMessage: true
     # Where the live stats summary message will be posted
     ChannelName: "tautulli"
+    EnableSlashCommands: true
   Customization:
     Nitro: true
 

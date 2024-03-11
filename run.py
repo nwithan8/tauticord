@@ -4,9 +4,9 @@
 # Please see the LICENSE file that should have been included as part of this package.
 import argparse
 
-import modules.discord_connector as discord
+import modules.discord.discord_connector as discord
 import modules.logs as logging
-import modules.tautulli_connector as tautulli
+import modules.tautulli.tautulli_connector as tautulli
 from consts import (
     GOOGLE_ANALYTICS_ID,
     APP_NAME,
@@ -16,7 +16,7 @@ from consts import (
     FILE_LOG_LEVEL,
 )
 from modules.analytics import GoogleAnalytics
-from modules.config_parser import Config
+from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
     MONITORED_DISK_SPACE_FOLDER,
@@ -54,7 +54,7 @@ analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
                             anonymous_ip=True,
                             do_not_track=not config.extras.allow_analytics)
 
-if __name__ == '__main__':
+def start():
     logging.info(splash_logo())
     logging.info("Starting Tauticord...")
 
@@ -83,15 +83,20 @@ if __name__ == '__main__':
             voice_channel_settings=config.tautulli.voice_channel_settings,
             display_live_stats=config.tautulli.any_live_stats_channels_enabled,
             display_library_stats=config.tautulli.any_library_stats_channels_enabled,
+            enable_slash_commands=config.discord.enable_slash_commands,
             thousands_separator=config.tautulli.thousands_separator,
             nitro=config.discord.has_discord_nitro,
             performance_monitoring=config.performance,
             analytics=analytics,
         )
-
+        # asyncio.run(discord_connector.load_commands())
         discord_connector.connect()
     except Exception as e:
         logging.fatal(f"Fatal error occurred. Shutting down: {e}")
         exit_code = determine_exit_code(exception=e)
         logging.fatal(f"Exiting with code {exit_code}")
         exit(exit_code)  # Exit the script if an error bubbles up (like an internet connection error)
+
+
+if __name__ == '__main__':
+    start()

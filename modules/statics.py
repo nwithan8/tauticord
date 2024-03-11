@@ -11,7 +11,9 @@ NITRO_EMOJIS_FOLDER = "resources/emojis/nitro"
 
 MONITORED_DISK_SPACE_FOLDER = "/monitor"
 
-voice_channel_order = {
+BOT_PREFIX = "tc-"
+
+VOICE_CHANNEL_ORDER = {
     'count': 1,
     'transcodes': 2,
     'bandwidth': 3,

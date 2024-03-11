@@ -445,6 +445,12 @@ class DiscordConfig(ConfigSection):
         return value
 
     @property
+    def enable_slash_commands(self) -> bool:
+        value = self._connection._get_value(key="EnableSlashCommands", default=False,
+                                            env_name_override="TC_DISCORD_ENABLE_SLASH_COMMANDS")
+        return _extract_bool(value)
+
+    @property
     def _customization(self) -> ConfigSection:
         return self._get_subsection(key="Customization")
 
@@ -576,7 +582,10 @@ class Config:
             "Discord - Connection - Use Summary Text Message": self.discord.use_summary_text_message,
             "Discord - Connection - Summary Text Channel Name": self.discord.channel_name,
             "Discord - Customization - Has Nitro": self.discord.has_discord_nitro,
+            "Discord - Connection - Enable Slash Commands": self.discord.enable_slash_commands,
             "Extras - Allow Analytics": self.extras.allow_analytics,
+            "Extras - Performance - Monitor Tautulli User Count": self.extras._performance_monitor_tautulli_user_count,
+            "Extras - Performance - Monitor Disk Space": self.extras._performance_monitor_disk_space,
             "Extras - Performance - Monitor CPU Performance": self.extras._performance_monitor_cpu,
             "Extras - Performance - Monitor Memory Performance": self.extras._performance_monitor_memory,
         }

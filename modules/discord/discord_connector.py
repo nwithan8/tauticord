@@ -3,15 +3,17 @@ from typing import Union, List, Tuple
 
 import discord
 from discord import Emoji
+from discord.ext import commands
 
 import modules.logs as logging
 import modules.statics as statics
 import modules.system_stats as system_stats
-import modules.tautulli_connector
+import modules.tautulli.tautulli_connector
 from modules import emojis, utils
+from modules.discord.command_manager import CommandManager
 from modules.emojis import EmojiManager
-from modules.settings_transports import LibraryVoiceChannelsVisibilities
-from modules.tautulli_connector import TautulliConnector, TautulliDataResponse
+from modules.settings.settings_transports import LibraryVoiceChannelsVisibilities
+from modules.tautulli.tautulli_connector import TautulliConnector, TautulliDataResponse
 from modules.utils import quote, format_thousands
 
 
@@ -20,6 +22,7 @@ async def add_emoji_reactions(message: discord.Message, count: int, emoji_manage
     Add reactions to a message for user interaction
     :param message: message to add emojis to
     :param count: how many emojis to add
+    :param emoji_manager: EmojiManager
     :return: None
     """
 
@@ -137,6 +140,7 @@ async def get_discord_channel_by_starting_name(client: discord.Client,
                                         category=category)
 
 
+# TODO: create_if_not_exist is not used
 async def get_discord_channel_by_name(client: discord.Client,
                                       guild_id: str,
                                       channel_name: str,
@@ -196,10 +200,11 @@ def build_response(message: discord.Message, bot_id: int, admin_ids: List[str]) 
 
 
 def get_voice_channel_position(stat_type: str) -> int:
-    return statics.voice_channel_order.get(stat_type, None)
+    return statics.VOICE_CHANNEL_ORDER.get(stat_type, None)
 
 
 class DiscordConnector:
+    # noinspection PyTypeChecker
     def __init__(self,
                  token: str,
                  guild_id: str,
@@ -214,6 +219,7 @@ class DiscordConnector:
                  display_library_stats: bool,
                  nitro: bool,
                  performance_monitoring: dict,
+                 enable_slash_commands: bool,
                  analytics,
                  thousands_separator: str = ""):
         self.token = token
@@ -240,8 +246,10 @@ class DiscordConnector:
         self.analytics = analytics
 
         intents = discord.Intents.default()
-        intents.reactions = True
-        self.client = discord.Client(intents=intents)
+        intents.reactions = True  # Required for on_raw_reaction_add
+        intents.message_content = True  # Required for slash commands
+        self.client = commands.Bot(command_prefix=statics.BOT_PREFIX,
+                                   intents=intents)  # Need a Bot (subclass of Client) for cogs to work
         self.on_ready = self.client.event(self.on_ready)
         self.on_raw_reaction_add = self.client.event(self.on_raw_reaction_add)
         self.on_message = self.client.event(self.on_message)
@@ -249,6 +257,15 @@ class DiscordConnector:
         self.current_message = None
 
         self.emoji_manager: EmojiManager = EmojiManager()
+
+        self.command_manager: CommandManager = CommandManager(
+            enable_slash_commands=enable_slash_commands,
+            bot=self.client,
+            guild_id=self.guild_id,
+            tautulli=self.tautulli,
+            emoji_manager=self.emoji_manager,
+            admin_ids=self.admin_ids,
+        )
 
     def connect(self) -> None:
         logging.info('Connecting to Discord...')
@@ -272,6 +289,14 @@ class DiscordConnector:
 
     async def on_ready(self) -> None:
         logging.info('Connected to Discord.')
+
+        logging.info('Setting up Discord slash commands...')
+        await self.command_manager.register_slash_commands()
+
+        logging.info("Activating Discord slash commands...")
+        await self.command_manager.activate_slash_commands()
+
+        logging.info("Setting bot status...")
         await self.client.change_presence(
             activity=discord.Activity(type=discord.ActivityType.watching, name='for Tautulli stats'))
 
@@ -305,15 +330,18 @@ class DiscordConnector:
 
         logging.info("Loading Tautulli summary service...")
         # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
+        # noinspection PyAsyncCall
         asyncio.create_task(self.run_live_summary_service(message=self.current_message,
                                                           refresh_time=max([5, self.refresh_time])))
 
         logging.info("Starting Tautulli library stats service...")
         # minimum 5-minute sleep time hard-coded, trust me, don't DDoS your server
+        # noinspection PyAsyncCall
         asyncio.create_task(self.run_library_stats_service(refresh_time=max([5 * 60, self.library_refresh_time])))
 
         if self.enable_performance_monitoring:
             logging.info("Starting performance monitoring service...")
+            # noinspection PyAsyncCall
             asyncio.create_task(
                 self.run_performance_monitoring_service(refresh_time=5 * 60))  # Hard-coded 5-minute refresh time
 
@@ -571,7 +599,7 @@ class DiscordConnector:
             await self.edit_stat_voice_channel_by_name(stat=stat, channel_name=channel_name, category=category)
 
     async def update_live_voice_channels(self,
-                                         activity: modules.tautulli_connector.Activity,
+                                         activity: modules.tautulli.tautulli_connector.Activity,
                                          plex_online: bool,
                                          category: discord.CategoryChannel = None) -> None:
 
@@ -681,7 +709,8 @@ class DiscordConnector:
                                                stat=user_count,
                                                category=self.performance_voice_category)
         if self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE, False):
-            path = self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH, statics.MONITORED_DISK_SPACE_FOLDER)
+            path = self.performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH,
+                                                   statics.MONITORED_DISK_SPACE_FOLDER)
             if not system_stats.path_exists(path):
                 logging.error(f"Could not find {quote(path)} to monitor disk space.")
                 stat = "N/A"

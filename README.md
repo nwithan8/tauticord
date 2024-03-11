@@ -69,6 +69,10 @@ library name with item counts every hour.
         - Manage Emojis
     - **Shortcut**: Use the following link to invite your bot to your server with the above permissions:
       https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot&permissions=1073818704
+        - You will also need to enable "Message Content Intent" [in the bot settings in the Discord Developer Portal]()
+          to allow [slash commands](#commands) to work. **This is required regardless of whether you have slash commands enabled.**
+
+      <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/message_content_intent.png">
 
 Tauticord runs as a Docker container. The Dockerfile is included in this repository, or can be pulled
 from [Docker Hub](https://hub.docker.com/r/nwithan8/tauticord)
@@ -137,6 +141,7 @@ You will need to set the following environment variables:
 | TC_DISCORD_POST_SUMMARY_MESSAGE   | No       | Whether to post a stat summary text message                                                                                                                                 | "True"                                           |
 | TC_DISCORD_CHANNEL_NAME           | No       | Channel name for stats summary text message                                                                                                                                 | "Tautulli Status"                                |
 | TC_DISCORD_NITRO                  | No       | Whether the Discord server has a Nitro subscription (bot will upload custom emojis)                                                                                         | "False"                                          |
+| TC_DISCORD_ENABLE_SLASH_COMMANDS  | No       | Whether to enable [Slash Commands](#commands)                                                                                                                               | "False"                                          |
 | TC_ALLOW_ANALYTICS                | No       | Allow Anonymous Crash Analytics?                                                                                                                                            | "True"                                           |                
 | TC_VC_PERFORMANCE_CATEGORY_NAME   | No       | Name of the performance voice channel category                                                                                                                              | "Performance"                                    |
 | TC_MONITOR_CPU                    | No       | Whether to monitor CPU performance (see [Performance Monitoring](#performance-monitoring))                                                                                  | "False"                                          |
@@ -291,6 +296,51 @@ The same applies to disk space monitoring. Tauticord's disk space monitoring fea
 space of the provided folder (default: The path mounted to `/monitor` inside the Docker container). This feature can be
 used, for example, to monitor the disk space of your Plex library, as long as the path to the library is mounted
 to `/monitor`. This will not work if Tauticord is running on a separate system from the Plex library.
+
+# Commands
+
+Out of the box, Tauticord does mostly passive, non-interactive things (posting messages, updating voice channels, etc.).
+
+However, Tauticord also has a few commands that can be used to interact with it, via Discord's slash commands. Below is
+a non-exhaustive list of commands that Tauticord supports:
+
+### `/recently-added`
+
+**Any user can use this command.**
+
+Displays the most recently added media to the Plex server.
+
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/recently_added.png" alt="recently_added">
+
+### `/most popular-movies`
+
+**This command and its variants are locked to administrators only.**
+
+Displays the most popular movies on the Plex server. This is similar to the "Most X" sections on the Tautulli homepage.
+
+Variants:
+
+- `/most popular-movies`
+- `/most popular-shows`
+- `/most popular-artists`
+- `/most watched-movies`
+- `/most watched-shows`
+- `/most played-artists`
+- `/most active-users`
+- `/most active-platforms`
+- `/most active-libraries`
+
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/most_active_libraries.png" alt="most_active_libraries">
+
+### `/summary`
+
+**This command is locked to administrators only.**
+
+Displays a summary of the current Tauitulli statistics. This is the exact same summary that Tauticord automatically
+posts.
+
+All slash command responses are ephemeral (only visible to the user who triggered it) by default. Most slash commands,
+however, have a `share` option that can be used to make the response visible to everyone in the channel.
 
 # Development
 
