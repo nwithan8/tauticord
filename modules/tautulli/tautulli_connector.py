@@ -240,7 +240,9 @@ class TautulliDataResponse:
                  text_manager: TextManager,
                  streams_info: List[TautulliStreamInfo] = None,
                  plex_pass: bool = False,
-                 error_occurred: bool = False):
+                 error_occurred: bool = False,
+                 additional_embed_fields: List[dict] = None,
+                 additional_embed_footers: List[str] = None):
         self._activity = activity
         self._streams = streams_info or []
         self.plex_pass = plex_pass
@@ -248,6 +250,8 @@ class TautulliDataResponse:
         self._emoji_manager = emoji_manager
         self._server_name = server_name
         self._text_manager = text_manager
+        self.additional_embed_fields = additional_embed_fields or []
+        self._additional_embed_footers = additional_embed_footers or []
 
     @property
     def embed(self) -> discord.Embed:
@@ -261,11 +265,18 @@ class TautulliDataResponse:
             embed.add_field(name=stream.get_title(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
                             value=stream.get_body(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
                             inline=False)
+        for field in self.additional_embed_fields:
+            embed.add_field(name=field['name'], value=field['value'], inline=False)
 
         footer_text = self._text_manager.overview_footer(no_connection=self.error,
                                                          activity=self._activity,
                                                          emoji_manager=self._emoji_manager,
                                                          add_termination_tip=self.plex_pass)
+        if self._additional_embed_footers:
+            footer_text += "\n"
+        for additional_footer in self._additional_embed_footers:
+            footer_text += "\n" + additional_footer
+
         embed.set_footer(text=footer_text)
 
         return embed
@@ -307,8 +318,8 @@ class TautulliConnector:
         logging.error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
-    def refresh_data(self, emoji_manager: EmojiManager) -> Tuple[
-        TautulliDataResponse, int, Union[Activity, None], bool]:
+    def refresh_data(self, emoji_manager: EmojiManager, additional_embed_fields: List[dict] = None,
+                     additional_embed_footers: List[str] = None) -> Tuple[TautulliDataResponse, int, Union[Activity, None], bool]:
         """
         Parse activity JSON from Tautulli, prepare summary message for Discord
         :return: data wrapper, number of active streams, activity data and whether Plex is online
@@ -339,7 +350,9 @@ class TautulliConnector:
                                             text_manager=self.text_manager,
                                             streams_info=session_details,
                                             plex_pass=self.plex_pass,
-                                            server_name=self.server_name), count, activity, self.is_plex_server_online()
+                                            server_name=self.server_name,
+                                            additional_embed_fields=additional_embed_fields,
+                                            additional_embed_footers=additional_embed_footers), count, activity, self.is_plex_server_online()
             except KeyError as e:
                 self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
 
@@ -349,7 +362,9 @@ class TautulliConnector:
                                     emoji_manager=emoji_manager,
                                     text_manager=self.text_manager,
                                     error_occurred=True,
-                                    server_name=self.server_name), 0, None, is_plex_online
+                                    server_name=self.server_name,
+                                    additional_embed_fields=additional_embed_fields,
+                                    additional_embed_footers=additional_embed_footers), 0, None, is_plex_online
 
     def ping_pms_server_directly(self) -> bool:
         """

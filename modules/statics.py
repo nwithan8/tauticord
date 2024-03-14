@@ -1,10 +1,10 @@
 # Number 1-9, and A-Z
 import subprocess
 import sys
-from typing import Optional
 
 VERSION = "VERSIONADDEDBYGITHUB"
 COPYRIGHT = "Copyright © YEARADDEDBYGITHUB Nate Harris. All rights reserved."
+UNKNOWN_COMMIT_HASH = "unknown-commit"
 
 STANDARD_EMOJIS_FOLDER = "resources/emojis/standard"
 NITRO_EMOJIS_FOLDER = "resources/emojis/nitro"
@@ -21,8 +21,7 @@ VOICE_CHANNEL_ORDER = {
     'remoteBandwidth': 5
 }
 
-MAX_EMBED_FIELD_NAME_LENGTH = 200 # 256 - estimated emojis + flairs + safety margin
-
+MAX_EMBED_FIELD_NAME_LENGTH = 200  # 256 - estimated emojis + flairs + safety margin
 
 KEY_STATS_CATEGORY_NAME = "stats_category_name"
 KEY_COUNT = "count"
@@ -70,7 +69,6 @@ KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH = "performance_monitor_disk_space_path"
 KEY_PERFORMANCE_MONITOR_CPU = "performance_monitor_cpu"
 KEY_PERFORMANCE_MONITOR_MEMORY = "performance_monitor_memory"
 
-
 MAX_STREAM_COUNT = 36
 
 ENCODING_SEPARATOR_1 = "%"
@@ -84,20 +82,42 @@ _  /   _  ___ / /_/ / _  /   __/ /  / /___  / /_/ /_  _, _/_  /_/ /
 /_/    /_/  |_\____/  /_/    /___/  \____/  \____/ /_/ |_| /_____/  
 """
 
+INFO_SUMMARY = f"""Version: {VERSION}
+"""
+
+
+def get_sha_hash(sha: str) -> str:
+    return f"git-{sha[0:7]}"
+
+
+def get_last_commit_hash() -> str:
+    """
+    Get the seven character commit hash of the last commit.
+    """
+    try:
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
+    except subprocess.SubprocessError:
+        sha = UNKNOWN_COMMIT_HASH
+
+    return get_sha_hash(sha)
+
+
+def is_git() -> bool:
+    return "GITHUB" in VERSION
+
+
+def get_version() -> str:
+    if not is_git():
+        return VERSION
+
+    return get_last_commit_hash()
+
+
 def splash_logo() -> str:
-    version = VERSION
-    if "GITHUB" in version:
-        try:
-            last_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
-            version = f"git-{last_commit[:7]}"
-        except subprocess.SubprocessError:
-            version = "git-unknown-commit"
+    version = get_version()
     return f"""
 {ASCII_ART}
 Version {version}, Python {sys.version}
 
 {COPYRIGHT}
-"""
-
-INFO_SUMMARY = f"""Version: {VERSION}
 """
