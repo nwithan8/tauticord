@@ -3,7 +3,6 @@
 # Tauticord is released as-is under the "GNU General Public License".
 # Please see the LICENSE file that should have been included as part of this package.
 import argparse
-import asyncio
 
 import modules.discord.discord_connector as discord
 import modules.logs as logging
@@ -57,33 +56,10 @@ analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
                             anonymous_ip=True,
                             do_not_track=not config.extras.allow_analytics)
 
-NEW_VERSION_AVAILABLE = False
 
-
-def is_new_version_available() -> bool:
-    return NEW_VERSION_AVAILABLE
-
-
-async def check_for_new_version():
-    global NEW_VERSION_AVAILABLE
-    while True:
-        try:
-            NEW_VERSION_AVAILABLE = versioning.newer_version_available()
-            if NEW_VERSION_AVAILABLE:
-                logging.debug(f"New version available")
-            await asyncio.sleep(60 * 60)  # Check for new version every hour
-        except Exception:
-            exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
-
-
-async def start():
+def start():
     logging.info(splash_logo())
     logging.info("Starting Tauticord...")
-
-    # Set up version checking schedule
-    logging.info("Setting up version checking schedule")
-    # noinspection PyAsyncCall
-    asyncio.create_task(check_for_new_version())  # This is purposefully not awaited, it's a background task
 
     # noinspection PyBroadException
     try:
@@ -117,7 +93,7 @@ async def start():
             nitro=config.discord.has_discord_nitro,
             performance_monitoring=config.performance,
             analytics=analytics,
-            new_version_available_func=is_new_version_available,
+            version_checker=versioning.VersionChecker(),
         )
         discord_connector.connect()
     except Exception as e:
@@ -128,4 +104,4 @@ async def start():
 
 
 if __name__ == '__main__':
-    asyncio.run(start())
+    start()

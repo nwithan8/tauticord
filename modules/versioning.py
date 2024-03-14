@@ -1,3 +1,4 @@
+import asyncio
 from typing import Union
 
 import objectrest
@@ -58,3 +59,21 @@ def newer_version_available() -> bool:
         return _newer_github_commit_available(current_commit_hash=current_version)
     else:
         return _newer_github_release_available(current_version=current_version)
+
+
+class VersionChecker:
+    def __init__(self):
+        self._new_version_available = False
+
+    async def check_for_new_version(self):
+        while True:
+            try:
+                self._new_version_available = newer_version_available()
+                if self._new_version_available:
+                    logging.debug(f"New version available")
+                await asyncio.sleep(60 * 60)  # Check for new version every hour
+            except Exception:
+                exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
+
+    def is_new_version_available(self) -> bool:
+        return self._new_version_available
