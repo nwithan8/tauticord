@@ -1,4 +1,4 @@
-import logging
+import modules.logs as logging
 from pathlib import Path
 from typing import Optional, Union, List
 

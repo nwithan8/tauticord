@@ -5,6 +5,7 @@ import discord
 from discord import Emoji
 from discord.ext import commands
 
+import consts
 import modules.logs as logging
 import modules.statics as statics
 import modules.system_stats as system_stats
@@ -221,6 +222,7 @@ class DiscordConnector:
                  performance_monitoring: dict,
                  enable_slash_commands: bool,
                  analytics,
+                 new_version_available_func: callable,
                  thousands_separator: str = ""):
         self.token = token
         self.guild_id = guild_id
@@ -266,6 +268,8 @@ class DiscordConnector:
             emoji_manager=self.emoji_manager,
             admin_ids=self.admin_ids,
         )
+
+        self.new_version_available_func = new_version_available_func
 
     def connect(self) -> None:
         logging.info('Connecting to Discord...')
@@ -447,7 +451,14 @@ class DiscordConnector:
         :param previous_message: discord.Message to replace
         :return: new discord.Message
         """
-        data_wrapper, count, activity, plex_online = self.tautulli.refresh_data(emoji_manager=self.emoji_manager)
+        embed_fields = []
+        if self.new_version_available_func():
+            embed_fields.append(
+                {"name": "🔔 New Version Available",
+                 "value": f"A new version of Tauticord is available! [Click here]({consts.GITHUB_REPO_FULL_LINK}) to download it."})
+
+        data_wrapper, count, activity, plex_online = self.tautulli.refresh_data(emoji_manager=self.emoji_manager,
+                                                                                additional_embed_fields=embed_fields)
 
         await self.update_live_voice_channels(activity=activity,
                                               plex_online=plex_online,
