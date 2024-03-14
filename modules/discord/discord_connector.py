@@ -10,7 +10,7 @@ import modules.logs as logging
 import modules.statics as statics
 import modules.system_stats as system_stats
 import modules.tautulli.tautulli_connector
-from modules import emojis, utils
+from modules import emojis, utils, versioning
 from modules.discord.command_manager import CommandManager
 from modules.emojis import EmojiManager
 from modules.settings.settings_transports import LibraryVoiceChannelsVisibilities
@@ -222,7 +222,7 @@ class DiscordConnector:
                  performance_monitoring: dict,
                  enable_slash_commands: bool,
                  analytics,
-                 new_version_available_func: callable,
+                 version_checker: versioning.VersionChecker,
                  thousands_separator: str = ""):
         self.token = token
         self.guild_id = guild_id
@@ -269,12 +269,12 @@ class DiscordConnector:
             admin_ids=self.admin_ids,
         )
 
-        self.new_version_available_func = new_version_available_func
+        self.version_checker = version_checker
 
     def connect(self) -> None:
         logging.info('Connecting to Discord...')
         # TODO: Look at merging loggers
-        self.client.run(self.token, reconnect=True)
+        self.client.run(self.token, reconnect=True)  # Can't have any asyncio tasks running before the bot is ready
 
     @property
     def stats_voice_category_name(self) -> str:
@@ -292,6 +292,8 @@ class DiscordConnector:
         return self.voice_channel_settings.get(statics.KEY_STATS_CHANNEL_IDS, {}).get(key, 0)
 
     async def on_ready(self) -> None:
+        # NOTE: This is the first place in the stack where asyncio tasks can be started
+
         logging.info('Connected to Discord.')
 
         logging.info('Setting up Discord slash commands...')
@@ -348,6 +350,11 @@ class DiscordConnector:
             # noinspection PyAsyncCall
             asyncio.create_task(
                 self.run_performance_monitoring_service(refresh_time=5 * 60))  # Hard-coded 5-minute refresh time
+
+        if self.version_checker:
+            logging.info("Starting version checking service...")
+            # noinspection PyAsyncCall
+            asyncio.create_task(self.version_checker.check_for_new_version())
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         emoji = payload.emoji
@@ -452,7 +459,7 @@ class DiscordConnector:
         :return: new discord.Message
         """
         embed_fields = []
-        if self.new_version_available_func():
+        if self.version_checker.is_new_version_available():
             embed_fields.append(
                 {"name": "🔔 New Version Available",
                  "value": f"A new version of Tauticord is available! [Click here]({consts.GITHUB_REPO_FULL_LINK}) to download it."})
