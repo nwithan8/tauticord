@@ -14,9 +14,9 @@ from modules.time_manager import TimeManager
 def _extract_bool(value):
     if isinstance(value, bool):
         return value
-    if value.lower() in ["true", "yes", "1", "t"]:
+    if value.lower() in ["true", "t", "yes", "y", "enable", "en", "on", "1"]:
         return True
-    elif value.lower() in ["false", "no", "0", "f"]:
+    elif value.lower() in ["false", "f", "no", "n", "disable", "dis", "off", "0"]:
         return False
     else:
         raise ValueError("Not a boolean: {}".format(value))
