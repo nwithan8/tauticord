@@ -310,7 +310,7 @@ a non-exhaustive list of commands that Tauticord supports:
 
 Displays the most recently added media to the Plex server.
 
-<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/recently_added.png" alt="recently_added">
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/recently_added.png" alt="recently_added">
 
 ### `/most popular-movies`
 
