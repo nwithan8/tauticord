@@ -330,7 +330,7 @@ Variants:
 - `/most active-platforms`
 - `/most active-libraries`
 
-<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/most_active_libraries.png" alt="most_active_libraries">
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/most_active_libraries.png" alt="most_active_libraries">
 
 ### `/summary`
 
