@@ -60,15 +60,11 @@ library name with item counts every hour.
 - Docker
 - [A Discord bot token](https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/)
     - Permissions required:
-        - Manage Channels
-        - View Channels
-        - Send Messages
-        - Manage Messages
-        - Read Message History
-        - Add Reactions
-        - Manage Emojis
-    - **Shortcut**: Use the following link to invite your bot to your server with the above permissions:
-      https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot&permissions=1073818704
+  
+      <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/permissions.png" alt="permissions">
+      
+      **SHORTCUT**: Discord occasionally changes the name of some permissions, so the screenshot above may be outdated. However, the final "Permissions Integer" won't change; you can use the following link to invite your bot to your server with the correct permissions:
+      https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot&permissions=3222350928
         - You will also need to enable "Message Content Intent" [in the bot settings in the Discord Developer Portal]()
           to allow [slash commands](#commands) to work. **This is required regardless of whether you have slash commands enabled.**
 
