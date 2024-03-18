@@ -19,7 +19,8 @@
       "exec_mode": "fork",
       "instances": 1,
       // 101 - Discord login failed
-      "stop_exit_codes": [101]
+      // 102 - Missing privileged intents
+      "stop_exit_codes": [101, 102]
     }
   ]
 }

@@ -10,5 +10,7 @@ def determine_exit_code(exception: Exception) -> int:
     """
     if isinstance(exception, discord.LoginFailure):
         return 101  # Invalid Discord token
+    elif isinstance(exception, discord.PrivilegedIntentsRequired):
+        return 102  # Privileged intents are required
     else:
         return 1
