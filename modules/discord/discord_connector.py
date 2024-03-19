@@ -299,9 +299,6 @@ class DiscordConnector:
         logging.info('Setting up Discord slash commands...')
         await self.command_manager.register_slash_commands()
 
-        logging.info("Activating Discord slash commands...")
-        await self.command_manager.activate_slash_commands()
-
         logging.info("Setting bot status...")
         await self.client.change_presence(
             activity=discord.Activity(type=discord.ActivityType.watching, name='for Tautulli stats'))
