@@ -475,6 +475,7 @@ class ExtrasConfig(ConfigSection):
     def _performance(self) -> ConfigSection:
         return self._get_subsection(key="Performance")
 
+    @property
     def _performance_monitor_tautulli_user_count(self) -> bool:
         value = self._performance._get_value(key="TautulliUserCount", default=False,
                                              env_name_override="TC_MONITOR_TAUTULLI_USER_COUNT")
