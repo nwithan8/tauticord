@@ -625,7 +625,7 @@ class DiscordConnector:
             status = "Online" if plex_online else "Offline"
             logging.info(f"Updating Plex Status voice channel with new status: {status}")
             if self.voice_channel_settings.get(statics.KEY_PLEX_STATUS_USE_EMOJI, False):
-                status = self.emoji_manager.get_emoji(key=f'plex_{status.lower()}')
+                status = self.emoji_manager.get_emoji(key=f'{statics.KEY_STATUS}_{status.lower()}')
             await self.edit_stat_voice_channel(channel_name="Plex Status",
                                                channel_id=self.get_voice_channel_id(
                                                    key=statics.KEY_PLEX_STATUS_CHANNEL_ID),
