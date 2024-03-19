@@ -49,6 +49,7 @@ KEY_BANDWIDTH_CHANNEL_ID = "bandwidth_channel_id"
 KEY_LAN_BANDWIDTH_CHANNEL_ID = "lan_bandwidth_channel_id"
 KEY_REMOTE_BANDWIDTH_CHANNEL_ID = "remote_bandwidth_channel_id"
 KEY_PLEX_STATUS_CHANNEL_ID = "plex_status_channel_id"
+KEY_STATUS = "status"
 
 KEY_TIME_MANAGER = "time_settings"
 
