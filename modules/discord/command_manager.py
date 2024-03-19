@@ -50,19 +50,17 @@ class CommandManager:
         return str(interaction.user.id) in self._admin_ids
 
     async def register_slash_commands(self):
-        for cog in self._cogs_to_add:
-            await self._add_cog(cog)
+        if self._enable_slash_commands:
+            for cog in self._cogs_to_add:
+                await self._add_cog(cog)
+            logging.info("Slash commands registered.")
+        else:
+            logging.info("Slash commands not enabled. Skipping registration...")
 
-        logging.info("Slash commands registered.")
-
-    async def activate_slash_commands(self):
-        if not self._enable_slash_commands:
-            logging.info("Slash commands not enabled. Skipping activation.")
-            return
-
+        # Need to sync regardless (either adding newly-registered cogs or syncing/removing existing ones)
         if not self._synced:
             await self._bot.tree.sync(guild=self._guild)
             self._synced = True
-            logging.info("Slash commands activated.")
+            logging.info("Slash commands synced.")
         else:
-            logging.info("Slash commands already activated.")
+            logging.info("Slash commands already synced.")
