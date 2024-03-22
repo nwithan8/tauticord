@@ -1,0 +1,65 @@
+name: Bug Report
+description: A bug has been discovered in Tauticord's source code.
+title: "[BUG] - <YOUR_SUMMARY_HERE>"
+labels: [ "bug", "triage" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug in Tauticord's source code. Please fill out the information below to help us investigate and resolve the issue.
+
+        Please replace `YOUR_SUMMARY_HERE` in the title with a brief summary of the bug, and complete the information below.
+  - type: checkboxes
+    id: new_issue
+    attributes:
+      label: This bug has not been reported already
+      description: |
+        To avoid duplicate tickets, please verify that the bug has not already been reported. If it has, please add any additional information to the existing ticket.
+      options:
+        - label: I have verified that this bug has not already been reported.
+          required: true
+  - type: checkboxes
+    id: have_tried_fixing_self
+    attributes:
+      label: You have tried to fix the bug yourself
+      description: |
+        If you have the technical knowledge to fix the bug yourself, please consider [submitting a pull request](https://github.com/nwithan8/tauticord/pulls) with the fix. If you are unable to fix the bug, please continue with the bug report.
+      options:
+        - label: I have tried to fix the bug myself.
+          required: false
+  - type: textarea
+    id: current_behaviour
+    attributes:
+      label: Current Behavior
+      description: |
+        Please describe the behavior of the bug (i.e. what is currently happening due to the bug).
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behaviour
+    attributes:
+      label: Expected Behavior
+      description: |
+        Please describe the expected behavior of the bug (i.e. what should happen if the bug did not exist).
+    validations:
+      required: true
+  - type: textarea
+    id: recreation_steps
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Please provide detailed steps to reproduce the bug. Include any relevant information such as the operating system, browser, or other software being used.
+    validations:
+      required: true
+  - type: textarea
+    id: supporting_info
+    attributes:
+      label: Supporting Information
+      description: |
+        Please provide any additional information that may be helpful in diagnosing and resolving the bug, including error messages, logs, screenshots and lines of code.
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting your report.
+        
+        Please keep an eye on this issue for any updates. If you have any additional information to add, please comment on this issue or join our [Discord server](https://discord.gg/ygRDVE9) to discuss the issue further.
