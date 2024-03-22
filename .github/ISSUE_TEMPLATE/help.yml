@@ -1,0 +1,112 @@
+name: Help Request
+description: A request for help with using Tauticord.
+title: "[HELP] - <YOUR_SUMMARY_HERE>"
+labels: [ "help", "triage" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for opening a help request for Tauticord. Please fill out the information below to help us investigate and resolve the issue.
+
+        Please replace `YOUR_SUMMARY_HERE` in the title with a brief summary of your issue, and complete the information below.
+  - type: checkboxes
+    id: new_issue
+    attributes:
+      label: This issue has not already been resolved
+      description: |
+        To avoid duplicate requests, please verify that no other user has already made a similar request. You can search for similar issues [here](https://github.com/nwithan8/tauticord/issues?q=is%3Aissue) or on our [Discord server](https://discord.gg/ygRDVE9).
+      options:
+        - label: I have verified that no one has asked for help with this issue before.
+          required: true
+  - type: checkboxes
+    id: reread_docs
+    attributes:
+      label: You have read the documentation
+      description: |
+        Before asking for help, please ensure that you have read the [documentation](https://github.com/nwithan8/tauticord/blob/master/README.mdhttps://github.com/nwithan8/tauticord/blob/master/README.md) and verified that your issue is not already addressed there.
+      options:
+        - label: I have read the documentation and my issue is not addressed there.
+          required: true
+  - type: dropdown
+    id: installation_type
+    attributes:
+      label: Installation Type
+      description: |
+        Please select how you are running Tauticord.
+      options:
+        - Standalone Docker
+        - Docker on Unraid
+        - Docker Compose
+        - Kubernetes
+        - Python script (not recommended)
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: configuration_type
+    attributes:
+      label: Configuration Type
+      description: |
+        Please select how you are configuring Tauticord.
+      options:
+        - Environment Variables
+        - Configuration File
+        - Unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Type of Issue
+      description: |
+        Please select the type of issue you are experiencing.
+      options:
+        - Installation (e.g. Cannot install Tauticord)
+        - Running (e.g. Tauticord not starting)
+        - Configuration (e.g settings not being applied)
+        - Usage (e.g. Tauticord not updating/responding)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: issue_details
+    attributes:
+      label: Issue Details
+      description: |
+        Please describe in detail the issue you are facing.
+    validations:
+      required: true
+  - type: textarea
+    id: recreation_steps
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Please describe how to reproduce the issue you are facing.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Please provide any relevant logs that may help diagnose the issue.
+        
+        **NOTE:** The log messages printed to the console are only informational and may not contain the necessary information to diagnose the issue. Please instead provide the logs from the `Tauticord.log` file in the `logs` directory.
+        
+        **Please remove any sensitive information before posting logs.**
+    validations:
+      required: true
+  - type: textarea
+    id: supporting_info
+    attributes:
+      label: Supporting Information
+      description: |
+        Please provide any additional information that may be helpful.
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting your request. We will review the information provided and respond as soon as possible.
+        
+        Please keep an eye on this issue for any updates. If you have any additional information to add, please comment on this ticket or join our [Discord server](https://discord.gg/ygRDVE9).

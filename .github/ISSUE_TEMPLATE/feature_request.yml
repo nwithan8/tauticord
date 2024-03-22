@@ -1,0 +1,58 @@
+name: Feature Request
+description: A request for a new feature in Tauticord.
+title: "[FEATURE] - <YOUR_SUMMARY_HERE>"
+labels: [ "enhancement", "triage" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for opening a feature request for Tauticord. Please fill out the information below.
+
+        Please replace `YOUR_SUMMARY_HERE` in the title with a brief summary of your idea, and complete the information below.
+  - type: checkboxes
+    id: new_request
+    attributes:
+      label: This request has not already been submitted
+      description: |
+        To avoid duplicate requests, please verify that no other user has already made a similar request. You can search for similar requests [here](https://github.com/nwithan8/tauticord/issues?q=is%3Aissue) or on our [Discord server](https://discord.gg/ygRDVE9).
+      options:
+        - label: I have verified that no one has asked for this feature before.
+          required: true
+  - type: checkboxes
+    id: feature_is_appropriate
+    attributes:
+      label: The feature is appropriate for Tauticord
+      description: |
+        Before submitting a feature request, please ensure that the feature is appropriate for Tauticord and aligns with the project's goals.
+      options:
+        - label: I believe this feature is appropriate for Tauticord.
+          required: true
+  - type: dropdown
+    id: feature_type
+    attributes:
+      label: Feature Type / Category
+      description: |
+        Please select the type or category of the feature you are requesting.
+      options:
+        - Statistic (e.g. New statistic or metric)
+        - Command (e.g. Interactive command)
+        - Integration (e.g. New service integration)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: feature_details
+    attributes:
+      label: Feature Details
+      description: |
+        Please describe in as much detail as possible the feature you are requesting. Please include any relevant information such as use cases, examples, or other details that may help us understand your request.
+        
+        If you have any ideas for how the feature should be implemented from a code perspective, please include those as well. Even better, consider [submitting a pull request](https://github.com/nwithan8/tauticord/pulls) with your changes if you are able.
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting your request. We will review the information provided and respond as soon as possible.
+        
+        Please keep an eye on this issue for any updates. If you have any additional information to add, please comment on this ticket or join our [Discord server](https://discord.gg/ygRDVE9).
