@@ -49,6 +49,7 @@ services:
       TC_VC_TV_SERIES_COUNT: "True"
       TC_VC_TV_EPISODE_COUNT: "True"
       TC_VC_MUSIC_ARTIST_COUNT: "True"
+      TC_VC_MUSIC_ALBUM_COUNT: "True"
       TC_VC_MUSIC_TRACK_COUNT: "True"
       TC_DISCORD_ADMIN_IDS: my_user_id,my_second_user_id
       TC_DISCORD_POST_SUMMARY_MESSAGE: "True"

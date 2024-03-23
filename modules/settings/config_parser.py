@@ -279,6 +279,12 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
+    def show_music_album_count(self) -> bool:
+        value = self._libraries_voice_channels._get_value(key="MusicAlbumCount", default=True,
+                                                          env_name_override="TC_VC_MUSIC_ALBUM_COUNT")
+        return _extract_bool(value)
+
+    @property
     def show_music_track_count(self) -> bool:
         value = self._libraries_voice_channels._get_value(key="MusicTrackCount", default=True,
                                                           env_name_override="TC_VC_MUSIC_TRACK_COUNT")
@@ -304,6 +310,7 @@ class TautulliConfig(ConfigSection):
             statics.KEY_SHOW_TV_EPISODES: self.show_tv_episode_count,
             statics.KEY_SHOW_TV_SERIES: self.show_tv_series_count,
             statics.KEY_SHOW_MUSIC_ARTISTS: self.show_music_artist_count,
+            statics.KEY_SHOW_MUSIC_ALBUMS: self.show_music_album_count,
             statics.KEY_SHOW_MUSIC_TRACKS: self.show_music_track_count,
             statics.KEY_STATS_CHANNEL_IDS: self.stats_voice_channels_ids,
             statics.KEY_USE_STATS_CHANNEL_IDS: self._use_stats_voice_channel_ids,
