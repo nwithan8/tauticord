@@ -451,6 +451,8 @@ class TautulliConnector:
             case 'artist':
                 if visibility_settings.show_music_artists:
                     results.append((emoji_manager.get_emoji(key="artists"), library_info.get('count')))
+                if visibility_settings.show_music_albums:
+                    results.append((emoji_manager.get_emoji(key="albums"), library_info.get('parent_count')))
                 if visibility_settings.show_music_tracks:
                     results.append((emoji_manager.get_emoji(key="tracks"), library_info.get('child_count')))
                 return results

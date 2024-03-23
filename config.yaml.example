@@ -52,6 +52,7 @@ Tautulli:
         TVSeriesCount: true
         TVEpisodeCount: true
         MusicArtistCount: true
+        MusicAlbumCount: true
         MusicTrackCount: true
       Performance:
         CategoryName: "Performance"

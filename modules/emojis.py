@@ -95,6 +95,7 @@ class EmojiManager:
             "series": "📺",
             "artist": "🎤",
             "artists": "🎤",
+            "albums": "📀",
             "track": "🎵",
             "tracks": "🎵",
             "unknown": "❓",
