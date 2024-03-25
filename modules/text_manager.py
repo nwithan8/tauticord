@@ -10,6 +10,7 @@ class TextManager:
     """
     Manages text formatting and anonymization.
     """
+
     def __init__(self, rules: Dict[str, Any]) -> None:
         self._rules: dict = rules
         self._anon_hide_usernames: bool = rules.get(statics.KEY_HIDE_USERNAMES, False)
@@ -21,7 +22,8 @@ class TextManager:
         self._anon_hide_progress: bool = rules.get(statics.KEY_HIDE_PROGRESS, False)
         self._anon_hide_eta: bool = rules.get(statics.KEY_HIDE_ETA, False)
         self._use_friendly_names: bool = rules.get(statics.KEY_USE_FRIENDLY_NAMES, False)
-        self._time_manager: TimeManager = rules.get(statics.KEY_TIME_MANAGER, TimeManager(timezone="UTC", military_time=False)) # fallback should not be needed
+        self._time_manager: TimeManager = rules.get(statics.KEY_TIME_MANAGER, TimeManager(timezone="UTC",
+                                                                                          military_time=False))  # fallback should not be needed
 
     def _session_user_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
         if self._anon_hide_usernames:
@@ -101,7 +103,8 @@ class TextManager:
         stubs = [stub for stub in stubs if stub is not None]
         return "\n".join(stubs)
 
-    def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager, add_termination_tip: bool) -> str:
+    def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager,
+                        add_termination_tip: bool) -> str:
         timestamp = f"\n\nUpdated {self._time_manager.now_string()}"
 
         if no_connection or activity is None:
