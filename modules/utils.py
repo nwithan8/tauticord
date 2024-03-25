@@ -5,6 +5,7 @@ from urllib.parse import quote_plus
 from pytz import timezone
 
 from modules.statics import ENCODING_SEPARATOR_1, ENCODING_SEPARATOR_2
+import modules.logs as logging
 
 
 def make_plural(word, count: int, suffix_override: str = 's') -> str:
@@ -469,5 +470,9 @@ def decode_combined_tautulli_libraries(encoded_string: str) -> tuple[str, List[s
     :return: tuple of the name and libraries decoded from the given string
     :rtype: tuple
     """
-    name, libraries = encoded_string.split(ENCODING_SEPARATOR_1)
-    return name, libraries.split(ENCODING_SEPARATOR_2)
+    try:
+        name, libraries = encoded_string.split(ENCODING_SEPARATOR_1)
+        return name, libraries.split(ENCODING_SEPARATOR_2)
+    except:
+        logging.error(f"Failed to decode combined tautulli libraries: {encoded_string}. Skipping...")
+

@@ -1,8 +1,37 @@
+## Adding Dropdown Options in Unraid Community Applications Template
+
+**Date Posted**: 2024-03-24
+
+**Latest Release:** *v4.1.4*
+
+**Affected Release:** *v4.2.0+*
+
+**Affected Users:** Those using the **Unraid Community Applications** template to deploy Tauticord
+
+In the next minor release of Tauticord, we will be adding dropdown options to the **Unraid Community Applications**.
+
+The majority of the configuration options for Tauticord are currently boolean in nature, and require either "True" or "
+False" as values. The fact that users have to provide the words "True" or "False" can be confusing, and have seen users
+provide incorrect values accidentally.
+
+Unraid Community Application templates offer a way to instead provide a set of predefined values, which will appear as a
+dropdown menu in the UI when configuring a container. This will make it easier for users to select the correct values
+for the configuration options.
+
+It is unclear if implementing this feature will erase and/or reset existing configurations for those fields. **We are
+under the assumption that this will effectively reset the existing configuration for Tauticord.**
+
+We have made every attempt to set each field to the best default value, but we recommend double-checking your
+configuration after updating to the new version. We recommend taking a screenshot of your current configuration before
+updating, so you can easily reconfigure Tauticord after the update.
+
 ## Dropping Python Script Support
 
 **Date Posted**: 2024-03-24
 
 **Latest Release:** *v4.1.4*
+
+**Affected Release:** *v5.0.0+*
 
 **Affected Users:** Those running Tauticord as a standalone Python script
 
@@ -18,6 +47,8 @@ script.
 **Date Posted**: 2024-03-24
 
 **Latest Release:** *v4.1.4*
+
+**Affected Release:** *v5.0.0+*
 
 **Affected Users:** Those using environmental variables to configure Tauticord, especially those using the **Unraid
 Community Applications** template
