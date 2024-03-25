@@ -12,3 +12,5 @@ __pycache__
 Tauticord.log
 documentation
 templates
+on_host
+migrated_config.yaml
