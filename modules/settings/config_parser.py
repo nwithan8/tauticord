@@ -55,6 +55,7 @@ class ConfigSection:
         except confuse.NotFoundError:
             return default
 
+
 class TautulliConfig(ConfigSection):
     def __init__(self, data, pull_from_env: bool = True):
         super().__init__(section_key="Tautulli", data=data, pull_from_env=pull_from_env)
@@ -241,10 +242,11 @@ class TautulliConfig(ConfigSection):
         return names
 
     @property
-    def combined_library_names(self) ->  List[str]:
+    def combined_library_names(self) -> List[str]:
         values = []
 
-        data = self._libraries_voice_channels._get_value(key="CombinedLibraries", default={}, env_name_override="TC_VC_COMBINED_LIBRARIES")
+        data = self._libraries_voice_channels._get_value(key="CombinedLibraries", default={},
+                                                         env_name_override="TC_VC_COMBINED_LIBRARIES")
 
         if isinstance(data, str):
             return data.split(",")
@@ -344,9 +346,10 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
-    def _anonymize_hide_player_names(self) -> str:
-        return self._anonymize_rules._get_value(key="HidePlayerNames", default=False,
-                                                env_name_override="TC_HIDE_PLAYER_NAMES")
+    def _anonymize_hide_player_names(self) -> bool:
+        value = self._anonymize_rules._get_value(key="HidePlayerNames", default=False,
+                                                 env_name_override="TC_HIDE_PLAYER_NAMES")
+        return _extract_bool(value)
 
     @property
     def _anonymize_hide_quality(self) -> bool:
@@ -379,9 +382,10 @@ class TautulliConfig(ConfigSection):
         return _extract_bool(value)
 
     @property
-    def _use_friendly_names(self) -> str:
-        return self._customization._get_value(key='UseFriendlyNames', default=False,
-                                              env_name_override="TC_USE_FRIENDLY_NAMES")
+    def _use_friendly_names(self) -> bool:
+        value = self._customization._get_value(key='UseFriendlyNames', default=False,
+                                               env_name_override="TC_USE_FRIENDLY_NAMES")
+        return _extract_bool(value)
 
     @property
     def thousands_separator(self) -> str:
@@ -393,7 +397,7 @@ class TautulliConfig(ConfigSection):
         return self._voice_channels._get_subsection(key="Performance")
 
     @property
-    def _performance_voice_channel_name(self) -> str:
+    def _performance_voice_channel_category_name(self) -> str:
         return self._performance_voice_channel_settings._get_value(key="CategoryName", default="Performance",
                                                                    env_name_override="TC_VC_PERFORMANCE_CATEGORY_NAME")
 
@@ -520,15 +524,18 @@ class Config:
                 raise FileNotFoundError(f"Config file not found: {config_path}")
             self.pull_from_env = True
             logging.debug(f"Config file not found: {config_path}, falling back to environment variables")
+            logging.info(
+                f"WARNING: Environment variable configuration is going away soon! Please use a config file instead.")
 
         self.tautulli = TautulliConfig(self.config, pull_from_env=self.pull_from_env)
         self.discord = DiscordConfig(self.config, pull_from_env=self.pull_from_env)
         self.extras = ExtrasConfig(self.config, pull_from_env=self.pull_from_env)
         self.performance = {
-            statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_name,
+            statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_category_name,
             statics.KEY_PERFORMANCE_MONITOR_TAUTULLI_USER_COUNT: self.extras._performance_monitor_tautulli_user_count,
             statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE: self.extras._performance_monitor_disk_space,
-            statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH: kwargs.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH, statics.MONITORED_DISK_SPACE_FOLDER),
+            statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH: kwargs.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH,
+                                                                        statics.MONITORED_DISK_SPACE_FOLDER),
             statics.KEY_PERFORMANCE_MONITOR_CPU: self.extras._performance_monitor_cpu,
             statics.KEY_PERFORMANCE_MONITOR_MEMORY: self.extras._performance_monitor_memory,
         }
@@ -583,7 +590,7 @@ class Config:
             "Tautulli - Customization - Anonymize - Hide ETA": self.tautulli._anonymize_hide_eta,
             "Tautulli - Customization - Use Friendly Names": self.tautulli._use_friendly_names,
             "Tautulli - Customization - Thousands Separator": self.tautulli.thousands_separator,
-            "Tautulli - Customization - Voice Channels - Performance - Voice Channel Category Name": self.tautulli._performance_voice_channel_name,
+            "Tautulli - Customization - Voice Channels - Performance - Voice Channel Category Name": self.tautulli._performance_voice_channel_category_name,
             "Discord - Connection - Bot Token": "Exists" if self.discord.bot_token else "Not Set",
             "Discord - Connection - Server ID": self.discord.server_id,
             "Discord - Connection - Admin IDs": self.discord.admin_ids,

@@ -9,10 +9,20 @@
       "instances": 1
     },
     {
+      "name": "migrate_env_vars",
+      "interpreter": "/bin/sh",
+      "script": "/app/migrations/001_env_var_to_config_yaml.sh",
+      // Only run migration once
+      "autorestart": false,
+      "exec_mode": "fork",
+      "instances": 1
+    },
+    {
       "name": "tauticord",
       "interpreter": "/app/venv/bin/python",
       "script": "run.py",
       "autorestart": true,
+      "combine_logs": true,
       // Auto restart on config change
       "watch": ["/config/config.yaml"],
       "watch_delay": 1000,
