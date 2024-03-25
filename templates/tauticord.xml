@@ -19,6 +19,12 @@
     <Maintainer>
         <WebPage>https://github.com/nwithan8</WebPage>
     </Maintainer>
+    <Requires>Please see announcements for potential breaking changes: https://github.com/nwithan8/tauticord/blob/master/documentation/ANNOUNCEMENTS.md</Requires>
+    <Changes>
+        ### 2024-03-25 - BREAKING CHANGE
+
+        Template now uses dropdowns for boolean values. Please see the [GitHub page](https://github.com/nwithan8/tauticord/blob/master/documentation/ANNOUNCEMENTS.md#adding-dropdown-options-in-unraid-community-applications-template) for more information.
+    </Changes>
     <Config Name="Discord bot token" Target="TC_DISCORD_BOT_TOKEN" Default="" Description="Discord bot token" Type="Variable" Display="always" Required="true" Mask="true" />
     <Config Name="Discord server ID" Target="TC_DISCORD_SERVER_ID" Default="" Description="Discord server ID" Type="Variable" Display="always" Required="true" Mask="false" />
     <Config Name="Discord Nitro" Target="TC_DISCORD_NITRO" Default="" Description="Discord Nitro subscriber" Type="Variable" Display="always" Required="false" Mask="false" />
