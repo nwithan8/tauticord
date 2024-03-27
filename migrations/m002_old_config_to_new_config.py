@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import yaml
 
@@ -213,9 +214,12 @@ class Migration(BaseMigration):
         # Write config file to disk
         new_config.save()
 
+        # Copy the file to config.yaml
+        shutil.copy(self.new_config_file, f"{self.config_folder}/config.yaml")
+
     def post_forward_check(self) -> bool:
         # Make sure the new config file was created
-        return os.path.isfile(self.new_config_file)
+        return os.path.isfile(self.new_config_file) and os.path.isfile(f"{self.config_folder}/config.yaml")
 
     def backwards(self):
         self.mark_undone()
