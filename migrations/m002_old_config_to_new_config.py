@@ -1,19 +1,11 @@
-# Need to import the modules folder
-import sys
-
-sys.path.append('./')  # Relative to "tauticord" folder when run from "tauticord" folder
-
-import shutil
-import argparse
-import yaml
 import os
 
-from base import BaseMigration
+import yaml
 
 import modules.settings.config_parser as config_parser
-from modules.utils import decode_combined_tautulli_libraries
-
+from migrations.base import BaseMigration
 from migrations.migration_names import CONFIG_FILE, MIGRATION_001_CONFIG_FILE, MIGRATION_002_CONFIG_FILE
+from modules.utils import decode_combined_tautulli_libraries
 
 
 def json_to_yaml(json_data) -> str:
@@ -42,7 +34,8 @@ class ConfigWriter:
             return
         self.add(value=value, key_path=to_path)
 
-    def build_voice_channel_config(self, parent_path: list[str], channel_name: str, enabled: bool, use_emojis: bool, custom_emoji: str = "", voice_channel_id: int = 0, **additional_pairs):
+    def build_voice_channel_config(self, parent_path: list[str], channel_name: str, enabled: bool, use_emojis: bool,
+                                   custom_emoji: str = "", voice_channel_id: int = 0, **additional_pairs):
         self.migrate_value(value=enabled, to_path=parent_path + [channel_name, "Enable"])
         self.migrate_value(value=use_emojis, to_path=parent_path + [channel_name, "UseEmojis"])
         self.migrate_value(value=custom_emoji, to_path=parent_path + [channel_name, "CustomEmoji"])
@@ -57,27 +50,34 @@ class ConfigWriter:
 
 
 class Migration(BaseMigration):
-    def __init__(self, number: str, migration_tracker: str, config_folder: str, logs_folder: str):
-        super().__init__(number=number, migration_file=migration_tracker)
+    def __init__(self, number: str, migration_tracker_folder: str, config_folder: str, logs_folder: str):
+        super().__init__(number=number, migration_tracker_folder=migration_tracker_folder)
         self.config_folder = config_folder
         self.logs_folder = logs_folder
+        self.old_config_file = f"{self.config_folder}/{CONFIG_FILE}"
+        self.new_config_file = f"{self.config_folder}/{MIGRATION_002_CONFIG_FILE}"
+
+    def pre_forward_check(self) -> bool:
+        # Make sure we have the old config file
+        if os.path.isfile(self.old_config_file):
+            return True
+
+        self.log(f"Could not find old config file at {self.old_config_file}, trying {MIGRATION_001_CONFIG_FILE}")
+
+        # Check if we have the migration 001 config file
+        if os.path.isfile(f"{self.config_folder}/{MIGRATION_001_CONFIG_FILE}"):
+            self.old_config_file = f"{self.config_folder}/{MIGRATION_001_CONFIG_FILE}"
+            return True
+
+        self.error(f"Could not find old config file to migrate")
+        return False
 
     def forward(self):
-        old_config_file = f"{self.config_folder}/{CONFIG_FILE}"
-        if not os.path.isfile(old_config_file):
-            self.log(f"Could not find old config file at {old_config_file}, trying {MIGRATION_001_CONFIG_FILE}")
-            old_config_file = MIGRATION_001_CONFIG_FILE
-        if not os.path.isfile(old_config_file):
-            self.log(f"Could not find old config file at {old_config_file}")
-            exit(1)
-
-        new_config_file = f"{self.config_folder}/{MIGRATION_002_CONFIG_FILE}"
-
         self.log("Migrating old config to new config schema")
 
-        old_config = config_parser.Config(app_name="Migration", config_path=old_config_file,
+        old_config = config_parser.Config(app_name="Migration", config_path=self.old_config_file,
                                           fallback_to_env=False, **{})
-        new_config = ConfigWriter(config_file_path=new_config_file)
+        new_config = ConfigWriter(config_file_path=self.new_config_file)
 
         # Tautulli
         new_config.migrate_value(value=old_config.tautulli.url, to_path=["Tautulli", "URL"])
@@ -147,7 +147,10 @@ class Migration(BaseMigration):
             'PlexServerAvailability': old_config.tautulli.display_plex_status
         }
         for channel_type, enabled in channels.items():
-            new_config.build_voice_channel_config(parent_path=["Stats", "Activity", "StatTypes"], channel_name=channel_type, enabled=enabled, use_emojis=old_config.tautulli.use_emojis_with_library_names, voice_channel_id=0)
+            new_config.build_voice_channel_config(parent_path=["Stats", "Activity", "StatTypes"],
+                                                  channel_name=channel_type, enabled=enabled,
+                                                  use_emojis=old_config.tautulli.use_emojis_with_library_names,
+                                                  voice_channel_id=0)
         new_config.migrate_value(value=old_config.tautulli.display_library_stats,
                                  to_path=["Stats", "Libraries", "Enable"])
         new_config.migrate_value(value=old_config.tautulli.libraries_voice_channel_category_name,
@@ -164,7 +167,10 @@ class Migration(BaseMigration):
                 'Track': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
-                new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "Libraries", library], channel_name=channel_type, enabled=enabled, use_emojis=old_config.tautulli.use_emojis_with_library_names, voice_channel_id=0)
+                new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "Libraries", library],
+                                                      channel_name=channel_type, enabled=enabled,
+                                                      use_emojis=old_config.tautulli.use_emojis_with_library_names,
+                                                      voice_channel_id=0)
         new_config.add(value={}, key_path=["Stats", "Libraries", "CombinedLibraries"])
         for encoded in old_config.tautulli.combined_library_names:
             name, libraries = decode_combined_tautulli_libraries(encoded_string=encoded)
@@ -177,7 +183,10 @@ class Migration(BaseMigration):
                 'Track': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
-                new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "CombinedLibraries", name], channel_name=channel_type, enabled=enabled, use_emojis=old_config.tautulli.use_emojis_with_library_names, voice_channel_id=0)
+                new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "CombinedLibraries", name],
+                                                      channel_name=channel_type, enabled=enabled,
+                                                      use_emojis=old_config.tautulli.use_emojis_with_library_names,
+                                                      voice_channel_id=0)
         new_config.add(value=any([
             old_config.extras._performance_monitor_tautulli_user_count,
             old_config.extras._performance_monitor_disk_space,
@@ -193,7 +202,10 @@ class Migration(BaseMigration):
             'Memory': old_config.extras._performance_monitor_memory
         }
         for channel_type, enabled in channels.items():
-            new_config.build_voice_channel_config(parent_path=["Stats", "Performance", "Metrics"], channel_name=channel_type, enabled=enabled, use_emojis=old_config.tautulli.use_emojis_with_library_names, voice_channel_id=0)
+            new_config.build_voice_channel_config(parent_path=["Stats", "Performance", "Metrics"],
+                                                  channel_name=channel_type, enabled=enabled,
+                                                  use_emojis=old_config.tautulli.use_emojis_with_library_names,
+                                                  voice_channel_id=0)
 
         # Extras
         new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "Analytics"])
@@ -201,18 +213,9 @@ class Migration(BaseMigration):
         # Write config file to disk
         new_config.save()
 
-        self.mark_done()
+    def post_forward_check(self) -> bool:
+        # Make sure the new config file was created
+        return os.path.isfile(self.new_config_file)
 
     def backwards(self):
         self.mark_undone()
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Migration 002 - Copy old config to new config schema")
-    parser.add_argument("migration_tracker", help="Path to migration tracker file")
-    parser.add_argument("config_folder", help="Path to config folder")
-    parser.add_argument("logs_folder", help="Path to logs folder")
-    args = parser.parse_args()
-
-    Migration(number="002", migration_tracker=args.migration_tracker, config_folder=args.config_folder,
-              logs_folder=args.logs_folder).forward()

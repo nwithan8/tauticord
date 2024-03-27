@@ -1,6 +1,7 @@
 import modules.logs as logging
 
 from migrations.m001_env_var_to_config_yaml import Migration as Migration001
+from migrations.m002_old_config_to_new_config import Migration as Migration002
 
 
 class MigrationManager:
@@ -13,6 +14,9 @@ class MigrationManager:
             # Copy environment variables to a YAML file (not config.yaml to avoid schema issues)
             Migration001(number="001",
                          migration_data_directory=self.migration_data_directory,
+                         config_folder=self.config_directory,
+                         logs_folder=self.logs_directory),
+            Migration002(number="002", migration_tracker_folder=self.config_directory,
                          config_folder=self.config_directory,
                          logs_folder=self.logs_directory),
         ]
