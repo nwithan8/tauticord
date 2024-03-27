@@ -1,5 +1,4 @@
 import json
-import os
 from typing import List, Dict, Any
 
 import confuse
@@ -11,22 +10,10 @@ from modules.text_manager import TextManager
 from modules.time_manager import TimeManager
 
 
-def _extract_bool(value):
-    if isinstance(value, bool):
-        return value
-    if value.lower() in ["true", "t", "yes", "y", "enable", "en", "on", "1"]:
-        return True
-    elif value.lower() in ["false", "f", "no", "n", "disable", "dis", "off", "0"]:
-        return False
-    else:
-        raise ValueError("Not a boolean: {}".format(value))
-
-
 class ConfigSection:
-    def __init__(self, section_key: str, data, parent_key: str = None, pull_from_env: bool = True):
+    def __init__(self, section_key: str, data, parent_key: str = None):
         self.section_key = section_key
         self.data = data
-        self.pull_from_env = pull_from_env
         try:
             self.data = data[self.section_key]
         except confuse.NotFoundError:
@@ -39,10 +26,7 @@ class ConfigSection:
             return self.section_key
         return f"{self._parent_key}_{self.section_key}".upper()
 
-    def _get_value(self, key: str, default=None, env_name_override: str = None):
-        if self.pull_from_env:
-            env_name = env_name_override or self.full_key
-            return os.getenv(env_name, default)
+    def _get_value(self, key: str, default=None):
         try:
             return self.data[key].get()
         except confuse.NotFoundError:
@@ -50,15 +34,14 @@ class ConfigSection:
 
     def _get_subsection(self, key: str, default=None):
         try:
-            return ConfigSection(section_key=key, parent_key=self.full_key, data=self.data,
-                                 pull_from_env=self.pull_from_env)
+            return ConfigSection(section_key=key, parent_key=self.full_key, data=self.data)
         except confuse.NotFoundError:
             return default
 
 
 class TautulliConfig(ConfigSection):
-    def __init__(self, data, pull_from_env: bool = True):
-        super().__init__(section_key="Tautulli", data=data, pull_from_env=pull_from_env)
+    def __init__(self, data):
+        super().__init__(section_key="Tautulli", data=data)
 
     @property
     def _connection(self) -> ConfigSection:
@@ -66,17 +49,16 @@ class TautulliConfig(ConfigSection):
 
     @property
     def api_key(self) -> str:
-        return self._connection._get_value(key="APIKey", env_name_override="TC_TAUTULLI_KEY")
+        return self._connection._get_value(key="APIKey")
 
     @property
     def url(self) -> str:
-        return self._connection._get_value(key="URL", env_name_override="TC_TAUTULLI_URL")
+        return self._connection._get_value(key="URL")
 
     @property
     def disable_ssl_verification(self) -> bool:
-        value = self._connection._get_value(key="UseSelfSignedCert", default=False,
-                                            env_name_override="TC_USE_SELF_SIGNED_CERT")
-        return _extract_bool(value)
+        value = self._connection._get_value(key="UseSelfSignedCert", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _customization(self) -> ConfigSection:
@@ -84,25 +66,21 @@ class TautulliConfig(ConfigSection):
 
     @property
     def refresh_interval(self) -> int:
-        value = self._customization._get_value(key='RefreshSeconds', default=15,
-                                               env_name_override="TC_REFRESH_SECONDS")
+        value = self._customization._get_value(key='RefreshSeconds', default=15)
         return int(value)
 
     @property
     def server_name(self) -> str:
-        return self._customization._get_value(key='ServerName', default="Plex",
-                                              env_name_override="TC_SERVER_NAME")
+        return self._customization._get_value(key='ServerName', default="Plex")
 
     @property
     def terminate_message(self) -> str:
-        return self._customization._get_value(key='TerminateMessage', default="Your stream has ended.",
-                                              env_name_override="TC_TERMINATE_MESSAGE")
+        return self._customization._get_value(key='TerminateMessage', default="Your stream has ended.")
 
     @property
     def time_manager(self) -> TimeManager:
-        timezone = self._customization._get_value(key='ServerTimeZone', default=None, env_name_override="TZ")
-        mil_time = self._customization._get_value(key='Use24HourTime', default=False,
-                                                  env_name_override="TC_USE_24_HOUR_TIME")
+        timezone = self._customization._get_value(key='ServerTimeZone', default=None)
+        mil_time = self._customization._get_value(key='Use24HourTime', default=False)
         return TimeManager(timezone=timezone, military_time=mil_time)
 
     @property
@@ -115,85 +93,71 @@ class TautulliConfig(ConfigSection):
 
     @property
     def stats_voice_channel_category_name(self) -> str:
-        return self._stats_voice_channels._get_value(key="CategoryName", default="Tautulli Stats",
-                                                     env_name_override="TC_VC_STATS_CATEGORY_NAME")
+        return self._stats_voice_channels._get_value(key="CategoryName", default="Tautulli Stats")
 
     @property
     def display_stream_count(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="StreamCount", default=False,
-                                                      env_name_override="TC_VC_STREAM_COUNT")
-        return _extract_bool(value)
+        value = self._stats_voice_channels._get_value(key="StreamCount", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def stream_count_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="StreamCountChannelID", default=0,
-                                                      env_name_override="TC_VC_STREAM_COUNT_CHANNEL_ID")
+        value = self._stats_voice_channels._get_value(key="StreamCountChannelID", default=0)
         return int(value)
 
     @property
     def display_transcode_count(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="TranscodeCount", default=False,
-                                                      env_name_override="TC_VC_TRANSCODE_COUNT")
-        return _extract_bool(value)
+        value = self._stats_voice_channels._get_value(key="TranscodeCount", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def transcode_count_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="TranscodeCountChannelID", default=0,
-                                                      env_name_override="TC_VC_TRANSCODE_COUNT_CHANNEL_ID")
+        value = self._stats_voice_channels._get_value(key="TranscodeCountChannelID", default=0)
         return int(value)
 
     @property
     def display_bandwidth(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="Bandwidth", default=False,
-                                                      env_name_override="TC_VC_BANDWIDTH")
-        return _extract_bool(value)
+        value = self._stats_voice_channels._get_value(key="Bandwidth", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def bandwidth_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="BandwidthChannelID", default=0,
-                                                      env_name_override="TC_VC_BANDWIDTH_CHANNEL_ID")
+        value = self._stats_voice_channels._get_value(key="BandwidthChannelID", default=0)
         return int(value)
 
     @property
     def display_local_bandwidth(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="LocalBandwidth", default=False,
-                                                      env_name_override="TC_VC_LOCAL_BANDWIDTH")
-        return _extract_bool(value)
+        value = self._stats_voice_channels._get_value(key="LocalBandwidth", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def local_bandwidth_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="LocalBandwidthChannelID", default=0,
-                                                      env_name_override="TC_VC_LOCAL_BANDWIDTH_CHANNEL_ID")
+        value = self._stats_voice_channels._get_value(key="LocalBandwidthChannelID", default=0)
         return int(value)
 
     @property
     def display_remote_bandwidth(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="RemoteBandwidth", default=False,
-                                                      env_name_override="TC_VC_REMOTE_BANDWIDTH")
-        return _extract_bool(value)
+        value = self._stats_voice_channels._get_value(key="RemoteBandwidth", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def remote_bandwidth_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="RemoteBandwidthChannelID", default=0,
-                                                      env_name_override="TC_VC_REMOTE_BANDWIDTH_CHANNEL_ID")
+        value = self._stats_voice_channels._get_value(key="RemoteBandwidthChannelID", default=0)
         return int(value)
 
     @property
     def display_plex_status(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="PlexStatus", default=False,
-                                                      env_name_override="TC_VC_PLEX_STATUS")
-        return _extract_bool(value)
+        value = self._stats_voice_channels._get_value(key="PlexStatus", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def plex_status_use_emoji(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="PlexStatusUseEmoji", default=False,
-                                                      env_name_override="TC_VC_PLEX_STATUS_USE_EMOJI")
-        return _extract_bool(value)
+        value = self._stats_voice_channels._get_value(key="PlexStatusUseEmoji", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def plex_status_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="PlexStatusChannelID", default=0,
-                                                      env_name_override="TC_VC_PLEX_STATUS_CHANNEL_ID")
+        value = self._stats_voice_channels._get_value(key="PlexStatusChannelID", default=0)
         return int(value)
 
     @property
@@ -219,24 +183,21 @@ class TautulliConfig(ConfigSection):
     @property
     def libraries_voice_channel_category_name(self) -> str:
         return self._libraries_voice_channels._get_value(key="CategoryName", default="Tautulli Libraries",
-                                                         env_name_override="TC_VC_LIBRARIES_CATEGORY_NAME")
+                                                         )
 
     @property
     def display_library_stats(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="Enable", default=False,
-                                                          env_name_override="TC_VC_LIBRARY_STATS")
-        return _extract_bool(value)
+        value = self._libraries_voice_channels._get_value(key="Enable", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def library_refresh_interval(self) -> int:
-        value = self._libraries_voice_channels._get_value(key="LibraryRefreshSeconds", default=3600,
-                                                          env_name_override="TC_VC_LIBRARY_REFRESH_SECONDS")
+        value = self._libraries_voice_channels._get_value(key="LibraryRefreshSeconds", default=3600)
         return int(value)
 
     @property
     def library_names(self) -> List[str]:
-        names = self._libraries_voice_channels._get_value(key="LibraryNames", default=[],
-                                                          env_name_override="TC_VC_LIBRARY_NAMES")
+        names = self._libraries_voice_channels._get_value(key="LibraryNames", default=[])
         if isinstance(names, str):
             return names.split(",")
         return names
@@ -245,8 +206,7 @@ class TautulliConfig(ConfigSection):
     def combined_library_names(self) -> List[str]:
         values = []
 
-        data = self._libraries_voice_channels._get_value(key="CombinedLibraries", default={},
-                                                         env_name_override="TC_VC_COMBINED_LIBRARIES")
+        data = self._libraries_voice_channels._get_value(key="CombinedLibraries", default={})
 
         if isinstance(data, str):
             return data.split(",")
@@ -258,39 +218,33 @@ class TautulliConfig(ConfigSection):
 
     @property
     def use_emojis_with_library_names(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="UseEmojis", default=True,
-                                                          env_name_override="TC_VC_LIBRARY_USE_EMOJIS")
-        return _extract_bool(value)
+        value = self._libraries_voice_channels._get_value(key="UseEmojis", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def show_tv_series_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="TVSeriesCount", default=True,
-                                                          env_name_override="TC_VC_TV_SERIES_COUNT")
-        return _extract_bool(value)
+        value = self._libraries_voice_channels._get_value(key="TVSeriesCount", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def show_tv_episode_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="TVEpisodeCount", default=True,
-                                                          env_name_override="TC_VC_TV_EPISODE_COUNT")
-        return _extract_bool(value)
+        value = self._libraries_voice_channels._get_value(key="TVEpisodeCount", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def show_music_artist_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="MusicArtistCount", default=True,
-                                                          env_name_override="TC_VC_MUSIC_ARTIST_COUNT")
-        return _extract_bool(value)
+        value = self._libraries_voice_channels._get_value(key="MusicArtistCount", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def show_music_album_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="MusicAlbumCount", default=True,
-                                                          env_name_override="TC_VC_MUSIC_ALBUM_COUNT")
-        return _extract_bool(value)
+        value = self._libraries_voice_channels._get_value(key="MusicAlbumCount", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def show_music_track_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="MusicTrackCount", default=True,
-                                                          env_name_override="TC_VC_MUSIC_TRACK_COUNT")
-        return _extract_bool(value)
+        value = self._libraries_voice_channels._get_value(key="MusicTrackCount", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def voice_channel_settings(self) -> Dict[str, Any]:
@@ -335,62 +289,52 @@ class TautulliConfig(ConfigSection):
 
     @property
     def _anonymize_hide_usernames(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideUsernames", default=False,
-                                                 env_name_override="TC_HIDE_USERNAMES")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HideUsernames", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _anonymize_hide_platforms(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HidePlatforms", default=False,
-                                                 env_name_override="TC_HIDE_PLATFORMS")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HidePlatforms", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _anonymize_hide_player_names(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HidePlayerNames", default=False,
-                                                 env_name_override="TC_HIDE_PLAYER_NAMES")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HidePlayerNames", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _anonymize_hide_quality(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideQuality", default=False,
-                                                 env_name_override="TC_HIDE_QUALITY")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HideQuality", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _anonymize_hide_bandwidth(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideBandwidth", default=False,
-                                                 env_name_override="TC_HIDE_BANDWIDTH")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HideBandwidth", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _anonymize_hide_transcode_decision(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideTranscode", default=False,
-                                                 env_name_override="TC_HIDE_TRANSCODE")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HideTranscode", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _anonymize_hide_progress(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideProgress", default=False,
-                                                 env_name_override="TC_HIDE_PROGRESS")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HideProgress", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _anonymize_hide_eta(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideETA", default=False,
-                                                 env_name_override="TC_HIDE_ETA")
-        return _extract_bool(value)
+        value = self._anonymize_rules._get_value(key="HideETA", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _use_friendly_names(self) -> bool:
-        value = self._customization._get_value(key='UseFriendlyNames', default=False,
-                                               env_name_override="TC_USE_FRIENDLY_NAMES")
-        return _extract_bool(value)
+        value = self._customization._get_value(key='UseFriendlyNames', default=False)
+        return utils.extract_boolean(value)
 
     @property
     def thousands_separator(self) -> str:
-        return self._customization._get_value(key='ThousandsSeparator', default="",
-                                              env_name_override="TC_THOUSANDS_SEPARATOR")
+        return self._customization._get_value(key='ThousandsSeparator', default="")
 
     @property
     def _performance_voice_channel_settings(self) -> ConfigSection:
@@ -398,8 +342,7 @@ class TautulliConfig(ConfigSection):
 
     @property
     def _performance_voice_channel_category_name(self) -> str:
-        return self._performance_voice_channel_settings._get_value(key="CategoryName", default="Performance",
-                                                                   env_name_override="TC_VC_PERFORMANCE_CATEGORY_NAME")
+        return self._performance_voice_channel_settings._get_value(key="CategoryName", default="Performance")
 
     @property
     def text_manager(self) -> TextManager:
@@ -419,8 +362,8 @@ class TautulliConfig(ConfigSection):
 
 
 class DiscordConfig(ConfigSection):
-    def __init__(self, data, pull_from_env: bool = True):
-        super().__init__(section_key="Discord", data=data, pull_from_env=pull_from_env)
+    def __init__(self, data):
+        super().__init__(section_key="Discord", data=data)
 
     @property
     def _connection(self) -> ConfigSection:
@@ -428,38 +371,35 @@ class DiscordConfig(ConfigSection):
 
     @property
     def bot_token(self) -> str:
-        return self._connection._get_value(key="BotToken", env_name_override="TC_DISCORD_BOT_TOKEN")
+        return self._connection._get_value(key="BotToken")
 
     @property
     def server_id(self) -> str:
-        value = self._connection._get_value(key="ServerID", env_name_override="TC_DISCORD_SERVER_ID")
+        value = self._connection._get_value(key="ServerID")
         return str(value)
 
     @property
     def admin_ids(self) -> List[str]:
-        ids = self._connection._get_value(key="AdminIDs", default=[], env_name_override="TC_DISCORD_ADMIN_IDS")
+        ids = self._connection._get_value(key="AdminIDs", default=[])
         if isinstance(ids, str):
             return [str(i) for i in ids.split(",")]
         return [str(i) for i in ids]
 
     @property
     def use_summary_text_message(self) -> bool:
-        value = self._connection._get_value(key="PostSummaryMessage", default=True,
-                                            env_name_override="TC_DISCORD_POST_SUMMARY_MESSAGE")
-        return _extract_bool(value)
+        value = self._connection._get_value(key="PostSummaryMessage", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def channel_name(self) -> str:
-        value = self._connection._get_value(key="ChannelName", default="tauticord",
-                                            env_name_override="TC_DISCORD_CHANNEL_NAME")
+        value = self._connection._get_value(key="ChannelName", default="tauticord")
         value = utils.discord_text_channel_name_format(string=value)
         return value
 
     @property
     def enable_slash_commands(self) -> bool:
-        value = self._connection._get_value(key="EnableSlashCommands", default=False,
-                                            env_name_override="TC_DISCORD_ENABLE_SLASH_COMMANDS")
-        return _extract_bool(value)
+        value = self._connection._get_value(key="EnableSlashCommands", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _customization(self) -> ConfigSection:
@@ -467,20 +407,19 @@ class DiscordConfig(ConfigSection):
 
     @property
     def has_discord_nitro(self) -> bool:
-        value = self._customization._get_value(key="Nitro", env_name_override="TC_DISCORD_NITRO",
+        value = self._customization._get_value(key="Nitro",
                                                default=False)
-        return _extract_bool(value)
+        return utils.extract_boolean(value)
 
 
 class ExtrasConfig(ConfigSection):
-    def __init__(self, data, pull_from_env: bool = True):
-        super().__init__(section_key="Extras", data=data, pull_from_env=pull_from_env)
+    def __init__(self, data):
+        super().__init__(section_key="Extras", data=data)
 
     @property
     def allow_analytics(self) -> bool:
-        value = self._get_value(key="Analytics", default=True,
-                                env_name_override="TC_ALLOW_ANALYTICS")
-        return _extract_bool(value)
+        value = self._get_value(key="Analytics", default=True)
+        return utils.extract_boolean(value)
 
     @property
     def _performance(self) -> ConfigSection:
@@ -488,27 +427,23 @@ class ExtrasConfig(ConfigSection):
 
     @property
     def _performance_monitor_tautulli_user_count(self) -> bool:
-        value = self._performance._get_value(key="TautulliUserCount", default=False,
-                                             env_name_override="TC_MONITOR_TAUTULLI_USER_COUNT")
-        return _extract_bool(value)
+        value = self._performance._get_value(key="TautulliUserCount", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _performance_monitor_disk_space(self) -> bool:
-        value = self._performance._get_value(key="DiskSpace", default=False,
-                                             env_name_override="TC_MONITOR_DISK_SPACE")
-        return _extract_bool(value)
+        value = self._performance._get_value(key="DiskSpace", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _performance_monitor_cpu(self) -> bool:
-        value = self._performance._get_value(key="CPU", default=False,
-                                             env_name_override="TC_MONITOR_CPU")
-        return _extract_bool(value)
+        value = self._performance._get_value(key="CPU", default=False)
+        return utils.extract_boolean(value)
 
     @property
     def _performance_monitor_memory(self) -> bool:
-        value = self._performance._get_value(key="Memory", default=False,
-                                             env_name_override="TC_MONITOR_MEMORY")
-        return _extract_bool(value)
+        value = self._performance._get_value(key="Memory", default=False)
+        return utils.extract_boolean(value)
 
 
 class Config:
@@ -527,9 +462,9 @@ class Config:
             logging.info(
                 f"WARNING: Environment variable configuration is going away soon! Please use a config file instead.")
 
-        self.tautulli = TautulliConfig(self.config, pull_from_env=self.pull_from_env)
-        self.discord = DiscordConfig(self.config, pull_from_env=self.pull_from_env)
-        self.extras = ExtrasConfig(self.config, pull_from_env=self.pull_from_env)
+        self.tautulli = TautulliConfig(self.config)
+        self.discord = DiscordConfig(self.config)
+        self.extras = ExtrasConfig(self.config)
         self.performance = {
             statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_category_name,
             statics.KEY_PERFORMANCE_MONITOR_TAUTULLI_USER_COUNT: self.extras._performance_monitor_tautulli_user_count,

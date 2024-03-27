@@ -32,6 +32,17 @@ def status_code_is_success(status_code: int) -> bool:
     return 200 <= status_code < 300
 
 
+def extract_boolean(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ["true", "t", "yes", "y", "enable", "en", "on", "1"]:
+        return True
+    elif value.lower() in ["false", "f", "no", "n", "disable", "dis", "off", "0"]:
+        return False
+    else:
+        raise ValueError("Not a boolean: {}".format(value))
+
+
 def format_decimal(number: float, denominator: int = 1, decimal_places: int = 1, no_zeros: bool = False) -> str:
     if decimal_places <= 0:
         value = f'{int(number / denominator):d}'
@@ -475,4 +486,3 @@ def decode_combined_tautulli_libraries(encoded_string: str) -> tuple[str, List[s
         return name, libraries.split(ENCODING_SEPARATOR_2)
     except:
         logging.error(f"Failed to decode combined tautulli libraries: {encoded_string}. Skipping...")
-
