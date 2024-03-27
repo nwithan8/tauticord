@@ -17,6 +17,15 @@ def value_exists(value):
     return value is not None and value != ""
 
 
+def path_exists_in_yaml(yaml_data, path: list[str]) -> bool:
+    current = yaml_data
+    for key in path:
+        if key not in current:
+            return False
+        current = current[key]
+    return True
+
+
 class ConfigWriter:
     def __init__(self, config_file_path: str):
         self._config = {}
@@ -59,8 +68,14 @@ class Migration(BaseMigration):
         self.new_config_file = f"{self.config_folder}/{MIGRATION_002_CONFIG_FILE}"
 
     def pre_forward_check(self) -> bool:
-        # Make sure we have the old config file
+        # Make sure we have the old config file and it's still the old schema
         if os.path.isfile(self.old_config_file):
+            with open(self.old_config_file, 'r') as f:
+                data = yaml.safe_load(f)
+                # This path is only in the new schema. If it exists, it's the new schema
+                if path_exists_in_yaml(yaml_data=data, path=["Stats", "Activity", "Enable"]):
+                    self.log(f"Config file at {self.old_config_file} is already in the new schema")
+                    return False
             return True
 
         self.log(f"Could not find old config file at {self.old_config_file}, trying {MIGRATION_001_CONFIG_FILE}")
