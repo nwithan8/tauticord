@@ -6,9 +6,10 @@ import objectrest
 import tautulli
 
 import modules.logs as logging
+import modules.settings.models as settings_models
 from modules import utils
+from modules.analytics import GoogleAnalytics
 from modules.emojis import EmojiManager
-from modules.settings.settings_transports import LibraryVoiceChannelsVisibilities
 from modules.text_manager import TextManager
 from modules.time_manager import TimeManager
 from modules.utils import status_code_is_success, url_encode
@@ -284,29 +285,28 @@ class TautulliDataResponse:
 
 class TautulliConnector:
     def __init__(self,
-                 base_url: str,
-                 api_key: str,
-                 terminate_message: str,
-                 analytics,
-                 time_manager: TimeManager,
-                 text_manager: TextManager,
-                 server_name: str = None,
-                 disable_ssl_verification: bool = False
-                 ):
-        self.base_url = base_url
-        self.text_manager = text_manager
-        self.api_key = api_key
-        logging.info(f"Connecting to Tautulli at {base_url}...")
+                 tautulli_settings: settings_models.Tautulli,
+                 display_settings: settings_models.Display,
+                 analytics: GoogleAnalytics):
+        self.base_url = tautulli_settings.url
+        self.api_key = tautulli_settings.api_key
+
+        logging.info(f"Connecting to Tautulli at {self.base_url}...")
         try:
-            self.api = tautulli.RawAPI(base_url=base_url, api_key=api_key, verify=True,
-                                       ssl_verify=not disable_ssl_verification)  # Disable SSL verification because of self-signed certs
-        except Exception as e:  # common issue - `base_url` is empty because config was not parsed properly, causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
+            # Disable SSL verification because of self-signed certs
+            self.api = tautulli.RawAPI(base_url=self.base_url, api_key=self.api_key, verify=True,
+                                       ssl_verify=not tautulli_settings.ignore_ssl)
+        except Exception as e:
+            # common issue - `base_url` is empty because config was not parsed properly, causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
             raise Exception(
-                f"Could not begin a Tautulli connection. Please check that your configuration is complete and reachable. Exception: {e}")
-        self.server_name = server_name or self.api.server_friendly_name
-        self.terminate_message = terminate_message
+                f"Could not begin a Tautulli connection. Please check that your configuration is complete and "
+                f"reachable. Exception: {e}")
+
+        self.server_name = display_settings.plex_server_name or self.api.server_friendly_name
+        self.terminate_message = tautulli_settings.termination_message
         self.analytics = analytics
-        self.time_manager = time_manager
+        self.text_manager = display_settings.text_manager
+        self.time_manager = display_settings.time.time_manager
 
         self.plex_details = self.api.server_info
         self.plex_pass = False if not self.plex_details else self.plex_details.get('pms_plexpass', 0) == 1
@@ -319,7 +319,8 @@ class TautulliConnector:
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
     def refresh_data(self, emoji_manager: EmojiManager, additional_embed_fields: List[dict] = None,
-                     additional_embed_footers: List[str] = None) -> Tuple[TautulliDataResponse, int, Union[Activity, None], bool]:
+                     additional_embed_footers: List[str] = None) -> Tuple[
+        TautulliDataResponse, int, Union[Activity, None], bool]:
         """
         Parse activity JSON from Tautulli, prepare summary message for Discord
         :return: data wrapper, number of active streams, activity data and whether Plex is online

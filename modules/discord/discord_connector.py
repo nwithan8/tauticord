@@ -7,14 +7,15 @@ from discord.ext import commands
 
 import consts
 import modules.logs as logging
+import modules.settings.models as settings_models
 import modules.statics as statics
 import modules.system_stats as system_stats
 import modules.tautulli.tautulli_connector
 from modules import emojis, utils, versioning
+from modules.analytics import GoogleAnalytics
 from modules.discord.command_manager import CommandManager
 from modules.emojis import EmojiManager
-from modules.settings.settings_transports import LibraryVoiceChannelsVisibilities
-from modules.tautulli.tautulli_connector import TautulliConnector, TautulliDataResponse
+from modules.tautulli.tautulli_connector import TautulliDataResponse
 from modules.utils import quote, format_thousands
 
 
@@ -99,12 +100,11 @@ async def send_message(content: TautulliDataResponse, message: discord.Message =
             return await channel.send(content=None, embed=content.embed)
 
 
-async def create_discord_channel(client: discord.Client, guild_id: str, channel_name: str,
+async def create_discord_channel(client: discord.Client, guild_id: int, channel_name: str,
                                  channel_type: discord.ChannelType = discord.ChannelType.text,
                                  category: discord.CategoryChannel = None) -> \
         Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]:
-    # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
-    guild = client.get_guild(int(guild_id))  # stupid positional-only parameters
+    guild = client.get_guild(guild_id)  # stupid positional-only parameters
     if not guild:
         raise Exception(f"Could not load guild with ID {guild_id}")
     channel_type_string = ""
@@ -124,7 +124,7 @@ async def create_discord_channel(client: discord.Client, guild_id: str, channel_
 
 
 async def get_discord_channel_by_starting_name(client: discord.Client,
-                                               guild_id: str,
+                                               guild_id: int,
                                                starting_channel_name: str,
                                                channel_type: discord.ChannelType = discord.ChannelType.text,
                                                category: discord.CategoryChannel = None) -> \
@@ -143,7 +143,7 @@ async def get_discord_channel_by_starting_name(client: discord.Client,
 
 # TODO: create_if_not_exist is not used
 async def get_discord_channel_by_name(client: discord.Client,
-                                      guild_id: str,
+                                      guild_id: int,
                                       channel_name: str,
                                       channel_type: discord.ChannelType = discord.ChannelType.text,
                                       category: discord.CategoryChannel = None,
@@ -169,7 +169,7 @@ def valid_reaction(reaction_emoji: discord.PartialEmoji,
                    valid_reaction_type: str = None,
                    valid_message: discord.Message = None,
                    valid_emojis: List[str] = None,
-                   valid_user_ids: List[str] = None,
+                   valid_user_ids: List[int] = None,
                    skip_self_reaction: bool = True) -> bool:
     if skip_self_reaction and reaction_user_id == valid_message.author.id:
         return False
@@ -184,7 +184,7 @@ def valid_reaction(reaction_emoji: discord.PartialEmoji,
     return True
 
 
-def build_response(message: discord.Message, bot_id: int, admin_ids: List[str]) -> Union[str, None]:
+def build_response(message: discord.Message, bot_id: int, admin_ids: List[int]) -> Union[str, None]:
     # If message does not mention the bot, return None
     if bot_id not in [user.id for user in message.mentions]:
         return None
@@ -193,7 +193,7 @@ def build_response(message: discord.Message, bot_id: int, admin_ids: List[str]) 
     if author_id == "DISCORDIDADDEDBYGITHUB":
         return "Hello, creator!"
 
-    if author_id not in admin_ids:
+    if author_id not in [str(admin_id) for admin_id in admin_ids]:
         return None
 
     # Message mentions the bot and is from an admin
@@ -207,45 +207,33 @@ def get_voice_channel_position(stat_type: str) -> int:
 class DiscordConnector:
     # noinspection PyTypeChecker
     def __init__(self,
-                 token: str,
-                 guild_id: str,
-                 admin_ids: List[str],
-                 refresh_time: int,
-                 library_refresh_time: int,
-                 tautulli_use_summary_message: bool,
-                 tautulli_channel_name: str,
-                 tautulli_connector: TautulliConnector,
-                 voice_channel_settings: dict,
-                 display_live_stats: bool,
-                 display_library_stats: bool,
-                 nitro: bool,
-                 performance_monitoring: dict,
-                 enable_slash_commands: bool,
-                 analytics,
-                 version_checker: versioning.VersionChecker,
-                 thousands_separator: str = ""):
-        self.token = token
-        self.guild_id = guild_id
-        self.nitro: bool = nitro
-        self.admin_ids = admin_ids
-        self.refresh_time = refresh_time
-        self.library_refresh_time = library_refresh_time
-        self.use_summary_message = tautulli_use_summary_message
-        self.tautulli_channel_name = tautulli_channel_name
-        self.voice_channel_settings = voice_channel_settings
-        self.display_live_stats = display_live_stats
-        self.display_library_stats = display_library_stats
-        self.thousands_separator = thousands_separator
+                 tautulli_connector: modules.tautulli.tautulli_connector.TautulliConnector,
+                 discord_settings: settings_models.Discord,
+                 tautulli_settings: settings_models.Tautulli,
+                 display_settings: settings_models.Display,
+                 stats_settings: settings_models.Stats,
+                 analytics: GoogleAnalytics,
+                 version_checker: versioning.VersionChecker):
+        self.tautulli: modules.tautulli.tautulli_connector.TautulliConnector = tautulli_connector
+        self.token: str = discord_settings.bot_token
+        self.guild_id: int = discord_settings.server_id
+        self.nitro: bool = discord_settings.has_discord_nitro
+        self.admin_ids: list[int] = discord_settings.admin_ids
+        self.refresh_time: int = tautulli_settings.refresh_interval_seconds
+        self.library_refresh_time: int = stats_settings.library.refresh_interval_seconds
+        self.use_summary_message: bool = discord_settings.use_summary_message
+        self.tautulli_channel_name: str = discord_settings.channel_name
+        self.stats_settings: settings_models.Stats = stats_settings
+        self.display_live_stats: bool = stats_settings.activity.enable
+        self.display_library_stats: bool = stats_settings.library.enable
+        self.display_performance_stats: bool = stats_settings.performance.enable
+        self.thousands_separator: str = display_settings.thousands_separator
+        self.analytics: GoogleAnalytics = analytics
+
         self.tautulli_channel: discord.TextChannel = None
         self.tautulli_stats_voice_category: discord.CategoryChannel = None
         self.tautulli_libraries_voice_category: discord.CategoryChannel = None
-        self.tautulli = tautulli_connector
-        self.performance_monitoring = performance_monitoring
-        self.enable_performance_monitoring = performance_monitoring.get(statics.KEY_PERFORMANCE_MONITOR_CPU,
-                                                                        False) or performance_monitoring.get(
-            statics.KEY_PERFORMANCE_MONITOR_MEMORY, False)
         self.performance_voice_category: discord.CategoryChannel = None
-        self.analytics = analytics
 
         intents = discord.Intents.default()
         intents.reactions = True  # Required for on_raw_reaction_add
@@ -261,7 +249,7 @@ class DiscordConnector:
         self.emoji_manager: EmojiManager = EmojiManager()
 
         self.command_manager: CommandManager = CommandManager(
-            enable_slash_commands=enable_slash_commands,
+            enable_slash_commands=discord_settings.enable_slash_commands,
             bot=self.client,
             guild_id=self.guild_id,
             tautulli=self.tautulli,
@@ -275,21 +263,6 @@ class DiscordConnector:
         logging.info('Connecting to Discord...')
         # TODO: Look at merging loggers
         self.client.run(self.token, reconnect=True)  # Can't have any asyncio tasks running before the bot is ready
-
-    @property
-    def stats_voice_category_name(self) -> str:
-        return self.voice_channel_settings.get(statics.KEY_STATS_CATEGORY_NAME, "Tautulli Stats")
-
-    @property
-    def libraries_voice_category_name(self) -> str:
-        return self.voice_channel_settings.get(statics.KEY_LIBRARIES_CATEGORY_NAME, "Tautulli Libraries")
-
-    @property
-    def performance_category_name(self) -> str:
-        return self.performance_monitoring.get(statics.KEY_PERFORMANCE_CATEGORY_NAME, "Performance")
-
-    def get_voice_channel_id(self, key: str) -> int:
-        return self.voice_channel_settings.get(statics.KEY_STATS_CHANNEL_IDS, {}).get(key, 0)
 
     async def on_ready(self) -> None:
         # NOTE: This is the first place in the stack where asyncio tasks can be started
@@ -320,16 +293,14 @@ class DiscordConnector:
         logging.info("Loading Tautulli voice settings...")
         # Only grab the voice category (make it) if we're going to use it
         if self.display_live_stats:
-            # only grab the stats voice category (make it) if stats channel IDs are not manually set
-            if not self.voice_channel_settings.get(statics.KEY_USE_STATS_CHANNEL_IDS, False):
-                self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
-                    category_name=self.stats_voice_category_name)
+            self.tautulli_stats_voice_category = await self.collect_discord_voice_category(
+                category_name=self.stats_settings.activity.category_name)
         if self.display_library_stats:
             self.tautulli_libraries_voice_category = await self.collect_discord_voice_category(
-                category_name=self.libraries_voice_category_name)
-        if self.enable_performance_monitoring:
+                category_name=self.stats_settings.library.category_name)
+        if self.display_performance_stats:
             self.performance_voice_category = await self.collect_discord_voice_category(
-                category_name=self.performance_category_name)
+                category_name=self.stats_settings.performance.category_name)
 
         logging.info("Loading Tautulli summary service...")
         # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
@@ -342,7 +313,7 @@ class DiscordConnector:
         # noinspection PyAsyncCall
         asyncio.create_task(self.run_library_stats_service(refresh_time=max([5 * 60, self.library_refresh_time])))
 
-        if self.enable_performance_monitoring:
+        if self.display_performance_stats:
             logging.info("Starting performance monitoring service...")
             # noinspection PyAsyncCall
             asyncio.create_task(

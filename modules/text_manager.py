@@ -1,4 +1,6 @@
-from typing import Dict, Any, Union
+from typing import Union
+
+from pydantic import BaseModel
 
 from modules import statics, utils
 from modules.emojis import EmojiManager
@@ -6,24 +8,20 @@ from modules.time_manager import TimeManager
 from modules.utils import limit_text_length
 
 
-class TextManager:
+class TextManager(BaseModel):
     """
     Manages text formatting and anonymization.
     """
-
-    def __init__(self, rules: Dict[str, Any]) -> None:
-        self._rules: dict = rules
-        self._anon_hide_usernames: bool = rules.get(statics.KEY_HIDE_USERNAMES, False)
-        self._anon_hide_player_names: bool = rules.get(statics.KEY_HIDE_PLAYER_NAMES, False)
-        self._anon_hide_platforms: bool = rules.get(statics.KEY_HIDE_PLATFORMS, False)
-        self._anon_hide_quality: bool = rules.get(statics.KEY_HIDE_QUALITY, False)
-        self._anon_hide_bandwidth: bool = rules.get(statics.KEY_HIDE_BANDWIDTH, False)
-        self._anon_hide_transcoding: bool = rules.get(statics.KEY_HIDE_TRANSCODING, False)
-        self._anon_hide_progress: bool = rules.get(statics.KEY_HIDE_PROGRESS, False)
-        self._anon_hide_eta: bool = rules.get(statics.KEY_HIDE_ETA, False)
-        self._use_friendly_names: bool = rules.get(statics.KEY_USE_FRIENDLY_NAMES, False)
-        self._time_manager: TimeManager = rules.get(statics.KEY_TIME_MANAGER, TimeManager(timezone="UTC",
-                                                                                          military_time=False))  # fallback should not be needed
+    hide_usernames: bool
+    hide_player_names: bool
+    hide_platforms: bool
+    hide_quality: bool
+    hide_bandwidth: bool
+    hide_transcoding: bool
+    hide_progress: bool
+    hide_eta: bool
+    use_friendly_names: bool
+    time_manager: TimeManager
 
     def _session_user_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
         if self._anon_hide_usernames:

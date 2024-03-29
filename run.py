@@ -24,7 +24,7 @@ from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
     MONITORED_DISK_SPACE_FOLDER,
-    KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH, KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH, KEY_RUN_ARGS_MONITOR_PATH,
+    KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH, KEY_RUN_ARGS_MONITOR_PATH,
 )
 
 # Parse arguments
@@ -81,36 +81,22 @@ def start():
     try:
         logging.info("Setting up Tautulli connector")
         tautulli_connector = tautulli.TautulliConnector(
-            base_url=config.tautulli.url,
-            api_key=config.tautulli.api_key,
-            terminate_message=config.tautulli.terminate_message,
+            tautulli_settings=config.tautulli,
+            display_settings=config.display,
             analytics=analytics,
-            time_manager=config.tautulli.time_manager,
-            server_name=config.tautulli.server_name,
-            text_manager=config.tautulli.text_manager,
-            disable_ssl_verification=config.tautulli.disable_ssl_verification,
         )
 
         logging.info("Setting up Discord connector")
         discord_connector = discord.DiscordConnector(
-            token=config.discord.bot_token,
-            guild_id=config.discord.server_id,
-            admin_ids=config.discord.admin_ids,
-            refresh_time=config.tautulli.refresh_interval,
-            library_refresh_time=config.tautulli.library_refresh_interval,
-            tautulli_use_summary_message=config.discord.use_summary_text_message,
-            tautulli_channel_name=config.discord.channel_name,
             tautulli_connector=tautulli_connector,
-            voice_channel_settings=config.tautulli.voice_channel_settings,
-            display_live_stats=config.tautulli.any_live_stats_channels_enabled,
-            display_library_stats=config.tautulli.any_library_stats_channels_enabled,
-            enable_slash_commands=config.discord.enable_slash_commands,
-            thousands_separator=config.tautulli.thousands_separator,
-            nitro=config.discord.has_discord_nitro,
-            performance_monitoring=config.performance,
+            discord_settings=config.discord,
+            tautulli_settings=config.tautulli,
+            display_settings=config.display,
+            stats_settings=config.stats,
             analytics=analytics,
             version_checker=versioning.VersionChecker(),
         )
+
         discord_connector.connect()
     except Exception as e:
         logging.fatal(f"Fatal error occurred. Shutting down: {e}")

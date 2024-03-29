@@ -1,10 +1,10 @@
-import modules.logs as logging
 from pathlib import Path
 from typing import Optional, Union, List
 
 import discord
 from discord import Emoji, PartialEmoji
 
+import modules.logs as logging
 from modules import statics
 
 
@@ -22,9 +22,8 @@ async def upload_new_emoji(file: str, name: str, client: discord.Client, guild_i
         return None
 
 
-async def collect_guild_emojis(client: discord.Client, guild_id: str) -> tuple[Emoji, ...]:
-    # guild ID is a string the whole time until here, we'll see how they account for int overflow in the future
-    guild = client.get_guild(int(guild_id))  # stupid positional-only parameters
+async def collect_guild_emojis(client: discord.Client, guild_id: int) -> tuple[Emoji, ...]:
+    guild = client.get_guild(guild_id)  # stupid positional-only parameters
 
     return guild.emojis
 
@@ -140,12 +139,12 @@ class EmojiManager:
     def valid_emoji_for_stream_number(self, emoji, number: int) -> bool:
         return str(emoji) == self.emoji_from_stream_number(number)
 
-    async def load_emojis(self, source_folder: str, client: discord.Client, guild_id: str) -> None:
+    async def load_emojis(self, source_folder: str, client: discord.Client, guild_id: int) -> None:
         # Upload PNG emojis from the source folder
         for file in Path(source_folder).glob("*.png"):
             await self.add_new_emoji(file=str(file), client=client, guild_id=guild_id)
 
-    async def add_new_emoji(self, file: str, client: discord.Client, guild_id: str, name: Optional[str] = None) -> None:
+    async def add_new_emoji(self, file: str, client: discord.Client, guild_id: int, name: Optional[str] = None) -> None:
         name = name or Path(file).stem
         name_with_prefix = f"{self._emoji_prefix}_{name}"
 
