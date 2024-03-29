@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional, Any
 from urllib.parse import quote_plus
 
 from pytz import timezone
 
-from modules.statics import ENCODING_SEPARATOR_1, ENCODING_SEPARATOR_2
 import modules.logs as logging
+from modules.statics import ENCODING_SEPARATOR_1, ENCODING_SEPARATOR_2
 
 
 def make_plural(word, count: int, suffix_override: str = 's') -> str:
@@ -41,6 +41,12 @@ def extract_boolean(value) -> bool:
         return False
     else:
         raise ValueError("Not a boolean: {}".format(value))
+
+
+def mark_exists(value: Optional[Any]) -> str:
+    if value:
+        return "Present"
+    return "Not Present"
 
 
 def format_decimal(number: float, denominator: int = 1, decimal_places: int = 1, no_zeros: bool = False) -> str:

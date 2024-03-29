@@ -70,6 +70,9 @@ KEY_PERFORMANCE_MONITOR_DISK_SPACE = "performance_monitor_disk_space"
 KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH = "performance_monitor_disk_space_path"
 KEY_PERFORMANCE_MONITOR_CPU = "performance_monitor_cpu"
 KEY_PERFORMANCE_MONITOR_MEMORY = "performance_monitor_memory"
+KEY_RUN_ARGS_MONITOR_PATH = "run_args_monitor_path"
+KEY_RUN_ARGS_CONFIG_PATH = "run_args_config_path"
+KEY_RUN_ARGS_LOG_PATH = "run_args_log_path"
 
 MAX_STREAM_COUNT = 36
 

@@ -24,7 +24,7 @@ from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
     MONITORED_DISK_SPACE_FOLDER,
-    KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH,
+    KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH, KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH, KEY_RUN_ARGS_MONITOR_PATH,
 )
 
 # Parse arguments
@@ -61,9 +61,11 @@ if not migration_manager.run_migrations():
 
 # Set up configuration
 kwargs = {
-    KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH: args.usage,
+    KEY_RUN_ARGS_MONITOR_PATH: args.usage,
+    KEY_RUN_ARGS_CONFIG_PATH: config_directory,
+    KEY_RUN_ARGS_LOG_PATH: args.log,
 }
-config = Config(app_name=APP_NAME, config_path=f"{args.config}", **kwargs)
+config = Config(config_path=f"{args.config}", **kwargs)
 
 # Set up analytics
 analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,

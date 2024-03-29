@@ -1,544 +1,385 @@
 import json
-from typing import List, Dict, Any
+import os
+from typing import Any
 
-import confuse
 import yaml
 
 import modules.logs as logging
-from modules import statics, utils
-from modules.text_manager import TextManager
-from modules.time_manager import TimeManager
+import modules.settings.models as settings_models
+from modules import utils
+from modules.statics import KEY_RUN_ARGS_MONITOR_PATH, KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH
 
 
 class ConfigSection:
-    def __init__(self, section_key: str, data, parent_key: str = None):
-        self.section_key = section_key
+    def __init__(self, data: dict):
         self.data = data
-        try:
-            self.data = data[self.section_key]
-        except confuse.NotFoundError:
-            pass
-        self._parent_key = parent_key
 
-    @property
-    def full_key(self):
-        if self._parent_key is None:
-            return self.section_key
-        return f"{self._parent_key}_{self.section_key}".upper()
-
-    def _get_value(self, key: str, default=None):
+    def get_value(self, key: str, default: Any = None) -> Any:
         try:
-            return self.data[key].get()
-        except confuse.NotFoundError:
+            return self.data[key]
+        except KeyError:
             return default
 
-    def _get_subsection(self, key: str, default=None):
+    def get_subsection_data(self, key: str) -> dict:
         try:
-            return ConfigSection(section_key=key, parent_key=self.full_key, data=self.data)
-        except confuse.NotFoundError:
-            return default
+            data = self.data[key]
+            assert isinstance(data, dict)
+            return data
+        except KeyError:
+            raise KeyError(f"Subsection '{key}' not found in section")
 
 
-class TautulliConfig(ConfigSection):
-    def __init__(self, data):
-        super().__init__(section_key="Tautulli", data=data)
+class VoiceChannelConfig(ConfigSection):
+    def __init__(self, channel_name: str, data):
+        super().__init__(data=data)
+        self.channel_name = channel_name
 
-    @property
-    def _connection(self) -> ConfigSection:
-        return self._get_subsection(key="Connection")
+    def to_model(self) -> settings_models.VoiceChannel:
+        enable = utils.extract_boolean(self.get_value(key="Enable", default=False))
+        emoji = self.get_value(key="CustomEmoji", default="")
+        use_emojis = utils.extract_boolean(self.get_value(key="UseEmojis", default=False))
+        channel_id = self.get_value(key="VoiceChannelID", default="0")
 
-    @property
-    def api_key(self) -> str:
-        return self._connection._get_value(key="APIKey")
-
-    @property
-    def url(self) -> str:
-        return self._connection._get_value(key="URL")
-
-    @property
-    def disable_ssl_verification(self) -> bool:
-        value = self._connection._get_value(key="UseSelfSignedCert", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _customization(self) -> ConfigSection:
-        return self._get_subsection(key="Customization")
-
-    @property
-    def refresh_interval(self) -> int:
-        value = self._customization._get_value(key='RefreshSeconds', default=15)
-        return int(value)
-
-    @property
-    def server_name(self) -> str:
-        return self._customization._get_value(key='ServerName', default="Plex")
-
-    @property
-    def terminate_message(self) -> str:
-        return self._customization._get_value(key='TerminateMessage', default="Your stream has ended.")
-
-    @property
-    def time_manager(self) -> TimeManager:
-        timezone = self._customization._get_value(key='ServerTimeZone', default=None)
-        mil_time = self._customization._get_value(key='Use24HourTime', default=False)
-        return TimeManager(timezone=timezone, military_time=mil_time)
-
-    @property
-    def _voice_channels(self) -> ConfigSection:
-        return self._customization._get_subsection(key="VoiceChannels")
-
-    @property
-    def _stats_voice_channels(self) -> ConfigSection:
-        return self._voice_channels._get_subsection(key="Stats")
-
-    @property
-    def stats_voice_channel_category_name(self) -> str:
-        return self._stats_voice_channels._get_value(key="CategoryName", default="Tautulli Stats")
-
-    @property
-    def display_stream_count(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="StreamCount", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def stream_count_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="StreamCountChannelID", default=0)
-        return int(value)
-
-    @property
-    def display_transcode_count(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="TranscodeCount", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def transcode_count_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="TranscodeCountChannelID", default=0)
-        return int(value)
-
-    @property
-    def display_bandwidth(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="Bandwidth", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def bandwidth_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="BandwidthChannelID", default=0)
-        return int(value)
-
-    @property
-    def display_local_bandwidth(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="LocalBandwidth", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def local_bandwidth_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="LocalBandwidthChannelID", default=0)
-        return int(value)
-
-    @property
-    def display_remote_bandwidth(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="RemoteBandwidth", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def remote_bandwidth_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="RemoteBandwidthChannelID", default=0)
-        return int(value)
-
-    @property
-    def display_plex_status(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="PlexStatus", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def plex_status_use_emoji(self) -> bool:
-        value = self._stats_voice_channels._get_value(key="PlexStatusUseEmoji", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def plex_status_channel_id(self) -> int:
-        value = self._stats_voice_channels._get_value(key="PlexStatusChannelID", default=0)
-        return int(value)
-
-    @property
-    def stats_voice_channels_ids(self) -> dict:
-        return {
-            statics.KEY_STREAM_COUNT_CHANNEL_ID: self.stream_count_channel_id,
-            statics.KEY_TRANSCODE_COUNT_CHANNEL_ID: self.transcode_count_channel_id,
-            statics.KEY_BANDWIDTH_CHANNEL_ID: self.bandwidth_channel_id,
-            statics.KEY_LAN_BANDWIDTH_CHANNEL_ID: self.local_bandwidth_channel_id,
-            statics.KEY_REMOTE_BANDWIDTH_CHANNEL_ID: self.remote_bandwidth_channel_id,
-            statics.KEY_PLEX_STATUS_CHANNEL_ID: self.plex_status_channel_id
-        }
-
-    @property
-    def _use_stats_voice_channel_ids(self) -> bool:
-        # If any of the stats voice channel IDs are not 0, then we are using them all.
-        return any(channel_id != 0 for channel_id in self.stats_voice_channels_ids.values())
-
-    @property
-    def _libraries_voice_channels(self) -> ConfigSection:
-        return self._voice_channels._get_subsection(key="Libraries")
-
-    @property
-    def libraries_voice_channel_category_name(self) -> str:
-        return self._libraries_voice_channels._get_value(key="CategoryName", default="Tautulli Libraries",
-                                                         )
-
-    @property
-    def display_library_stats(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="Enable", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def library_refresh_interval(self) -> int:
-        value = self._libraries_voice_channels._get_value(key="LibraryRefreshSeconds", default=3600)
-        return int(value)
-
-    @property
-    def library_names(self) -> List[str]:
-        names = self._libraries_voice_channels._get_value(key="LibraryNames", default=[])
-        if isinstance(names, str):
-            return names.split(",")
-        return names
-
-    @property
-    def combined_library_names(self) -> List[str]:
-        values = []
-
-        data = self._libraries_voice_channels._get_value(key="CombinedLibraries", default={})
-
-        if isinstance(data, str):
-            return data.split(",")
-
-        for name, libraries in data.items():
-            values.append(utils.encode_combined_tautulli_libraries(name=name, libraries=libraries))
-
-        return values
-
-    @property
-    def use_emojis_with_library_names(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="UseEmojis", default=True)
-        return utils.extract_boolean(value)
-
-    @property
-    def show_tv_series_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="TVSeriesCount", default=True)
-        return utils.extract_boolean(value)
-
-    @property
-    def show_tv_episode_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="TVEpisodeCount", default=True)
-        return utils.extract_boolean(value)
-
-    @property
-    def show_music_artist_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="MusicArtistCount", default=True)
-        return utils.extract_boolean(value)
-
-    @property
-    def show_music_album_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="MusicAlbumCount", default=True)
-        return utils.extract_boolean(value)
-
-    @property
-    def show_music_track_count(self) -> bool:
-        value = self._libraries_voice_channels._get_value(key="MusicTrackCount", default=True)
-        return utils.extract_boolean(value)
-
-    @property
-    def voice_channel_settings(self) -> Dict[str, Any]:
-        return {
-            statics.KEY_STATS_CATEGORY_NAME: self.stats_voice_channel_category_name,
-            statics.KEY_COUNT: self.display_stream_count,
-            statics.KEY_TRANSCODE_COUNT: self.display_transcode_count,
-            statics.KEY_BANDWIDTH: self.display_bandwidth,
-            statics.KEY_LAN_BANDWIDTH: self.display_local_bandwidth,
-            statics.KEY_REMOTE_BANDWIDTH: self.display_remote_bandwidth,
-            statics.KEY_STATS: self.display_library_stats,
-            statics.KEY_PLEX_STATUS: self.display_plex_status,
-            statics.KEY_PLEX_STATUS_USE_EMOJI: self.plex_status_use_emoji,
-            statics.KEY_REFRESH_TIME: self.library_refresh_interval,
-            statics.KEY_LIBRARIES_CATEGORY_NAME: self.libraries_voice_channel_category_name,
-            statics.KEY_LIBRARIES: self.library_names,
-            statics.KEY_COMBINED_LIBRARIES: self.combined_library_names,
-            statics.KEY_USE_EMOJIS: self.use_emojis_with_library_names,
-            statics.KEY_SHOW_TV_EPISODES: self.show_tv_episode_count,
-            statics.KEY_SHOW_TV_SERIES: self.show_tv_series_count,
-            statics.KEY_SHOW_MUSIC_ARTISTS: self.show_music_artist_count,
-            statics.KEY_SHOW_MUSIC_ALBUMS: self.show_music_album_count,
-            statics.KEY_SHOW_MUSIC_TRACKS: self.show_music_track_count,
-            statics.KEY_STATS_CHANNEL_IDS: self.stats_voice_channels_ids,
-            statics.KEY_USE_STATS_CHANNEL_IDS: self._use_stats_voice_channel_ids,
-        }
-
-    @property
-    def any_live_stats_channels_enabled(self) -> bool:
-        keys = [statics.KEY_COUNT, statics.KEY_TRANSCODE_COUNT, statics.KEY_BANDWIDTH,
-                statics.KEY_LAN_BANDWIDTH, statics.KEY_REMOTE_BANDWIDTH, statics.KEY_PLEX_STATUS]
-        return any([self.voice_channel_settings.get(key, False) for key in keys])
-
-    @property
-    def any_library_stats_channels_enabled(self) -> bool:
-        keys = [statics.KEY_STATS]
-        return any([self.voice_channel_settings.get(key, False) for key in keys])
-
-    @property
-    def _anonymize_rules(self) -> ConfigSection:
-        return self._customization._get_subsection(key="Anonymize")
-
-    @property
-    def _anonymize_hide_usernames(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideUsernames", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _anonymize_hide_platforms(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HidePlatforms", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _anonymize_hide_player_names(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HidePlayerNames", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _anonymize_hide_quality(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideQuality", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _anonymize_hide_bandwidth(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideBandwidth", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _anonymize_hide_transcode_decision(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideTranscode", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _anonymize_hide_progress(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideProgress", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _anonymize_hide_eta(self) -> bool:
-        value = self._anonymize_rules._get_value(key="HideETA", default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def _use_friendly_names(self) -> bool:
-        value = self._customization._get_value(key='UseFriendlyNames', default=False)
-        return utils.extract_boolean(value)
-
-    @property
-    def thousands_separator(self) -> str:
-        return self._customization._get_value(key='ThousandsSeparator', default="")
-
-    @property
-    def _performance_voice_channel_settings(self) -> ConfigSection:
-        return self._voice_channels._get_subsection(key="Performance")
-
-    @property
-    def _performance_voice_channel_category_name(self) -> str:
-        return self._performance_voice_channel_settings._get_value(key="CategoryName", default="Performance")
-
-    @property
-    def text_manager(self) -> TextManager:
-        rules = {
-            statics.KEY_HIDE_USERNAMES: self._anonymize_hide_usernames,
-            statics.KEY_HIDE_PLAYER_NAMES: self._anonymize_hide_player_names,
-            statics.KEY_HIDE_PLATFORMS: self._anonymize_hide_platforms,
-            statics.KEY_HIDE_QUALITY: self._anonymize_hide_quality,
-            statics.KEY_HIDE_BANDWIDTH: self._anonymize_hide_bandwidth,
-            statics.KEY_HIDE_TRANSCODING: self._anonymize_hide_transcode_decision,
-            statics.KEY_HIDE_PROGRESS: self._anonymize_hide_progress,
-            statics.KEY_HIDE_ETA: self._anonymize_hide_eta,
-            statics.KEY_USE_FRIENDLY_NAMES: self._use_friendly_names,
-            statics.KEY_TIME_MANAGER: self.time_manager,
-        }
-        return TextManager(rules=rules)
+        return settings_models.VoiceChannel(
+            name=self.channel_name,
+            enable=enable,
+            emoji=emoji,
+            use_emojis=use_emojis,
+            channel_id=channel_id
+        )
 
 
 class DiscordConfig(ConfigSection):
-    def __init__(self, data):
-        super().__init__(section_key="Discord", data=data)
+    def __init__(self, data: dict):
+        super().__init__(data=data)
 
-    @property
-    def _connection(self) -> ConfigSection:
-        return self._get_subsection(key="Connection")
+    def to_model(self) -> settings_models.Discord:
+        bot_token = self.get_value(key="BotToken")
+        server_id = self.get_value(key="ServerID")
+        admin_ids = [str(i) for i in self.get_value(key="AdminIDs", default=[])]
+        channel_name = self.get_value(key="ChannelName", default="tauticord")
+        channel_name = utils.discord_text_channel_name_format(string=channel_name)
+        use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
+        enable_slash_commands = utils.extract_boolean(self.get_value(key="EnableSlashCommands", default=False))
+        has_discord_nitro = utils.extract_boolean(self.get_value(key="Nitro", default=False))
 
-    @property
-    def bot_token(self) -> str:
-        return self._connection._get_value(key="BotToken")
+        return settings_models.Discord(
+            bot_token=bot_token,
+            server_id=server_id,
+            admin_ids=admin_ids,
+            channel_name=channel_name,
+            use_summary_message=use_summary_message,
+            enable_slash_commands=enable_slash_commands,
+            has_discord_nitro=has_discord_nitro
+        )
 
-    @property
-    def server_id(self) -> str:
-        value = self._connection._get_value(key="ServerID")
-        return str(value)
 
-    @property
-    def admin_ids(self) -> List[str]:
-        ids = self._connection._get_value(key="AdminIDs", default=[])
-        if isinstance(ids, str):
-            return [str(i) for i in ids.split(",")]
-        return [str(i) for i in ids]
+class AnonymityConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
 
-    @property
-    def use_summary_text_message(self) -> bool:
-        value = self._connection._get_value(key="PostSummaryMessage", default=True)
-        return utils.extract_boolean(value)
+    def to_model(self) -> settings_models.Anonymity:
+        hide_usernames = utils.extract_boolean(self.get_value(key="HideUsernames", default=False))
+        hide_platforms = utils.extract_boolean(self.get_value(key="HidePlatforms", default=False))
+        hide_player_names = utils.extract_boolean(self.get_value(key="HidePlayerNames", default=False))
+        hide_quality = utils.extract_boolean(self.get_value(key="HideQuality", default=False))
+        hide_bandwidth = utils.extract_boolean(self.get_value(key="HideBandwidth", default=False))
+        hide_transcode_decision = utils.extract_boolean(self.get_value(key="HideTranscode", default=False))
+        hide_progress = utils.extract_boolean(self.get_value(key="HideProgress", default=False))
+        hide_eta = utils.extract_boolean(self.get_value(key="HideETA", default=False))
 
-    @property
-    def channel_name(self) -> str:
-        value = self._connection._get_value(key="ChannelName", default="tauticord")
-        value = utils.discord_text_channel_name_format(string=value)
-        return value
+        return settings_models.Anonymity(
+            hide_usernames=hide_usernames,
+            hide_platforms=hide_platforms,
+            hide_player_names=hide_player_names,
+            hide_quality=hide_quality,
+            hide_bandwidth=hide_bandwidth,
+            hide_transcode_decision=hide_transcode_decision,
+            hide_progress=hide_progress,
+            hide_eta=hide_eta,
+        )
 
-    @property
-    def enable_slash_commands(self) -> bool:
-        value = self._connection._get_value(key="EnableSlashCommands", default=False)
-        return utils.extract_boolean(value)
 
-    @property
-    def _customization(self) -> ConfigSection:
-        return self._get_subsection(key="Customization")
+class TimeConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
 
-    @property
-    def has_discord_nitro(self) -> bool:
-        value = self._customization._get_value(key="Nitro",
-                                               default=False)
-        return utils.extract_boolean(value)
+    def to_model(self) -> settings_models.Time:
+        tautulli_server_time_zone = self.get_value(key="TautulliServerTimeZone", default="UTC")
+        use_24_hour_time = utils.extract_boolean(self.get_value(key="Use24HourTime", default=False))
+
+        return settings_models.Time(
+            tautulli_server_time_zone=tautulli_server_time_zone,
+            use_24_hour_time=use_24_hour_time
+        )
+
+
+class DisplayConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.Display:
+        anonymity = AnonymityConfig(data=self.get_subsection_data(key="Anonymize")).to_model()
+        plex_server_name = self.get_value(key="ServerName", default="Plex Server")
+        thousands_separator = self.get_value(key="ThousandsSeparator", default="")
+        time = TimeConfig(data=self.get_subsection_data(key="Time")).to_model()
+        use_friendly_names = utils.extract_boolean(self.get_value(key="UseFriendlyNames", default=False))
+
+        return settings_models.Display(
+            anonymity=anonymity,
+            plex_server_name=plex_server_name,
+            thousands_separator=thousands_separator,
+            time=time,
+            use_friendly_names=use_friendly_names
+        )
 
 
 class ExtrasConfig(ConfigSection):
-    def __init__(self, data):
-        super().__init__(section_key="Extras", data=data)
+    def __init__(self, data: dict):
+        super().__init__(data=data)
 
-    @property
-    def allow_analytics(self) -> bool:
-        value = self._get_value(key="Analytics", default=True)
-        return utils.extract_boolean(value)
+    def to_model(self) -> settings_models.Extras:
+        allow_analytics = utils.extract_boolean(self.get_value(key="Analytics", default=True))
 
-    @property
-    def _performance(self) -> ConfigSection:
-        return self._get_subsection(key="Performance")
+        return settings_models.Extras(allow_analytics=allow_analytics)
 
-    @property
-    def _performance_monitor_tautulli_user_count(self) -> bool:
-        value = self._performance._get_value(key="TautulliUserCount", default=False)
-        return utils.extract_boolean(value)
 
-    @property
-    def _performance_monitor_disk_space(self) -> bool:
-        value = self._performance._get_value(key="DiskSpace", default=False)
-        return utils.extract_boolean(value)
+class StatsActivityConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
 
-    @property
-    def _performance_monitor_cpu(self) -> bool:
-        value = self._performance._get_value(key="CPU", default=False)
-        return utils.extract_boolean(value)
+    def to_model(self) -> settings_models.ActivityStats:
+        category_name = self.get_value(key="CategoryName", default="Plex Activity")
+        enable = utils.extract_boolean(self.get_value(key="Enable", default=False))
 
-    @property
-    def _performance_monitor_memory(self) -> bool:
-        value = self._performance._get_value(key="Memory", default=False)
-        return utils.extract_boolean(value)
+        stats_types = ConfigSection(data=self.get_subsection_data(key="StatTypes"))
+        bandwidth = VoiceChannelConfig(channel_name="Bandwidth",
+                                       data=stats_types.get_subsection_data("Bandwidth")).to_model()
+        local_bandwidth = VoiceChannelConfig(channel_name="Local Bandwidth",
+                                             data=stats_types.get_subsection_data("LocalBandwidth")).to_model()
+        remote_bandwidth = VoiceChannelConfig(channel_name="Remote Bandwidth",
+                                              data=stats_types.get_subsection_data("RemoteBandwidth")).to_model()
+        stream_count = VoiceChannelConfig(channel_name="Stream Count",
+                                          data=stats_types.get_subsection_data("StreamCount")).to_model()
+        transcode_count = VoiceChannelConfig(channel_name="Transcode Count",
+                                             data=stats_types.get_subsection_data("TranscodeCount")).to_model()
+        plex_availability = VoiceChannelConfig(channel_name="Plex Availability",
+                                               data=stats_types.get_subsection_data(
+                                                   "PlexServerAvailability")).to_model()
+
+        return settings_models.ActivityStats(
+            category_name=category_name,
+            enable=enable,
+            bandwidth=bandwidth,
+            local_bandwidth=local_bandwidth,
+            remote_bandwidth=remote_bandwidth,
+            stream_count=stream_count,
+            transcode_count=transcode_count,
+            plex_availability=plex_availability
+        )
+
+
+class StatsLibrariesConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.LibraryStats:
+        category_name = self.get_value(key="CategoryName", default="Plex Libraries")
+        enable = utils.extract_boolean(self.get_value(key="Enable", default=False))
+
+        libraries = []
+        libraries_data = self.get_value(key="Libraries", default={})
+        for library_name, details in libraries_data.items():
+            details_config = ConfigSection(data=details)
+
+            alternate_name = details_config.get_value(key="AlternateName", default="")
+            album = VoiceChannelConfig(channel_name="Albums",
+                                       data=details_config.get_subsection_data("Albums")).to_model()
+            artist = VoiceChannelConfig(channel_name="Artists",
+                                        data=details_config.get_subsection_data("Artists")).to_model()
+            episode = VoiceChannelConfig(channel_name="Episodes",
+                                         data=details_config.get_subsection_data("Episodes")).to_model()
+            series = VoiceChannelConfig(channel_name="Series",
+                                        data=details_config.get_subsection_data("Series")).to_model()
+            track = VoiceChannelConfig(channel_name="Tracks",
+                                       data=details_config.get_subsection_data("Tracks")).to_model()
+
+            libraries.append(
+                settings_models.Library(
+                    name=library_name,
+                    alternate_name=alternate_name,
+                    voice_channels=settings_models.LibraryVoiceChannels(
+                        album=album,
+                        artist=artist,
+                        episode=episode,
+                        series=series,
+                        track=track
+                    )
+                )
+            )
+
+        combined_libraries = []
+        combined_libraries_data = self.get_value(key="CombinedLibraries", default={})
+        for combined_library_name, details in combined_libraries_data.items():
+            details_config = ConfigSection(data=details)
+
+            combined_library_names = details_config.get_value(key="Libraries", default=[])
+            album = VoiceChannelConfig(channel_name="Albums",
+                                       data=details_config.get_subsection_data("Albums")).to_model()
+            artist = VoiceChannelConfig(channel_name="Artists",
+                                        data=details_config.get_subsection_data("Artists")).to_model()
+            episode = VoiceChannelConfig(channel_name="Episodes",
+                                         data=details_config.get_subsection_data("Episodes")).to_model()
+            series = VoiceChannelConfig(channel_name="Series",
+                                        data=details_config.get_subsection_data("Series")).to_model()
+            track = VoiceChannelConfig(channel_name="Tracks",
+                                       data=details_config.get_subsection_data("Tracks")).to_model()
+
+            combined_libraries.append(
+                settings_models.CombinedLibrary(
+                    name=combined_library_name,
+                    libraries=combined_library_names,
+                    voice_channels=settings_models.LibraryVoiceChannels(
+                        album=album,
+                        artist=artist,
+                        episode=episode,
+                        series=series,
+                        track=track
+                    )
+                )
+            )
+
+        refresh_interval_seconds = self.get_value(key="RefreshSeconds", default=15)
+
+        return settings_models.LibraryStats(
+            category_name=category_name,
+            enable=enable,
+            libraries=libraries,
+            combined_libraries=combined_libraries,
+            refresh_interval_seconds=refresh_interval_seconds
+        )
+
+
+class StatsPerformanceConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.PerformanceStats:
+        category_name = self.get_value(key="CategoryName", default="Performance")
+        enable = utils.extract_boolean(self.get_value(key="Enable", default=False))
+
+        metrics = ConfigSection(data=self.get_subsection_data(key="Metrics"))
+        cpu = VoiceChannelConfig(channel_name="CPU",
+                                 data=metrics.get_subsection_data("CPU")).to_model()
+        memory = VoiceChannelConfig(channel_name="Memory",
+                                    data=metrics.get_subsection_data("Memory")).to_model()
+        disk = VoiceChannelConfig(channel_name="Disk",
+                                  data=metrics.get_subsection_data("DiskSpace")).to_model()
+        user_count = VoiceChannelConfig(channel_name="User Count",
+                                        data=metrics.get_subsection_data("UserCount")).to_model()
+
+        return settings_models.PerformanceStats(
+            category_name=category_name,
+            enable=enable,
+            cpu=cpu,
+            memory=memory,
+            disk=disk,
+            user_count=user_count
+        )
+
+
+class StatsConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.Stats:
+        activity = StatsActivityConfig(data=self.get_subsection_data(key="Activity")).to_model()
+        library = StatsLibrariesConfig(data=self.get_subsection_data(key="Libraries")).to_model()
+        performance = StatsPerformanceConfig(data=self.get_subsection_data(key="Performance")).to_model()
+
+        return settings_models.Stats(
+            activity=activity,
+            library=library,
+            performance=performance
+        )
+
+
+class TautulliConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.Tautulli:
+        api_key = self.get_value(key="APIKey")
+        url = self.get_value(key="URL")
+        ignore_ssl = utils.extract_boolean(self.get_value(key="UseSelfSignedCert", default=False))
+        refresh_interval_seconds = self.get_value(key='RefreshSeconds', default=15)
+        termination_message = self.get_value(key='TerminateMessage', default="Your stream has ended.")
+
+        return settings_models.Tautulli(
+            api_key=api_key,
+            url=url,
+            ignore_ssl=ignore_ssl,
+            refresh_interval_seconds=refresh_interval_seconds,
+            termination_message=termination_message
+        )
+
+
+class RunArgsConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.RunArgs:
+        performance_disk_space_mapping = self.get_value(key=KEY_RUN_ARGS_MONITOR_PATH, default=None)
+        config_path = self.get_value(key=KEY_RUN_ARGS_CONFIG_PATH, default=None)
+        log_path = self.get_value(key=KEY_RUN_ARGS_LOG_PATH, default=None)
+
+        return settings_models.RunArgs(
+            performance_disk_space_mapping=performance_disk_space_mapping,
+            config_path=config_path,
+            log_path=log_path
+        )
 
 
 class Config:
-    def __init__(self, app_name: str, config_path: str, fallback_to_env: bool = True, **kwargs):
-        self.config = confuse.Configuration(app_name)
-        self.pull_from_env = False
-        # noinspection PyBroadException
-        try:
-            self.config.set_file(filename=config_path)
-            logging.debug(f"Loaded config from {config_path}")
-        except Exception:  # pylint: disable=broad-except # not sure what confuse will throw
-            if not fallback_to_env:
-                raise FileNotFoundError(f"Config file not found: {config_path}")
-            self.pull_from_env = True
-            logging.debug(f"Config file not found: {config_path}, falling back to environment variables")
-            logging.info(
-                f"WARNING: Environment variable configuration is going away soon! Please use a config file instead.")
+    discord: settings_models.Discord
+    display: settings_models.Display
+    extras: settings_models.Extras
+    stats: settings_models.Stats
+    tautulli: settings_models.Tautulli
+    run_args: settings_models.RunArgs
 
-        self.tautulli = TautulliConfig(self.config)
-        self.discord = DiscordConfig(self.config)
-        self.extras = ExtrasConfig(self.config)
-        self.performance = {
-            statics.KEY_PERFORMANCE_CATEGORY_NAME: self.tautulli._performance_voice_channel_category_name,
-            statics.KEY_PERFORMANCE_MONITOR_TAUTULLI_USER_COUNT: self.extras._performance_monitor_tautulli_user_count,
-            statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE: self.extras._performance_monitor_disk_space,
-            statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH: kwargs.get(statics.KEY_PERFORMANCE_MONITOR_DISK_SPACE_PATH,
-                                                                        statics.MONITORED_DISK_SPACE_FOLDER),
-            statics.KEY_PERFORMANCE_MONITOR_CPU: self.extras._performance_monitor_cpu,
-            statics.KEY_PERFORMANCE_MONITOR_MEMORY: self.extras._performance_monitor_memory,
+    def __init__(self, config_path: str, **docker_kwargs):
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(f"Config file not found: {config_path}")
+
+        logging.debug(f"Loaded config from {config_path}")
+        self.yaml_data = yaml.load(open(config_path), Loader=yaml.FullLoader)
+        self.json_data = json.loads(json.dumps(self.yaml_data, indent=4))
+
+        start = ConfigSection(data=self.json_data)
+
+        self.tautulli = TautulliConfig(data=start.get_subsection_data(key="Tautulli")).to_model()
+        self.discord = DiscordConfig(data=start.get_subsection_data(key="Discord")).to_model()
+        self.extras = ExtrasConfig(data=start.get_subsection_data(key="Extras")).to_model()
+        self.display = DisplayConfig(data=start.get_subsection_data(key="Display")).to_model()
+        self.stats = StatsConfig(data=start.get_subsection_data(key="Stats")).to_model()
+        self.run_args = RunArgsConfig(data=docker_kwargs).to_model()
+
+    def as_json(self) -> dict:
+        return {
+            "Tautulli": self.tautulli.as_dict(),
+            "Discord": self.discord.as_dict(),
+            "Extras": self.extras.as_dict(),
+            "Display": self.display.as_dict(),
+            "Stats": self.stats.as_dict(),
+            "Run Args": self.run_args.as_dict()
         }
 
-        logging.debug(f"Using configuration:\n{self.log()}")
+    def as_yaml(self) -> str:
+        return yaml.dump(self.as_json(), default_flow_style=False, sort_keys=False)
 
     def __repr__(self) -> str:
-        raw_yaml_data = self.config.dump()
-        json_data = yaml.load(raw_yaml_data, Loader=yaml.FullLoader)
-        return json.dumps(json_data, indent=4)
+        return self.as_yaml()
 
-    @property
-    def all(self) -> dict:
-        return {
-            "Tautulli - Connection - API Key": "Exists" if self.tautulli.api_key else "Not Set",
-            "Tautulli - Connection - URL": self.tautulli.url,
-            "Tautulli - Connection - Use Self-Signed Cert": self.tautulli.disable_ssl_verification,
-            "Tautulli - Customization - Refresh Interval": self.tautulli.refresh_interval,
-            "Tautulli - Customization - Server Name": self.tautulli.server_name,
-            "Tautulli - Customization - Terminate Message": self.tautulli.terminate_message,
-            "Tautulli - Customization - Time Manager": self.tautulli.time_manager,
-            "Tautulli - Customization - Voice Channels - Stats - Voice Channel Category Name": self.tautulli.stats_voice_channel_category_name,
-            "Tautulli - Customization - Voice Channels - Stats - Display Stream Count": self.tautulli.display_stream_count,
-            "Tautulli - Customization - Voice Channels - Stats - Stream Count Channel ID": self.tautulli.stream_count_channel_id,
-            "Tautulli - Customization - Voice Channels - Stats - Display Transcode Count": self.tautulli.display_transcode_count,
-            "Tautulli - Customization - Voice Channels - Stats - Transcode Count Channel ID": self.tautulli.transcode_count_channel_id,
-            "Tautulli - Customization - Voice Channels - Stats - Display Bandwidth": self.tautulli.display_bandwidth,
-            "Tautulli - Customization - Voice Channels - Stats - Bandwidth Channel ID": self.tautulli.bandwidth_channel_id,
-            "Tautulli - Customization - Voice Channels - Stats - Display Local Bandwidth": self.tautulli.display_local_bandwidth,
-            "Tautulli - Customization - Voice Channels - Stats - Local Bandwidth Channel ID": self.tautulli.local_bandwidth_channel_id,
-            "Tautulli - Customization - Voice Channels - Stats - Display Remote Bandwidth": self.tautulli.display_remote_bandwidth,
-            "Tautulli - Customization - Voice Channels - Stats - Remote Bandwidth Channel ID": self.tautulli.remote_bandwidth_channel_id,
-            "Tautulli - Customization - Voice Channels - Stats - Display Plex Status": self.tautulli.display_plex_status,
-            "Tautulli - Customization - Voice Channels - Stats - Plex Status Channel ID": self.tautulli.plex_status_channel_id,
-            "Tautulli - Customization - Voice Channels - Libraries - Voice Channel Category Name": self.tautulli.libraries_voice_channel_category_name,
-            "Tautulli - Customization - Voice Channels - Libraries - Display Library Stats": self.tautulli.display_library_stats,
-            "Tautulli - Customization - Voice Channels - Libraries - Library Refresh Interval": self.tautulli.library_refresh_interval,
-            "Tautulli - Customization - Voice Channels - Libraries - Library Names": self.tautulli.library_names,
-            "Tautulli - Customization - Voice Channels - Libraries - Combined Libraries": self.tautulli.combined_library_names,
-            "Tautulli - Customization - Voice Channels - Libraries - Use Emojis With Library Names": self.tautulli.use_emojis_with_library_names,
-            "Tautulli - Customization - Voice Channels - Libraries - Show TV Series Count": self.tautulli.show_tv_series_count,
-            "Tautulli - Customization - Voice Channels - Libraries - Show TV Episode Count": self.tautulli.show_tv_episode_count,
-            "Tautulli - Customization - Voice Channels - Libraries - Show Music Artist Count": self.tautulli.show_music_artist_count,
-            "Tautulli - Customization - Voice Channels - Libraries - Show Music Track Count": self.tautulli.show_music_track_count,
-            "Tautulli - Customization - Anonymize - Hide Usernames": self.tautulli._anonymize_hide_usernames,
-            "Tautulli - Customization - Anonymize - Hide Platforms": self.tautulli._anonymize_hide_platforms,
-            "Tautulli - Customization - Anonymize - Hide Player Names": self.tautulli._anonymize_hide_player_names,
-            "Tautulli - Customization - Anonymize - Hide Quality": self.tautulli._anonymize_hide_quality,
-            "Tautulli - Customization - Anonymize - Hide Bandwidth": self.tautulli._anonymize_hide_bandwidth,
-            "Tautulli - Customization - Anonymize - Hide Transcode Decision": self.tautulli._anonymize_hide_transcode_decision,
-            "Tautulli - Customization - Anonymize - Hide Progress": self.tautulli._anonymize_hide_progress,
-            "Tautulli - Customization - Anonymize - Hide ETA": self.tautulli._anonymize_hide_eta,
-            "Tautulli - Customization - Use Friendly Names": self.tautulli._use_friendly_names,
-            "Tautulli - Customization - Thousands Separator": self.tautulli.thousands_separator,
-            "Tautulli - Customization - Voice Channels - Performance - Voice Channel Category Name": self.tautulli._performance_voice_channel_category_name,
-            "Discord - Connection - Bot Token": "Exists" if self.discord.bot_token else "Not Set",
-            "Discord - Connection - Server ID": self.discord.server_id,
-            "Discord - Connection - Admin IDs": self.discord.admin_ids,
-            "Discord - Connection - Use Summary Text Message": self.discord.use_summary_text_message,
-            "Discord - Connection - Summary Text Channel Name": self.discord.channel_name,
-            "Discord - Customization - Has Nitro": self.discord.has_discord_nitro,
-            "Discord - Connection - Enable Slash Commands": self.discord.enable_slash_commands,
-            "Extras - Allow Analytics": self.extras.allow_analytics,
-            "Extras - Performance - Monitor Tautulli User Count": self.extras._performance_monitor_tautulli_user_count,
-            "Extras - Performance - Monitor Disk Space": self.extras._performance_monitor_disk_space,
-            "Extras - Performance - Monitor CPU Performance": self.extras._performance_monitor_cpu,
-            "Extras - Performance - Monitor Memory Performance": self.extras._performance_monitor_memory,
-        }
-
-    def log(self) -> str:
-        return "\n".join([f"{key}: {value}" for key, value in self.all.items()])
+    def print(self) -> str:
+        return self.as_yaml()

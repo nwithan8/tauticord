@@ -45,11 +45,12 @@ class ConfigWriter:
         self.add(value=value, key_path=to_path)
 
     def build_voice_channel_config(self, parent_path: list[str], channel_name: str, enabled: bool, use_emojis: bool,
-                                   custom_emoji: str = "", voice_channel_id: int = 0, **additional_pairs):
+                                   custom_emoji: str = "", voice_channel_id: int = 0, additional_pairs: dict = None):
         self.migrate_value(value=enabled, to_path=parent_path + [channel_name, "Enable"])
         self.migrate_value(value=use_emojis, to_path=parent_path + [channel_name, "UseEmojis"])
         self.migrate_value(value=custom_emoji, to_path=parent_path + [channel_name, "CustomEmoji"])
         self.migrate_value(value=voice_channel_id, to_path=parent_path + [channel_name, "VoiceChannelID"])
+        additional_pairs = additional_pairs or {}
         for key, value in additional_pairs.items():
             self.migrate_value(value=value, to_path=parent_path + [channel_name, key])
 
@@ -175,12 +176,13 @@ class Migration(BaseMigration):
                                  to_path=["Stats", "Libraries", "RefreshSeconds"])
         new_config.add(value={}, key_path=["Stats", "Libraries", "Libraries"])
         for library in old_config.tautulli.library_names:
+            new_config.add(value=library, key_path=["Stats", "Libraries", "Libraries", library, "AlternateName"])
             channels = {
                 'Series': old_config.tautulli.show_tv_series_count,
-                'Episode': old_config.tautulli.show_tv_episode_count,
-                'Artist': old_config.tautulli.show_music_artist_count,
-                'Album': old_config.tautulli.show_music_album_count,
-                'Track': old_config.tautulli.show_music_track_count
+                'Episodes': old_config.tautulli.show_tv_episode_count,
+                'Artists': old_config.tautulli.show_music_artist_count,
+                'Albums': old_config.tautulli.show_music_album_count,
+                'Tracks': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
                 new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "Libraries", library],
@@ -193,10 +195,10 @@ class Migration(BaseMigration):
             new_config.add(value=libraries, key_path=["Stats", "Libraries", "CombinedLibraries", name, "Libraries"])
             channels = {
                 'Series': old_config.tautulli.show_tv_series_count,
-                'Episode': old_config.tautulli.show_tv_episode_count,
-                'Artist': old_config.tautulli.show_music_artist_count,
-                'Album': old_config.tautulli.show_music_album_count,
-                'Track': old_config.tautulli.show_music_track_count
+                'Episodes': old_config.tautulli.show_tv_episode_count,
+                'Artists': old_config.tautulli.show_music_artist_count,
+                'Albums': old_config.tautulli.show_music_album_count,
+                'Tracks': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
                 new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "CombinedLibraries", name],
