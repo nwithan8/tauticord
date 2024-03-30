@@ -51,8 +51,10 @@ logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file
 config_directory = os.path.dirname(args.config)
 if config_directory == "":
     config_directory = "./"
-migration_manager = MigrationManager(config_directory=config_directory,
-                                     logs_directory=args.log)
+migration_manager = MigrationManager(
+    migration_data_directory=os.path.join(config_directory, "migration_data"),
+    config_directory=config_directory,
+    logs_directory=args.log)
 if not migration_manager.run_migrations():
     logging.fatal("Migrations failed. Exiting...")
     exit(201)
