@@ -199,10 +199,11 @@ class StatsLibrariesConfig(ConfigSection):
         enable = utils.extract_boolean(self.get_value(key="Enable", default=False))
 
         libraries = []
-        libraries_data = self.get_value(key="Libraries", default={})
-        for library_name, details in libraries_data.items():
-            details_config = ConfigSection(data=details)
+        libraries_data: list[dict] = self.get_value(key="Libraries", default=[])
+        for library_details in libraries_data:
+            details_config = ConfigSection(data=library_details)
 
+            library_name = details_config.get_value(key="Name", default="")
             alternate_name = details_config.get_value(key="AlternateName", default="")
             voice_channel_name = alternate_name if alternate_name else library_name
             movie = VoiceChannelConfig(channel_name=voice_channel_name,
@@ -240,10 +241,11 @@ class StatsLibrariesConfig(ConfigSection):
             )
 
         combined_libraries = []
-        combined_libraries_data = self.get_value(key="CombinedLibraries", default={})
-        for combined_library_name, details in combined_libraries_data.items():
-            details_config = ConfigSection(data=details)
+        combined_libraries_data: list[dict] = self.get_value(key="CombinedLibraries", default=[])
+        for combined_library_details in combined_libraries_data:
+            details_config = ConfigSection(data=combined_library_details)
 
+            combined_library_name = details_config.get_value(key="Name", default="")
             combined_library_names = details_config.get_value(key="Libraries", default=[])
             movie = VoiceChannelConfig(channel_name=combined_library_name,
                                        emoji=Emoji.Movie,

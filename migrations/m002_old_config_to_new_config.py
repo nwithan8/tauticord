@@ -53,6 +53,19 @@ class ConfigWriter:
         for key, value in additional_pairs.items():
             self.migrate_value(value=value, to_path=parent_path + [channel_name, key])
 
+    def build_voice_channel_config(self, channel_name: str, enabled: bool, custom_emoji: str = "",
+                                   voice_channel_id: int = 0, additional_pairs: dict = None) -> dict:
+        config = {
+            "Enable": enabled,
+            "CustomEmoji": custom_emoji,
+            "VoiceChannelID": voice_channel_id
+        }
+        additional_pairs = additional_pairs or {}
+        for key, value in additional_pairs.items():
+            config[key] = value
+
+        return config
+
     def save(self):
         yaml_data = json_to_yaml(self._config)
         with open(self._config_file_path, 'w') as f:
@@ -161,19 +174,26 @@ class Migration(BaseMigration):
             'RemoteBandwidth': old_config.tautulli.display_remote_bandwidth,
             'PlexServerAvailability': old_config.tautulli.display_plex_status
         }
+        stat_types = {}
         for channel_type, enabled in channels.items():
-            new_config.build_voice_channel_config(parent_path=["Stats", "Activity", "StatTypes"],
-                                                  channel_name=channel_type, enabled=enabled,
-                                                  voice_channel_id=0)
+            channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+                                                                   voice_channel_id=0)
+            stat_types[channel_type] = channel_config
+
+        new_config.add(value=stat_types, key_path=["Stats", "Activity", "StatTypes"])
         new_config.migrate_value(value=old_config.tautulli.display_library_stats,
                                  to_path=["Stats", "Libraries", "Enable"])
         new_config.migrate_value(value=old_config.tautulli.libraries_voice_channel_category_name,
                                  to_path=["Stats", "Libraries", "CategoryName"])
         new_config.migrate_value(value=old_config.tautulli.library_refresh_interval,
                                  to_path=["Stats", "Libraries", "RefreshSeconds"])
-        new_config.add(value={}, key_path=["Stats", "Libraries", "Libraries"])
+
+        library_configs = []
         for library in old_config.tautulli.library_names:
-            new_config.add(value=library, key_path=["Stats", "Libraries", "Libraries", library, "AlternateName"])
+            library_config = {
+                "Name": library,
+                "AlternateName": "",
+            }
             channels = {
                 'Movies': True,
                 'Series': old_config.tautulli.show_tv_series_count,
@@ -183,13 +203,19 @@ class Migration(BaseMigration):
                 'Tracks': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
-                new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "Libraries", library],
-                                                      channel_name=channel_type, enabled=enabled,
-                                                      voice_channel_id=0)
-        new_config.add(value={}, key_path=["Stats", "Libraries", "CombinedLibraries"])
+                channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+                                                                       voice_channel_id=0)
+                library_config[channel_type] = channel_config
+            library_configs.append(library_config)
+        new_config.add(value=library_configs, key_path=["Stats", "Libraries", "Libraries"])
+
+        combined_library_configs = []
         for encoded in old_config.tautulli.combined_library_names:
             name, libraries = decode_combined_tautulli_libraries(encoded_string=encoded)
-            new_config.add(value=libraries, key_path=["Stats", "Libraries", "CombinedLibraries", name, "Libraries"])
+            library_config = {
+                "Name": name,
+                "Libraries": libraries,
+            }
             channels = {
                 'Movies': True,
                 'Series': old_config.tautulli.show_tv_series_count,
@@ -199,9 +225,12 @@ class Migration(BaseMigration):
                 'Tracks': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
-                new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "CombinedLibraries", name],
-                                                      channel_name=channel_type, enabled=enabled,
-                                                      voice_channel_id=0)
+                channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+                                                                       voice_channel_id=0)
+                library_config[channel_type] = channel_config
+            combined_library_configs.append(library_config)
+        new_config.add(value=combined_library_configs, key_path=["Stats", "Libraries", "CombinedLibraries"])
+
         new_config.add(value=any([
             old_config.extras._performance_monitor_tautulli_user_count,
             old_config.extras._performance_monitor_disk_space,
@@ -217,9 +246,9 @@ class Migration(BaseMigration):
             'Memory': old_config.extras._performance_monitor_memory
         }
         for channel_type, enabled in channels.items():
-            new_config.build_voice_channel_config(parent_path=["Stats", "Performance", "Metrics"],
-                                                  channel_name=channel_type, enabled=enabled,
-                                                  voice_channel_id=0)
+            channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+                                                                   voice_channel_id=0)
+            new_config.add(value=channel_config, key_path=["Stats", "Performance", "Metrics", channel_type])
 
         # Extras
         new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "AllowAnalytics"])
