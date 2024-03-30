@@ -11,6 +11,9 @@ class VoiceCategory(BaseConfig):
     def as_dict(self) -> dict:
         raise NotImplementedError
 
+    def channel_order(self) -> dict:
+        raise NotImplementedError
+
 
 class ActivityStats(VoiceCategory):
     bandwidth: VoiceChannel

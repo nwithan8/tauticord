@@ -47,7 +47,7 @@ class CommandManager:
         await self._bot.add_cog(cog, guild=self._guild)
 
     def is_admin(self, interaction: discord.Interaction) -> bool:
-        return str(interaction.user.id) in self._admin_ids
+        return interaction.user.id in self._admin_ids
 
     async def register_slash_commands(self):
         if self._enable_slash_commands:

@@ -9,7 +9,9 @@ class Time(BaseConfig):
 
     @property
     def time_manager(self):
-        return TimeManager(timezone=self.tautulli_server_time_zone, military_time=self.use_24_hour_time)
+        return TimeManager(
+            timezone=self.tautulli_server_time_zone,
+            use_24_hour_time=self.use_24_hour_time)
 
     def as_dict(self) -> dict:
         return {

@@ -83,6 +83,7 @@ def start():
         tautulli_connector = tautulli.TautulliConnector(
             tautulli_settings=config.tautulli,
             display_settings=config.display,
+            stats_settings=config.stats,
             analytics=analytics,
         )
 
@@ -93,8 +94,9 @@ def start():
             tautulli_settings=config.tautulli,
             display_settings=config.display,
             stats_settings=config.stats,
+            run_args_settings=config.run_args,
             analytics=analytics,
-            version_checker=versioning.VersionChecker(),
+            version_checker=versioning.VersionChecker(enable=config.extras.update_reminders),
         )
 
         discord_connector.connect()

@@ -36,5 +36,5 @@ class Summary(commands.Cog):
             return
 
         # Does NOT include new version reminder.
-        data_wrapper, count, activity, plex_online = self._tautulli.refresh_data(emoji_manager=self._emoji_manager)
-        await interaction.response.send_message(embed=data_wrapper.embed, ephemeral=not share)
+        summary = self._tautulli.refresh_data(emoji_manager=self._emoji_manager)
+        await interaction.response.send_message(embed=summary.embed, ephemeral=not share)

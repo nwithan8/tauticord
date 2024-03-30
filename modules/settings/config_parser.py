@@ -7,6 +7,7 @@ import yaml
 import modules.logs as logging
 import modules.settings.models as settings_models
 from modules import utils
+from modules.emojis import Emoji
 from modules.statics import KEY_RUN_ARGS_MONITOR_PATH, KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH
 
 
@@ -30,21 +31,23 @@ class ConfigSection:
 
 
 class VoiceChannelConfig(ConfigSection):
-    def __init__(self, channel_name: str, data):
+    def __init__(self, channel_name: str, emoji: Emoji, data):
         super().__init__(data=data)
         self.channel_name = channel_name
+        self.emoji = emoji
 
     def to_model(self) -> settings_models.VoiceChannel:
         enable = utils.extract_boolean(self.get_value(key="Enable", default=False))
         emoji = self.get_value(key="CustomEmoji", default="")
-        use_emojis = utils.extract_boolean(self.get_value(key="UseEmojis", default=False))
+        if not emoji:
+            # Fall back to the default emoji if a custom emoji is not provided
+            emoji = self.emoji.value
         channel_id = self.get_value(key="VoiceChannelID", default="0")
 
         return settings_models.VoiceChannel(
             name=self.channel_name,
             enable=enable,
             emoji=emoji,
-            use_emojis=use_emojis,
             channel_id=channel_id
         )
 
@@ -56,7 +59,7 @@ class DiscordConfig(ConfigSection):
     def to_model(self) -> settings_models.Discord:
         bot_token = self.get_value(key="BotToken")
         server_id = self.get_value(key="ServerID")
-        admin_ids = [str(i) for i in self.get_value(key="AdminIDs", default=[])]
+        admin_ids = self.get_value(key="AdminIDs", default=[])
         channel_name = self.get_value(key="ChannelName", default="tauticord")
         channel_name = utils.discord_text_channel_name_format(string=channel_name)
         use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
@@ -105,7 +108,7 @@ class TimeConfig(ConfigSection):
         super().__init__(data=data)
 
     def to_model(self) -> settings_models.Time:
-        tautulli_server_time_zone = self.get_value(key="TautulliServerTimeZone", default="UTC")
+        tautulli_server_time_zone = self.get_value(key="ServerTimeZone", default="UTC")
         use_24_hour_time = utils.extract_boolean(self.get_value(key="Use24HourTime", default=False))
 
         return settings_models.Time(
@@ -139,9 +142,13 @@ class ExtrasConfig(ConfigSection):
         super().__init__(data=data)
 
     def to_model(self) -> settings_models.Extras:
-        allow_analytics = utils.extract_boolean(self.get_value(key="Analytics", default=True))
+        allow_analytics = utils.extract_boolean(self.get_value(key="AllowAnalytics", default=True))
+        enable_update_reminders = utils.extract_boolean(self.get_value(key="EnableUpdateReminders", default=True))
 
-        return settings_models.Extras(allow_analytics=allow_analytics)
+        return settings_models.Extras(
+            allow_analytics=allow_analytics,
+            update_reminders=enable_update_reminders
+        )
 
 
 class StatsActivityConfig(ConfigSection):
@@ -154,16 +161,22 @@ class StatsActivityConfig(ConfigSection):
 
         stats_types = ConfigSection(data=self.get_subsection_data(key="StatTypes"))
         bandwidth = VoiceChannelConfig(channel_name="Bandwidth",
+                                       emoji=Emoji.Bandwidth,
                                        data=stats_types.get_subsection_data("Bandwidth")).to_model()
         local_bandwidth = VoiceChannelConfig(channel_name="Local Bandwidth",
+                                             emoji=Emoji.LocalBandwidth,
                                              data=stats_types.get_subsection_data("LocalBandwidth")).to_model()
         remote_bandwidth = VoiceChannelConfig(channel_name="Remote Bandwidth",
+                                              emoji=Emoji.RemoteBandwidth,
                                               data=stats_types.get_subsection_data("RemoteBandwidth")).to_model()
         stream_count = VoiceChannelConfig(channel_name="Stream Count",
+                                          emoji=Emoji.Stream,
                                           data=stats_types.get_subsection_data("StreamCount")).to_model()
         transcode_count = VoiceChannelConfig(channel_name="Transcode Count",
+                                             emoji=Emoji.Transcode,
                                              data=stats_types.get_subsection_data("TranscodeCount")).to_model()
         plex_availability = VoiceChannelConfig(channel_name="Plex Availability",
+                                               emoji=Emoji.Status,
                                                data=stats_types.get_subsection_data(
                                                    "PlexServerAvailability")).to_model()
 
@@ -193,15 +206,24 @@ class StatsLibrariesConfig(ConfigSection):
             details_config = ConfigSection(data=details)
 
             alternate_name = details_config.get_value(key="AlternateName", default="")
-            album = VoiceChannelConfig(channel_name="Albums",
+            voice_channel_name = alternate_name if alternate_name else library_name
+            movie = VoiceChannelConfig(channel_name=voice_channel_name,
+                                       emoji=Emoji.Movie,
+                                       data=details_config.get_subsection_data("Movies")).to_model()
+            album = VoiceChannelConfig(channel_name=voice_channel_name,
+                                       emoji=Emoji.Album,
                                        data=details_config.get_subsection_data("Albums")).to_model()
-            artist = VoiceChannelConfig(channel_name="Artists",
+            artist = VoiceChannelConfig(channel_name=voice_channel_name,
+                                        emoji=Emoji.Artist,
                                         data=details_config.get_subsection_data("Artists")).to_model()
-            episode = VoiceChannelConfig(channel_name="Episodes",
+            episode = VoiceChannelConfig(channel_name=voice_channel_name,
+                                         emoji=Emoji.Episode,
                                          data=details_config.get_subsection_data("Episodes")).to_model()
-            series = VoiceChannelConfig(channel_name="Series",
+            series = VoiceChannelConfig(channel_name=voice_channel_name,
+                                        emoji=Emoji.Series,
                                         data=details_config.get_subsection_data("Series")).to_model()
-            track = VoiceChannelConfig(channel_name="Tracks",
+            track = VoiceChannelConfig(channel_name=voice_channel_name,
+                                       emoji=Emoji.Track,
                                        data=details_config.get_subsection_data("Tracks")).to_model()
 
             libraries.append(
@@ -209,6 +231,7 @@ class StatsLibrariesConfig(ConfigSection):
                     name=library_name,
                     alternate_name=alternate_name,
                     voice_channels=settings_models.LibraryVoiceChannels(
+                        movie=movie,
                         album=album,
                         artist=artist,
                         episode=episode,
@@ -224,15 +247,23 @@ class StatsLibrariesConfig(ConfigSection):
             details_config = ConfigSection(data=details)
 
             combined_library_names = details_config.get_value(key="Libraries", default=[])
-            album = VoiceChannelConfig(channel_name="Albums",
+            movie = VoiceChannelConfig(channel_name=combined_library_name,
+                                       emoji=Emoji.Movie,
+                                       data=details_config.get_subsection_data("Movies")).to_model()
+            album = VoiceChannelConfig(channel_name=combined_library_name,
+                                       emoji=Emoji.Album,
                                        data=details_config.get_subsection_data("Albums")).to_model()
-            artist = VoiceChannelConfig(channel_name="Artists",
+            artist = VoiceChannelConfig(channel_name=combined_library_name,
+                                        emoji=Emoji.Artist,
                                         data=details_config.get_subsection_data("Artists")).to_model()
-            episode = VoiceChannelConfig(channel_name="Episodes",
+            episode = VoiceChannelConfig(channel_name=combined_library_name,
+                                         emoji=Emoji.Episode,
                                          data=details_config.get_subsection_data("Episodes")).to_model()
-            series = VoiceChannelConfig(channel_name="Series",
+            series = VoiceChannelConfig(channel_name=combined_library_name,
+                                        emoji=Emoji.Series,
                                         data=details_config.get_subsection_data("Series")).to_model()
-            track = VoiceChannelConfig(channel_name="Tracks",
+            track = VoiceChannelConfig(channel_name=combined_library_name,
+                                       emoji=Emoji.Track,
                                        data=details_config.get_subsection_data("Tracks")).to_model()
 
             combined_libraries.append(
@@ -240,6 +271,7 @@ class StatsLibrariesConfig(ConfigSection):
                     name=combined_library_name,
                     libraries=combined_library_names,
                     voice_channels=settings_models.LibraryVoiceChannels(
+                        movie=movie,
                         album=album,
                         artist=artist,
                         episode=episode,
@@ -270,12 +302,16 @@ class StatsPerformanceConfig(ConfigSection):
 
         metrics = ConfigSection(data=self.get_subsection_data(key="Metrics"))
         cpu = VoiceChannelConfig(channel_name="CPU",
+                                 emoji=Emoji.CPU,
                                  data=metrics.get_subsection_data("CPU")).to_model()
         memory = VoiceChannelConfig(channel_name="Memory",
+                                    emoji=Emoji.Memory,
                                     data=metrics.get_subsection_data("Memory")).to_model()
         disk = VoiceChannelConfig(channel_name="Disk",
+                                  emoji=Emoji.Disk,
                                   data=metrics.get_subsection_data("DiskSpace")).to_model()
         user_count = VoiceChannelConfig(channel_name="User Count",
+                                        emoji=Emoji.Person,
                                         data=metrics.get_subsection_data("UserCount")).to_model()
 
         return settings_models.PerformanceStats(

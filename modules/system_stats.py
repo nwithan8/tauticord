@@ -39,6 +39,18 @@ def cpu_usage(timeframe: CPUTimeFrame = CPUTimeFrame.INSTANT) -> float:
             raise ValueError("Invalid timeframe")
 
 
+def cpu_usage_display(timeframe: CPUTimeFrame = CPUTimeFrame.INSTANT) -> str:
+    """
+    Get the current CPU usage display
+
+    :param timeframe: (Optional) Timeframe to get CPU usage for
+    :type timeframe: CPUTimeFrame, optional
+    :return: CPU usage display
+    :rtype: str
+    """
+    return f"{utils.format_decimal(cpu_usage(timeframe))}%"
+
+
 def ram_usage_percentage() -> float:
     """
     Get the current RAM usage percentage
@@ -57,6 +69,16 @@ def ram_usage() -> float:
     :rtype: float
     """
     return psutil.virtual_memory()[3] / 1000000000
+
+
+def ram_usage_display() -> str:
+    """
+    Get the current RAM usage display
+
+    :return: RAM usage display
+    :rtype: str
+    """
+    return f"{utils.format_decimal(ram_usage())} GB ({utils.format_decimal(ram_usage_percentage())}%)"
 
 
 def path_exists(path: str) -> bool:

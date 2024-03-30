@@ -1,7 +1,5 @@
-import enum
-from typing import List, Tuple, Union, Optional
+from typing import List, Union, Optional
 
-import discord
 import objectrest
 import tautulli
 
@@ -9,284 +7,21 @@ import modules.logs as logging
 import modules.settings.models as settings_models
 from modules import utils
 from modules.analytics import GoogleAnalytics
+from modules.discord.models.tautulli_activity_summary import TautulliActivitySummary
+from modules.discord.models.tautulli_stream_info import TautulliStreamInfo
 from modules.emojis import EmojiManager
-from modules.text_manager import TextManager
-from modules.time_manager import TimeManager
-from modules.utils import status_code_is_success, url_encode
-
-session_ids = {}
-
-
-class HomeStatMetricType(enum.Enum):
-    PLAYS = 'plays'
-    DURATION = 'duration'
-
-
-class HomeStatType(enum.Enum):
-    TOP_MOVIES = 'top_movies'
-    POPULAR_MOVIES = 'popular_movies'
-    TOP_TV = 'top_tv'
-    POPULAR_TV = 'popular_tv'
-    TOP_MUSIC = 'top_music'
-    POPULAR_MUSIC = 'popular_music'
-    TOP_LIBRARIES = 'top_libraries'
-    TOP_USERS = 'top_users'
-    TOP_PLATFORMS = 'top_platforms'
-    LAST_WATCHED = 'last_watched'
-    MOST_CONCURRENT = 'most_concurrent'
-
-
-class RecentlyAddedMediaItem:
-    title: str
-    poster_url: str
-    summary: str
-    library: str
-    link: str
-
-
-class Session:
-    def __init__(self, session_data, time_manager: TimeManager):
-        self._data = session_data
-        self._time_manager = time_manager
-
-    @property
-    def duration_milliseconds(self) -> int:
-        value = self._data.get('duration', 0)
-        try:
-            value = int(value)
-        except:
-            value = 0
-        return int(value)
-
-    @property
-    def location_milliseconds(self) -> int:
-        value = self._data.get('view_offset', 0)
-        try:
-            value = int(value)
-        except:
-            value = 0
-        return int(value)
-
-    @property
-    def progress_percentage(self) -> int:
-        if not self.duration_milliseconds:
-            return 0
-        return int(self.location_milliseconds / self.duration_milliseconds)
-
-    @property
-    def progress_marker(self) -> str:
-        current_progress_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.location_milliseconds)
-        total_min_sec = utils.milliseconds_to_minutes_seconds(milliseconds=self.duration_milliseconds)
-        return f"{current_progress_min_sec}/{total_min_sec}"
-
-    @property
-    def eta(self) -> str:
-        if not self.duration_milliseconds or not self.location_milliseconds:
-            return "Unknown"
-        milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
-        return self._time_manager.now_plus_milliseconds_string(milliseconds=milliseconds_remaining)
-
-    @property
-    def title(self) -> str:
-        if self._data.get('live'):
-            return f"{self._data.get('grandparent_title', '')} - {self._data['title']}"
-        elif self._data['media_type'] == 'episode':
-            return f"{self._data.get('grandparent_title', '')} - S{self._data.get('parent_title', '').replace('Season ', '').zfill(2)}E{self._data.get('media_index', '').zfill(2)} - {self._data['title']}"
-        else:
-            return self._data.get('full_title')
-
-    def get_status_icon(self, emoji_manager: EmojiManager) -> str:
-        """
-        Get icon for a stream state
-        :return: emoji icon
-        """
-        return emoji_manager.get_emoji(key=self._data.get('state', ""))
-
-    def get_type_icon(self, emoji_manager: EmojiManager) -> str:
-        key = self._data.get('media_type', "")
-        if self._data.get('live'):
-            key = 'live'
-        emoji = emoji_manager.get_emoji(key=key)
-        if not emoji:
-            logging.info(
-                "New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
-            return '🎁'
-        return emoji
-
-    @property
-    def id(self) -> str:
-        return self._data['session_id']
-
-    @property
-    def username(self) -> str:
-        return self._data['username']
-
-    @property
-    def friendly_name(self) -> str:
-        return self._data['friendly_name']
-
-    @property
-    def product(self) -> str:
-        return self._data['product']
-
-    @property
-    def player(self) -> str:
-        return self._data['player']
-
-    @property
-    def quality_profile(self) -> str:
-        return self._data['quality_profile']
-
-    @property
-    def bandwidth(self) -> str:
-        value = self._data.get('bandwidth', 0)
-        try:
-            value = int(value)
-        except:
-            value = 0
-        return utils.human_bitrate(float(value) * 1024)
-
-    @property
-    def is_transcoding(self) -> bool:
-        return self.stream_container_decision == 'transcode'
-
-    @property
-    def transcoding_stub(self) -> str:
-        return ' (Transcode)' if self.is_transcoding else ''
-
-    @property
-    def stream_container_decision(self) -> str:
-        return self._data['stream_container_decision']
-
-
-class Activity:
-    def __init__(self, activity_data, time_manager: TimeManager, emoji_manager: EmojiManager):
-        self._data = activity_data
-        self._time_manager = time_manager
-        self._emoji_manager = emoji_manager
-
-    @property
-    def stream_count(self) -> int:
-        value = self._data.get('stream_count', 0)
-        try:
-            return int(value)
-        except:
-            return 0
-
-    @property
-    def transcode_count(self) -> int:
-        # TODO: Tautulli is reporting the wrong data:
-        # https://github.com/Tautulli/Tautulli/blob/444b138e97a272e110fcb4364e8864348eee71c3/plexpy/webserve.py#L6000
-        # Judgment there made by transcode_decision
-        # We want to consider stream_container_decision
-        return max([0, [s.is_transcoding for s in self.sessions].count(True)])
-
-    @property
-    def total_bandwidth(self) -> Union[str, None]:
-        value = self._data.get('total_bandwidth', 0)
-        try:
-            return utils.human_bitrate(float(value) * 1024)
-        except:
-            return None
-
-    @property
-    def lan_bandwidth(self) -> Union[str, None]:
-        value = self._data.get('lan_bandwidth', 0)
-        try:
-            return utils.human_bitrate(float(value) * 1024)
-        except:
-            return None
-
-    @property
-    def wan_bandwidth(self) -> Union[str, None]:
-        total = self._data.get('total_bandwidth', 0)
-        lan = self._data.get('lan_bandwidth', 0)
-        value = total - lan
-        try:
-            return utils.human_bitrate(float(value) * 1024)
-        except:
-            return None
-
-    @property
-    def sessions(self) -> List[Session]:
-        return [Session(session_data=session_data, time_manager=self._time_manager) for session_data in
-                self._data.get('sessions', [])]
-
-
-class TautulliStreamInfo:
-    def __init__(self, session: Session, session_number: int):
-        self._session = session
-        self._session_number = session_number
-
-    def get_title(self, emoji_manager: EmojiManager, text_manager: TextManager) -> str:
-        try:
-            return text_manager.session_title(session=self._session, session_number=self._session_number,
-                                              emoji_manager=emoji_manager)
-        except Exception as title_exception:
-            return "Unknown"
-
-    def get_body(self, emoji_manager: EmojiManager, text_manager: TextManager) -> str:
-        try:
-            return text_manager.session_body(session=self._session, emoji_manager=emoji_manager)
-        except Exception as body_exception:
-            logging.error(str(body_exception))
-            return f"Could not display data for session {self._session_number}"
-
-
-class TautulliDataResponse:
-    def __init__(self,
-                 activity: Union[Activity, None],
-                 server_name: str,
-                 emoji_manager: EmojiManager,
-                 text_manager: TextManager,
-                 streams_info: List[TautulliStreamInfo] = None,
-                 plex_pass: bool = False,
-                 error_occurred: bool = False,
-                 additional_embed_fields: List[dict] = None,
-                 additional_embed_footers: List[str] = None):
-        self._activity = activity
-        self._streams = streams_info or []
-        self.plex_pass = plex_pass
-        self.error = error_occurred
-        self._emoji_manager = emoji_manager
-        self._server_name = server_name
-        self._text_manager = text_manager
-        self.additional_embed_fields = additional_embed_fields or []
-        self._additional_embed_footers = additional_embed_footers or []
-
-    @property
-    def embed(self) -> discord.Embed:
-        title = f"Current activity on {self._server_name}"
-        if len(self._streams) <= 0:
-            title = "No current activity"
-
-        embed = discord.Embed(title=title)
-
-        for stream in self._streams:
-            embed.add_field(name=stream.get_title(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
-                            value=stream.get_body(emoji_manager=self._emoji_manager, text_manager=self._text_manager),
-                            inline=False)
-        for field in self.additional_embed_fields:
-            embed.add_field(name=field['name'], value=field['value'], inline=False)
-
-        footer_text = self._text_manager.overview_footer(no_connection=self.error,
-                                                         activity=self._activity,
-                                                         emoji_manager=self._emoji_manager,
-                                                         add_termination_tip=self.plex_pass)
-        if self._additional_embed_footers:
-            footer_text += "\n"
-        for additional_footer in self._additional_embed_footers:
-            footer_text += "\n" + additional_footer
-
-        embed.set_footer(text=footer_text)
-
-        return embed
+from modules.tautulli.enums import LibraryType, HomeStatType, HomeStatMetricType
+from modules.tautulli.models.activity import Activity
+from modules.tautulli.models.library_item_counts import LibraryItemCounts
+from modules.tautulli.models.recently_added_media_item import RecentlyAddedMediaItem
+from modules.utils import status_code_is_success
 
 
 class TautulliConnector:
     def __init__(self,
                  tautulli_settings: settings_models.Tautulli,
                  display_settings: settings_models.Display,
+                 stats_settings: settings_models.Stats,
                  analytics: GoogleAnalytics):
         self.base_url = tautulli_settings.url
         self.api_key = tautulli_settings.api_key
@@ -297,7 +32,8 @@ class TautulliConnector:
             self.api = tautulli.RawAPI(base_url=self.base_url, api_key=self.api_key, verify=True,
                                        ssl_verify=not tautulli_settings.ignore_ssl)
         except Exception as e:
-            # common issue - `base_url` is empty because config was not parsed properly, causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
+            # common issue - `base_url` is empty because config was not parsed properly,
+            # causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
             raise Exception(
                 f"Could not begin a Tautulli connection. Please check that your configuration is complete and "
                 f"reachable. Exception: {e}")
@@ -307,65 +43,67 @@ class TautulliConnector:
         self.analytics = analytics
         self.text_manager = display_settings.text_manager
         self.time_manager = display_settings.time.time_manager
+        self.stats_settings = stats_settings
 
         self.plex_details = self.api.server_info
-        self.plex_pass = False if not self.plex_details else self.plex_details.get('pms_plexpass', 0) == 1
+        self.has_plex_pass = False if not self.plex_details else self.plex_details.get('pms_plexpass', 0) == 1
 
         tautulli_version = self.api.shortcuts.api_version
         logging.debug(f"Connected to Tautulli version: {tautulli_version}")
+
+        self.session_id_mappings = {}
 
     def _error_and_analytics(self, error_message, function_name) -> None:
         logging.error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
-    def refresh_data(self, emoji_manager: EmojiManager, additional_embed_fields: List[dict] = None,
-                     additional_embed_footers: List[str] = None) -> Tuple[
-        TautulliDataResponse, int, Union[Activity, None], bool]:
+    def refresh_data(self,
+                     emoji_manager: EmojiManager,
+                     additional_embed_fields: List[dict] = None,
+                     additional_embed_footers: List[str] = None) -> TautulliActivitySummary:
         """
         Parse activity JSON from Tautulli, prepare summary message for Discord
-        :return: data wrapper, number of active streams, activity data and whether Plex is online
+        :return: data wrapper with activity summary
         """
-        global session_ids
+        # Erase session ID mappings from last refresh
+        self.session_id_mappings = {}
+
         data = self.api.activity()
 
         # Tautulli returned data (is online)
         if data:
             logging.debug(f"JSON returned by GET request: {data}")
-            try:
-                activity = Activity(activity_data=data, time_manager=self.time_manager, emoji_manager=emoji_manager)
-                sessions = activity.sessions
-                count = 0
-                session_ids = {}
-                session_details = []
-                for session in sessions:
-                    try:
-                        count += 1
-                        session_details.append(TautulliStreamInfo(session=session, session_number=count))
-                        session_ids[count] = str(session.id)
-                    except ValueError as err:
-                        self._error_and_analytics(error_message=err, function_name='refresh_data (ValueError)')
-                        pass
-                logging.debug(f"Count: {count}")
-                return TautulliDataResponse(activity=activity,
-                                            emoji_manager=emoji_manager,
-                                            text_manager=self.text_manager,
-                                            streams_info=session_details,
-                                            plex_pass=self.plex_pass,
-                                            server_name=self.server_name,
-                                            additional_embed_fields=additional_embed_fields,
-                                            additional_embed_footers=additional_embed_footers), count, activity, self.is_plex_server_online()
-            except KeyError as e:
-                self._error_and_analytics(error_message=e, function_name='refresh_data (KeyError)')
+
+            activity = Activity(activity_data=data, time_manager=self.time_manager, emoji_manager=emoji_manager)
+
+            # Store session IDs for stopping streams later
+            session_details = []
+            for session_number, session in enumerate(activity.sessions):
+                session_details.append(TautulliStreamInfo(session=session,
+                                                          session_number=session_number + 1))  # +1 for human-readable numbering
+                self.session_id_mappings[session_number + 1] = str(session.id)
+
+            return TautulliActivitySummary(activity=activity,
+                                           plex_online=self.is_plex_server_online(),
+                                           emoji_manager=emoji_manager,
+                                           text_manager=self.text_manager,
+                                           streams=session_details,
+                                           has_plex_pass=self.has_plex_pass,
+                                           server_name=self.server_name,
+                                           additional_embed_fields=additional_embed_fields,
+                                           additional_embed_footers=additional_embed_footers)
 
         # Tautulli did not return data (is offline)
         is_plex_online = self.ping_pms_server_directly()  # Check directly if Plex is online
-        return TautulliDataResponse(activity=None,
-                                    emoji_manager=emoji_manager,
-                                    text_manager=self.text_manager,
-                                    error_occurred=True,
-                                    server_name=self.server_name,
-                                    additional_embed_fields=additional_embed_fields,
-                                    additional_embed_footers=additional_embed_footers), 0, None, is_plex_online
+        return TautulliActivitySummary(activity=None,
+                                       plex_online=is_plex_online,
+                                       emoji_manager=emoji_manager,
+                                       text_manager=self.text_manager,
+                                       error_occurred=True,
+                                       has_plex_pass=False,  # Tautulli is unreachable, so we can't know check
+                                       server_name=self.server_name,
+                                       additional_embed_fields=additional_embed_fields,
+                                       additional_embed_footers=additional_embed_footers)
 
     def ping_pms_server_directly(self) -> bool:
         """
@@ -395,17 +133,22 @@ class TautulliConnector:
         :param stream_number: stream number used to react to Discord message (ex. 1, 2, 3)
         :return: Success/failure message
         """
-        if stream_number not in session_ids.keys():
+        if stream_number not in self.session_id_mappings.keys():
             return utils.bold(
-                f"Invalid stream number: {stream_number}. Valid stream numbers: {', '.join([str(x) for x in session_ids.keys()])}")
-        logging.info(f"User attempting to stop session {emoji}, id {session_ids[stream_number]}")
+                f"Invalid stream number: {stream_number}. Valid stream numbers: {', '.join([str(x) for x in self.session_id_mappings.keys()])}")
+
+        session_id = self.session_id_mappings[stream_number]
+
+        logging.info(f"User attempting to stop session {emoji}, id {session_id}")
+
         try:
-            if self.api.terminate_session(session_id=session_ids[stream_number], message=self.terminate_message):
+            if self.api.terminate_session(session_id=session_id, message=self.terminate_message):
                 return f"Stream {emoji} was stopped."
             else:
                 return f"Stream {emoji} could not be stopped."
         except Exception as e:
             self._error_and_analytics(error_message=e, function_name='stop_stream')
+
         return "Something went wrong."
 
     def get_user_count(self) -> int:
@@ -434,75 +177,85 @@ class TautulliConnector:
             return None
         return self.api.get_library(section_id=library_id)
 
-    def get_library_item_count(self, library_name: str, emoji_manager: EmojiManager,
-                               visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
+    def get_item_counts_for_a_single_library(self, library_name: str) -> LibraryItemCounts | None:
         library_info = self.get_library_info(library_name=library_name)
         logging.debug(f"JSON returned by GET request: {library_info}")
+
         if not library_info:
-            return [('', 0)]
-        library_type = library_info.get('section_type')
-        results = []
+            return None
+
+        library_type: LibraryType = LibraryType.from_str(value=library_info.get('section_type'))
+
+        movies = 0
+        series = 0
+        episodes = 0
+        artists = 0
+        albums = 0
+        tracks = 0
+
         match library_type:
-            case 'show':
-                if visibility_settings.show_tv_series:
-                    results.append((emoji_manager.get_emoji(key="series"), library_info.get('count')))
-                if visibility_settings.show_tv_episodes:
-                    results.append((emoji_manager.get_emoji(key="episodes"), library_info.get('child_count')))
-                return results
-            case 'artist':
-                if visibility_settings.show_music_artists:
-                    results.append((emoji_manager.get_emoji(key="artists"), library_info.get('count')))
-                if visibility_settings.show_music_albums:
-                    results.append((emoji_manager.get_emoji(key="albums"), library_info.get('parent_count')))
-                if visibility_settings.show_music_tracks:
-                    results.append((emoji_manager.get_emoji(key="tracks"), library_info.get('child_count')))
-                return results
-            case 'movie':
-                return [(emoji_manager.get_emoji(key="movies"), library_info.get('count'))]
-        return [(emoji_manager.get_emoji(key="unknown"), 0)]
+            case LibraryType.MOVIE:
+                movies = library_info.get('count')
+            case LibraryType.SHOW:
+                series = library_info.get('count')
+                episodes = library_info.get('child_count')
+            case LibraryType.MUSIC:
+                artists = library_info.get('count')
+                albums = library_info.get('parent_count')
+                tracks = library_info.get('child_count')
 
-    def get_combined_library_item_count(self, library_names: List[str], emoji_manager: EmojiManager,
-                                        visibility_settings: LibraryVoiceChannelsVisibilities) -> List[Tuple[str, int]]:
-        previous_library_name = None
-        running_library_type = None
-        running_total = 0
-        emoji = emoji_manager.get_emoji(key="unknown")
-        for library_name in library_names:
-            library_info = self.get_library_info(library_name=library_name)
+        return LibraryItemCounts(
+            library_name=library_name,
+            library_type=library_type,
+            movies=movies,
+            series=series,
+            episodes=episodes,
+            artists=artists,
+            albums=albums,
+            tracks=tracks
+        )
 
-            if not library_info:
+    def get_item_counts_for_multiple_combined_libraries(self, combined_library_name: str,
+                                                        sub_library_names: List[str]) -> LibraryItemCounts | None:
+        rolling_library_type = None
+
+        movies = 0
+        series = 0
+        episodes = 0
+        artists = 0
+        albums = 0
+        tracks = 0
+
+        for library_name in sub_library_names:
+            library_item_counts = self.get_item_counts_for_a_single_library(library_name=library_name)
+
+            if not library_item_counts:
                 continue
 
-            library_type = library_info.get('section_type')
-            if running_library_type and running_library_type != library_type:
+            if rolling_library_type and rolling_library_type != library_item_counts.library_type:
                 logging.error(
-                    f"Library types do not match: {library_name} ({library_type}) and {previous_library_name} ({running_library_type}). Cannot combine stats for different types of libraries.")
-                return []
-            running_library_type = library_type
-            previous_library_name = library_name
+                    f"Library types do not match: {library_name} ({library_item_counts.library_type}) and {combined_library_name} ({rolling_library_type}). Cannot combine stats for different types of libraries.")
+                return None
 
-            match library_type:
-                case 'show':
-                    # Use the lowest child count possible
-                    if visibility_settings.show_tv_episodes:
-                        running_total += library_info.get('child_count')
-                        emoji = emoji_manager.get_emoji(key="episodes")
-                    else:
-                        running_total += library_info.get('count')
-                        emoji = emoji_manager.get_emoji(key="series")
-                case 'artist':
-                    # Use the lowest child count possible
-                    if visibility_settings.show_music_tracks:
-                        running_total += library_info.get('child_count')
-                        emoji = emoji_manager.get_emoji(key="tracks")
-                    else:
-                        running_total += library_info.get('count')
-                        emoji = emoji_manager.get_emoji(key="artists")
-                case 'movie':
-                    running_total += library_info.get('count')
-                    emoji = emoji_manager.get_emoji(key="movies")
+            rolling_library_type = library_item_counts.library_type
 
-        return [(emoji, running_total)]
+            movies += library_item_counts.movies
+            series += library_item_counts.series
+            episodes += library_item_counts.episodes
+            artists += library_item_counts.artists
+            albums += library_item_counts.albums
+            tracks += library_item_counts.tracks
+
+        return LibraryItemCounts(
+            library_name=combined_library_name,
+            library_type=rolling_library_type,
+            movies=movies,
+            series=series,
+            episodes=episodes,
+            artists=artists,
+            albums=albums,
+            tracks=tracks
+        )
 
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)
@@ -532,17 +285,6 @@ class TautulliConnector:
         data = self.api.get_recently_added(count=count, media_type=media_type)
         recently_added = data.get('recently_added', [])
 
-        plex_server_details = self.plex_details
-        pms_url = plex_server_details.get('pms_url')
-        pms_id = plex_server_details.get('pms_identifier')
-
-        def get_link_to_media_on_plex(rating_key: str) -> Union[str, None]:
-            if not pms_url or not pms_id:
-                return None
-
-            media_id = f"/library/metadata/{rating_key}"
-            return f"{pms_url}#!/server/{pms_id}/details?key={url_encode(media_id)}"
-
         items = []
         for element in recently_added:
             item = RecentlyAddedMediaItem()
@@ -565,7 +307,7 @@ class TautulliConnector:
             item.library = element.get('library_name', '')
 
             rating_key = element.get('rating_key', '')
-            item.link = get_link_to_media_on_plex(rating_key)
+            item.link = self.api.shortcuts.get_link_to_open_media_item_in_browser(media_item_id=rating_key)
 
             items.append(item)
 

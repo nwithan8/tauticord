@@ -5,27 +5,30 @@ class VoiceChannel(BaseConfig):
     name: str
     enable: bool
     emoji: str
-    use_emojis: bool = False
     channel_id: int = 0
 
-    def build_channel_name(self, value) -> str:
-        name = self.name
-        if self.use_emojis:
-            name = f"{self.emoji} {name}"
+    @property
+    def prefix(self) -> str:
+        return f"{self.emoji} {self.name}"
 
-        return f"{name}: {value}"
+    @property
+    def channel_id_set(self) -> bool:
+        return self.channel_id != 0
+
+    def build_channel_name(self, value) -> str:
+        return f"{self.prefix}: {value}"
 
     def as_dict(self) -> dict:
         return {
             "name": self.name,
             "enable": self.enable,
             "emoji": self.emoji,
-            "use_emojis": self.use_emojis,
             "channel_id": self.channel_id
         }
 
 
 class LibraryVoiceChannels(BaseConfig):
+    movie: VoiceChannel
     album: VoiceChannel
     artist: VoiceChannel
     episode: VoiceChannel
@@ -34,7 +37,7 @@ class LibraryVoiceChannels(BaseConfig):
 
     @property
     def _channels(self) -> list[VoiceChannel]:
-        return [self.album, self.artist, self.episode, self.series, self.track]
+        return [self.movie, self.album, self.artist, self.episode, self.series, self.track]
 
     @property
     def enabled_channels(self) -> list[VoiceChannel]:
@@ -42,6 +45,7 @@ class LibraryVoiceChannels(BaseConfig):
 
     def as_dict(self) -> dict:
         return {
+            "movie": self.movie.as_dict(),
             "album": self.album.as_dict(),
             "artist": self.artist.as_dict(),
             "episode": self.episode.as_dict(),

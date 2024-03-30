@@ -44,10 +44,9 @@ class ConfigWriter:
             return
         self.add(value=value, key_path=to_path)
 
-    def build_voice_channel_config(self, parent_path: list[str], channel_name: str, enabled: bool, use_emojis: bool,
+    def build_voice_channel_config(self, parent_path: list[str], channel_name: str, enabled: bool,
                                    custom_emoji: str = "", voice_channel_id: int = 0, additional_pairs: dict = None):
         self.migrate_value(value=enabled, to_path=parent_path + [channel_name, "Enable"])
-        self.migrate_value(value=use_emojis, to_path=parent_path + [channel_name, "UseEmojis"])
         self.migrate_value(value=custom_emoji, to_path=parent_path + [channel_name, "CustomEmoji"])
         self.migrate_value(value=voice_channel_id, to_path=parent_path + [channel_name, "VoiceChannelID"])
         additional_pairs = additional_pairs or {}
@@ -166,7 +165,6 @@ class Migration(BaseMigration):
         for channel_type, enabled in channels.items():
             new_config.build_voice_channel_config(parent_path=["Stats", "Activity", "StatTypes"],
                                                   channel_name=channel_type, enabled=enabled,
-                                                  use_emojis=old_config.tautulli.use_emojis_with_library_names,
                                                   voice_channel_id=0)
         new_config.migrate_value(value=old_config.tautulli.display_library_stats,
                                  to_path=["Stats", "Libraries", "Enable"])
@@ -178,6 +176,7 @@ class Migration(BaseMigration):
         for library in old_config.tautulli.library_names:
             new_config.add(value=library, key_path=["Stats", "Libraries", "Libraries", library, "AlternateName"])
             channels = {
+                'Movies': True,
                 'Series': old_config.tautulli.show_tv_series_count,
                 'Episodes': old_config.tautulli.show_tv_episode_count,
                 'Artists': old_config.tautulli.show_music_artist_count,
@@ -187,13 +186,13 @@ class Migration(BaseMigration):
             for channel_type, enabled in channels.items():
                 new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "Libraries", library],
                                                       channel_name=channel_type, enabled=enabled,
-                                                      use_emojis=old_config.tautulli.use_emojis_with_library_names,
                                                       voice_channel_id=0)
         new_config.add(value={}, key_path=["Stats", "Libraries", "CombinedLibraries"])
         for encoded in old_config.tautulli.combined_library_names:
             name, libraries = decode_combined_tautulli_libraries(encoded_string=encoded)
             new_config.add(value=libraries, key_path=["Stats", "Libraries", "CombinedLibraries", name, "Libraries"])
             channels = {
+                'Movies': True,
                 'Series': old_config.tautulli.show_tv_series_count,
                 'Episodes': old_config.tautulli.show_tv_episode_count,
                 'Artists': old_config.tautulli.show_music_artist_count,
@@ -203,7 +202,6 @@ class Migration(BaseMigration):
             for channel_type, enabled in channels.items():
                 new_config.build_voice_channel_config(parent_path=["Stats", "Libraries", "CombinedLibraries", name],
                                                       channel_name=channel_type, enabled=enabled,
-                                                      use_emojis=old_config.tautulli.use_emojis_with_library_names,
                                                       voice_channel_id=0)
         new_config.add(value=any([
             old_config.extras._performance_monitor_tautulli_user_count,
@@ -222,11 +220,11 @@ class Migration(BaseMigration):
         for channel_type, enabled in channels.items():
             new_config.build_voice_channel_config(parent_path=["Stats", "Performance", "Metrics"],
                                                   channel_name=channel_type, enabled=enabled,
-                                                  use_emojis=old_config.tautulli.use_emojis_with_library_names,
                                                   voice_channel_id=0)
 
         # Extras
-        new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "Analytics"])
+        new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "AllowAnalytics"])
+        new_config.add(value=True, to_path=["Extras", "EnableUpdateReminders"])
 
         # Write config file to disk
         new_config.save()
