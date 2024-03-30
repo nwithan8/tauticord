@@ -1,0 +1,540 @@
+{
+  "$id": "https://github.com/nwithan8/tauticord/.schema/config_v2.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "https://github.com/nwithan8/tauticord",
+  "title": "Tauticord Config v2 Schema",
+  "type": "object",
+  "additionalProperties": true,
+  "definitions": {
+    "discordBotToken": {
+      "id": "#/definitions/discordBotToken",
+      "type": "string",
+      "pattern": "^[MNO][a-zA-Z\\d_-]{23,25}\\.[a-zA-Z\\d_-]{6}\\.[a-zA-Z\\d_-]{27,}$",
+      "description": "A Discord Bot Token",
+      "$comment": "https://github.com/Yelp/detect-secrets/blob/master/detect_secrets/plugins/discord.py#L17C22-L17C81"
+    },
+    "discordChannelId": {
+      "id": "#/definitions/discordChannelId",
+      "description": "A Discord channel ID",
+      "type": "number",
+      "pattern": "^[0-9]{17,20}$"
+    },
+    "discordUserId": {
+      "id": "#/definitions/discordUserId",
+      "description": "A Discord user ID",
+      "type": "number",
+      "pattern": "^[0-9]{17,20}$"
+    },
+    "discordServerId": {
+      "id": "#/definitions/discordServerId",
+      "description": "A Discord server ID",
+      "type": "string",
+      "pattern": "^[0-9]{17,20}$"
+    },
+    "discordTextChannelName": {
+      "id": "#/definitions/discordTextChannelName",
+      "description": "A Discord text channel name",
+      "type": "string",
+      "pattern": "^[a-z0-9_-]{2,100}$",
+      "$comment": "Cannot contain spaces or uppercase letters"
+    },
+    "discordVoiceChannelName": {
+      "id": "#/definitions/discordVoiceChannelName",
+      "description": "A Discord voice channel name",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-_ ]{2,100}$"
+    },
+    "discordCategoryName": {
+      "id": "#/definitions/discordCategoryName",
+      "description": "A Discord category name",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-_ ]{2,100}$"
+    },
+    "tautulliApiKey": {
+      "id": "#/definitions/tautulliApiKey",
+      "description": "A Tautulli API key",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9]{32}$"
+    },
+    "tautulliUrl": {
+      "id": "#/definitions/tautulliUrl",
+      "description": "A Tautulli URL",
+      "type": "string",
+      "pattern": "^https?:\/\/[a-zA-Z0-9.-]{2,100}(:[0-9]{1,5})?$"
+    },
+    "voiceChannel": {
+      "id": "#/definitions/voiceChannel",
+      "type": "object",
+      "properties": {
+        "CustomEmoji": {
+          "type": "string"
+        },
+        "Enable": {
+          "type": "boolean"
+        },
+        "VoiceChannelID": {
+          "$ref": "#/definitions/discordChannelId"
+        }
+      },
+      "required": [
+        "CustomEmoji",
+        "Enable",
+        "VoiceChannelID"
+      ]
+    },
+    "library": {
+      "id": "#/definitions/library",
+      "type": "object",
+      "properties": {
+        "AlternateName": {
+          "$ref": "#/definitions/discordVoiceChannelName"
+        },
+        "Albums": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Artists": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Episodes": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Movies": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Series": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Tracks": {
+          "$ref": "#/definitions/voiceChannel"
+        }
+      }
+    },
+    "combinedLibrary": {
+      "id": "#/definitions/combinedLibrary",
+      "type": "object",
+      "properties": {
+        "Libraries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Albums": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Artists": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Episodes": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Movies": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Series": {
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Tracks": {
+          "$ref": "#/definitions/voiceChannel"
+        }
+      },
+      "required": [
+        "CombinedLibraries",
+        "VoiceChannel"
+      ]
+    }
+  },
+  "properties": {
+    "Tautulli": {
+      "title": "Tautulli configuration",
+      "description": "Settings for the Tautulli instance",
+      "type": "object",
+      "properties": {
+        "URL": {
+          "title": "Tautulli URL",
+          "description": "The URL of the Tautulli instance",
+          "$ref": "#/definitions/tautulliUrl"
+        },
+        "APIKey": {
+          "title": "Tautulli API key",
+          "description": "The API key for the Tautulli instance",
+          "$ref": "#/definitions/tautulliApiKey"
+        },
+        "UseSelfSignedCert": {
+          "title": "Use self-signed certificate",
+          "description": "Whether to use a self-signed certificate for the Tautulli instance (ignore SSL warnings)",
+          "type": "boolean"
+        },
+        "RefreshSeconds": {
+          "title": "Activity data refresh interval",
+          "description": "How often, in seconds, the bot pulls new live activity data. A 5-second minimum is built-in; it's for your own good",
+          "type": "integer"
+        },
+        "TerminateMessage": {
+          "title": "Stream termination message",
+          "description": "The message to send when a stream is terminated",
+          "type": "string"
+        }
+      },
+      "required": [
+        "URL",
+        "APIKey",
+        "UseSelfSignedCert",
+        "RefreshSeconds",
+        "TerminateMessage"
+      ]
+    },
+    "Discord": {
+      "title": "Discord configuration",
+      "description": "Settings for the Discord bot and server",
+      "type": "object",
+      "properties": {
+        "BotToken": {
+          "title": "Discord bot token",
+          "description": "The token for the Discord bot",
+          "$ref": "#/definitions/discordBotToken"
+        },
+        "ServerID": {
+          "title": "Discord server ID",
+          "description": "The ID of the Discord server where the bot will be used",
+          "$ref": "#/definitions/discordServerId"
+        },
+        "AdminIDs": {
+          "title": "Admin IDs",
+          "description": "The IDs of the Discord users who will have admin permissions",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/discordUserId"
+          }
+        },
+        "PostSummaryMessage": {
+          "title": "Post summary message",
+          "description": "Whether to post a summary message in the activity summary channel",
+          "type": "boolean"
+        },
+        "ChannelName": {
+          "title": "Activity summary channel name",
+          "description": "The name of the channel where the bot will post messages",
+          "$ref": "#/definitions/discordTextChannelName"
+        },
+        "EnableSlashCommands": {
+          "title": "Enable slash commands",
+          "description": "Whether to enable slash commands for the bot",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "BotToken",
+        "ServerID",
+        "AdminIDs",
+        "PostSummaryMessage",
+        "ChannelName",
+        "EnableSlashCommands"
+      ]
+    },
+    "Display": {
+      "title": "Display configuration",
+      "description": "Settings for how the bot displays information",
+      "type": "object",
+      "properties": {
+        "Anonymize": {
+          "title": "Anonymization settings",
+          "description": "Settings for anonymizing user information",
+          "type": "object",
+          "properties": {
+            "HideBandwidth": {
+              "title": "Hide bandwidth",
+              "description": "Whether to hide bandwidth information",
+              "type": "boolean"
+            },
+            "HideETA": {
+              "title": "Hide ETA",
+              "description": "Whether to hide ETAs for streams",
+              "type": "boolean"
+            },
+            "HidePlatforms": {
+              "title": "Hide platforms",
+              "description": "Whether to hide stream platform information",
+              "type": "boolean"
+            },
+            "HidePlayerNames": {
+              "title": "Hide player names",
+              "description": "Whether to hide stream player names",
+              "type": "boolean"
+            },
+            "HideProgress": {
+              "title": "Hide progress",
+              "description": "Whether to hide stream progress",
+              "type": "boolean"
+            },
+            "HideQuality": {
+              "title": "Hide quality",
+              "description": "Whether to hide stream quality information",
+              "type": "boolean"
+            },
+            "HideTranscode": {
+              "title": "Hide transcode",
+              "description": "Whether to hide stream transcoding information",
+              "type": "boolean"
+            },
+            "HideUsernames": {
+              "title": "Hide usernames",
+              "description": "Whether to hide Plex usernames",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "HideBandwidth",
+            "HideETA",
+            "HidePlatforms",
+            "HidePlayerNames",
+            "HideProgress",
+            "HideQuality",
+            "HideTranscode",
+            "HideUsernames"
+          ]
+        },
+        "ServerName": {
+          "title": "Server name",
+          "description": "The name of the Plex server",
+          "type": "string"
+        },
+        "ThousandsSeparator": {
+          "title": "Thousands separator",
+          "description": "The character to use as a numerical thousands separator",
+          "type": "string"
+        },
+        "Time": {
+          "title": "Time settings",
+          "description": "Settings for how the bot handles time",
+          "type": "object",
+          "properties": {
+            "ServerTimeZone": {
+              "title": "Server time zone",
+              "description": "The time zone of the Plex server",
+              "type": "string"
+            },
+            "Use24HourTime": {
+              "title": "Use 24-hour (military) time",
+              "description": "Whether to use 24-hour (military) time",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "ServerTimeZone",
+            "Use24HourTime"
+          ]
+        },
+        "UseFriendlyNames": {
+          "title": "Use friendly names",
+          "description": "Whether to use Plex user names instead of Plex usernames",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Anonymize",
+        "ServerName",
+        "ThousandsSeparator",
+        "Time",
+        "UseFriendlyNames"
+      ]
+    },
+    "Extras": {
+      "title": "Extras configuration",
+      "description": "Extra settings for the bot",
+      "type": "object",
+      "properties": {
+        "AllowAnalytics": {
+          "title": "Allow analytics",
+          "description": "Whether to allow the bot to collect and send analytics data",
+          "type": "boolean"
+        },
+        "EnableUpdateReminders": {
+          "title": "Enable update reminders",
+          "description": "Whether to enable update reminders",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "AllowAnalytics",
+        "EnableUpdateReminders"
+      ]
+    },
+    "Stats": {
+      "title": "Stats configuration",
+      "description": "Settings for the bot's stat tracking features",
+      "type": "object",
+      "properties": {
+        "Activity": {
+          "title": "Activity stats settings",
+          "type": "object",
+          "properties": {
+            "CategoryName": {
+              "title": "Category name",
+              "description": "The name of the category for activity stats",
+              "$ref": "#/definitions/discordCategoryName"
+            },
+            "Enable": {
+              "title": "Enable activity stats",
+              "description": "Whether to enable activity stats",
+              "type": "boolean"
+            },
+            "StatTypes": {
+              "title": "Stat types",
+              "description": "The types of activity stats to track",
+              "type": "object",
+              "properties": {
+                "Bandwidth": {
+                  "title": "Bandwidth",
+                  "description": "Settings for bandwidth stats",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "LocalBandwidth": {
+                  "title": "Local bandwidth",
+                  "description": "Settings for local bandwidth stats",
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "PlexServerAvailability": {
+                  "title": "Plex server availability",
+                  "description": "Settings for Plex server availability stats",
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "RemoteBandwidth": {
+                  "title": "Remote bandwidth",
+                  "description": "Settings for remote bandwidth stats",
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "StreamCount": {
+                  "title": "Stream count",
+                  "description": "Settings for stream count stats",
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "TranscodeCount": {
+                  "title": "Transcode count",
+                  "description": "Settings for transcode count stats",
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                }
+              },
+              "required": [
+                "Bandwidth",
+                "LocalBandwidth",
+                "PlexServerAvailability",
+                "RemoteBandwidth",
+                "StreamCount",
+                "TranscodeCount"
+              ]
+            }
+          },
+          "required": [
+            "CategoryName",
+            "Enable",
+            "StatTypes"
+          ]
+        },
+        "Libraries": {
+          "title": "Library stats settings",
+          "type": "object",
+          "properties": {
+            "Enable": {
+              "title": "Enable library stats",
+              "description": "Whether to enable library stats",
+              "type": "boolean"
+            },
+            "CategoryName": {
+              "title": "Category name",
+              "description": "The name of the category for library stats",
+              "$ref": "#/definitions/discordCategoryName"
+            },
+            "RefreshSeconds": {
+              "title": "Library data refresh interval",
+              "description": "How often, in seconds, the bot pulls new library data. A 5-minute minimum is built-in; it's for your own good",
+              "type": "integer"
+            },
+            "Libraries": {
+              "title": "Libraries",
+              "description": "Libraries to track",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/library"
+              }
+            },
+            "CombinedLibraries": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "Enable",
+            "CategoryName",
+            "RefreshSeconds",
+            "Libraries",
+            "CombinedLibraries"
+          ]
+        },
+        "Performance": {
+          "type": "object",
+          "properties": {
+            "CategoryName": {
+              "title": "Category name",
+              "description": "The name of the category for performance stats",
+              "$ref": "#/definitions/discordCategoryName"
+            },
+            "Enable": {
+              "title": "Enable performance stats",
+              "description": "Whether to enable performance stats",
+              "type": "boolean"
+            },
+            "Metrics": {
+              "type": "object",
+              "properties": {
+                "CPU": {
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "DiskSpace": {
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "Memory": {
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                },
+                "UserCount": {
+                  "type": "object",
+                  "$ref": "#/definitions/voiceChannel"
+                }
+              },
+              "required": [
+                "CPU",
+                "DiskSpace",
+                "Memory",
+                "UserCount"
+              ]
+            }
+          },
+          "required": [
+            "CategoryName",
+            "Enable",
+            "Metrics"
+          ]
+        }
+      },
+      "required": [
+        "Activity",
+        "Libraries",
+        "Performance"
+      ]
+    }
+  },
+  "required": [
+    "Tautulli",
+    "Discord",
+    "Display",
+    "Stats",
+    "Extras"
+  ]
+}
