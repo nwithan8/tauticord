@@ -4,9 +4,9 @@ import shutil
 import yaml
 
 import legacy.config_parser_v1 as config_parser
+from legacy.utils import decode_combined_tautulli_libraries
 from migrations.base import BaseMigration
 from migrations.migration_names import CONFIG_FILE, MIGRATION_001_CONFIG_FILE, MIGRATION_002_CONFIG_FILE
-from legacy.utils import decode_combined_tautulli_libraries
 
 
 def json_to_yaml(json_data) -> str:
@@ -223,7 +223,7 @@ class Migration(BaseMigration):
 
         # Extras
         new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "AllowAnalytics"])
-        new_config.add(value=True, to_path=["Extras", "EnableUpdateReminders"])
+        new_config.add(value=True, key_path=["Extras", "EnableUpdateReminders"])
 
         # Write config file to disk
         new_config.save()
