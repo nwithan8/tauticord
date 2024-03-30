@@ -1,94 +1,200 @@
 Tautulli:
-  Connection:
-    URL: ""
-    APIKey: ""
-    UseSelfSignedCert: false
-  Customization:
-    ServerName: "Plex"
-    TerminateMessage: "Your stream has been terminated. Please contact the admin in the Discord."
-    # How often (seconds) the bot pulls new data. 5-second minimum built-in, it's for your own good
-    RefreshSeconds: 15
-    # Can only kill streams if you have a Plex Pass, so this controls whether you're given the option
-    PlexPass: true
-    ServerTimeZone: "UTC"
-    Use24HourTime: false
-    VoiceChannels:
-      Stats:
-        CategoryName: "Tautulli Stats"
-        StreamCount: true
-        StreamCountChannelID: 0
-        TranscodeCount: true
-        TranscodeCountChannelID: 0
-        Bandwidth: false
-        BandwidthChannelID: 0
-        LocalBandwidth: false
-        LocalBandwidthChannelID: 0
-        RemoteBandwidth: false
-        RemoteBandwidthChannelID: 0
-        PlexStatus: true
-        PlexStatusChannelID: 0
-      Libraries:
-        CategoryName: "Tautulli Libraries"
-        Enable: false
-        LibraryRefreshSeconds: 3600
-        LibraryNames:
-          # List of names of the libraries you'd like stats about. Voice channels will be made/updated with stats (refreshed every hour)
-          - Movies
-          - TV Shows
-          - Music
-        CombinedLibraries:
-          # list of names of the libraries you'd like to combine into one voice channel
-          # Voice channels will be made/updated with stats (refreshed every hour)
-          All Movies:
-            - Movies
-            - Movies (Non-English)
-            - Movies (4K)
-          All TV Shows:
-            - TV Shows
-            - TV Shows (Non-English)
-            - TV Shows (4K)
-        UseEmojis: true
-        # Which stats to show for each type of library
-        TVSeriesCount: true
-        TVEpisodeCount: true
-        MusicArtistCount: true
-        MusicAlbumCount: true
-        MusicTrackCount: true
-      Performance:
-        CategoryName: "Performance"
-    Anonymize:
-      HideUsernames: false
-      HidePlayerNames: false
-      HidePlatforms: false
-      HideQuality: false
-      HideBandwidth: false
-      HideTranscode: false
-      HideProgress: false
-      HideETA: false
-    UseFriendlyNames: false
-    ThousandsSeparator: ""
-
+  URL: "http://127.0.0.1:8181"
+  APIKey: "thisismyapikey"
+  UseSelfSignedCert: false
+  RefreshSeconds: 15 # How often (seconds) the bot pulls new data. 5-second minimum built-in, it's for your own good
+  TerminateMessage: "Your stream has been terminated. Please contact the admin in the Discord."
 Discord:
-  Connection:
-    BotToken: ""
-    # Right-click on your server's icon -> "Copy ID"
-    ServerID: 472537215457689601
-    # Right-click on your profile picture -> "Copy ID"
-    AdminIDs:
-      - 00000000000
-    # Whether to post a live stats summary message
-    PostSummaryMessage: true
-    # Where the live stats summary message will be posted
-    ChannelName: "tautulli"
-    EnableSlashCommands: true
-  Customization:
-    Nitro: true
-
+  BotToken: "thisismydiscordbottoken"
+  ServerID: '000000000001' # Right-click on your server's icon -> "Copy ID"
+  AdminIDs:
+    - '00000000000000000001' # Right-click on your profile picture -> "Copy ID"
+  PostSummaryMessage: true # Whether to post a live stats summary message
+  ChannelName: "tautulli" # Where the live stats summary message will be posted
+  EnableSlashCommands: true
+Display:
+  Anonymize:
+    HideBandwidth: false
+    HideETA: false
+    HidePlatforms: false
+    HidePlayerNames: false
+    HideProgress: false
+    HideQuality: false
+    HideTranscode: false
+    HideUsernames: false
+  ServerName: ''
+  ThousandsSeparator: ''
+  Time:
+    ServerTimeZone: America/Denver
+    Use24HourTime: false
+  UseFriendlyNames: true  # Use Plex users' names instead of usernames
 Extras:
-  # See README.md for details
-  Analytics: true
-  Performance:
-    TautulliUserCount: true
-    DiskSpace: true
-    CPU: true
-    Memory: true
+  AllowAnalytics: true  # See README.md for details
+  EnableUpdateReminders: true  # Enable reminders to update Tauticord
+Stats:
+  Activity: # Stats about the Plex server's activity
+    CategoryName: "Plex Stats"
+    Enable: true
+    StatTypes:
+      Bandwidth:
+        CustomEmoji: ''
+        Enable: false
+        VoiceChannelID: 0
+      LocalBandwidth:
+        CustomEmoji: ''
+        Enable: false
+        VoiceChannelID: 0
+      PlexServerAvailability:
+        CustomEmoji: ''
+        Enable: true
+        VoiceChannelID: 0
+      RemoteBandwidth:
+        CustomEmoji: ''
+        Enable: false
+        VoiceChannelID: 0
+      StreamCount:
+        CustomEmoji: ''
+        Enable: false
+        VoiceChannelID: 0
+      TranscodeCount:
+        CustomEmoji: ''
+        Enable: false
+        VoiceChannelID: 0
+  Libraries: # Stats about the Plex server's libraries
+    Enable: true
+    CategoryName: "Plex Libraries"
+    RefreshSeconds: 3600
+    Libraries:
+      # Each key is the name of a library in Plex, as seen by Tautulli
+      "Audiobooks":
+        AlternateName: "My Audiobooks" # Optional: A friendlier name for the library to use in Discord
+        # How to display stats for each type of media in this library
+        # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
+        Albums:
+          CustomEmoji: ''  # Override the default emoji for this metric
+          Enable: true  # Whether to display this metric for this library
+          VoiceChannelID: 0  # Use a specific voice channel for this library's stats, rather than generating a new one
+        Artists:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Episodes:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Movies:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Series:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Tracks:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+      "Movies (4K)":
+        AlternateName: "My 4K Movies"
+        Albums:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Artists:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Episodes:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Movies:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Series:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Tracks:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+      "TV Shows (Non-English)":
+        AlternateName: "My Non-English TV Shows"
+        Albums:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Artists:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Episodes:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Movies:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Series:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Tracks:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+    CombinedLibraries:
+      "All Movies":
+        Libraries: # Which Plex libraries to combine into this aggregate library
+          - Movies
+          - Movies (Non-English)
+          - Movies (4K)
+        # How to display stats for each type of media in this library
+        # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
+        Albums:
+          CustomEmoji: ''
+          Enable: true  # Whether to display this metric for this library
+          VoiceChannelID: 0
+        Artists:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Episodes:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Movies:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Series:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+        Tracks:
+          CustomEmoji: ''
+          Enable: true
+          VoiceChannelID: 0
+  Performance: # Stats about the Tauticord host's performance
+    CategoryName: "Performance"
+    Enable: true
+    Metrics:
+      CPU:
+        CustomEmoji: ''
+        Enable: true
+        VoiceChannelID: 0
+      DiskSpace:
+        CustomEmoji: ''
+        Enable: true
+        VoiceChannelID: 0
+      Memory:
+        CustomEmoji: ''
+        Enable: true
+        VoiceChannelID: 0
+      UserCount:
+        CustomEmoji: ''
+        Enable: true
+        VoiceChannelID: 0
