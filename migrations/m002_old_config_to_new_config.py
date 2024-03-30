@@ -6,7 +6,7 @@ import yaml
 import legacy.config_parser_v1 as config_parser
 from migrations.base import BaseMigration
 from migrations.migration_names import CONFIG_FILE, MIGRATION_001_CONFIG_FILE, MIGRATION_002_CONFIG_FILE
-from modules.utils import decode_combined_tautulli_libraries
+from legacy.utils import decode_combined_tautulli_libraries
 
 
 def json_to_yaml(json_data) -> str:

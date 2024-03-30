@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta
-from typing import List, Optional, Any
+from typing import Optional, Any
 from urllib.parse import quote_plus
 
 from pytz import timezone
-
-import modules.logs as logging
-from modules.statics import ENCODING_SEPARATOR_1, ENCODING_SEPARATOR_2
 
 
 def make_plural(word, count: int, suffix_override: str = 's') -> str:
@@ -462,33 +459,3 @@ def discord_text_channel_name_format(string: str) -> str:
     # lowercase and replace spaces with dashes
     string = string.lower().replace(" ", "-")
     return string
-
-
-def encode_combined_tautulli_libraries(name: str, libraries: List[str]) -> str:
-    """
-    Return a string encoded with the given name and libraries
-
-    :param name: name to encode
-    :type name: str
-    :param libraries: list of libraries to encode
-    :type libraries: list
-    :return: string encoded with the given name and libraries
-    :rtype: str
-    """
-    return f"{name}{ENCODING_SEPARATOR_1}{ENCODING_SEPARATOR_2.join(libraries)}"
-
-
-def decode_combined_tautulli_libraries(encoded_string: str) -> tuple[str, List[str]]:
-    """
-    Return a tuple of the name and libraries decoded from the given string
-
-    :param encoded_string: string to decode
-    :type encoded_string: str
-    :return: tuple of the name and libraries decoded from the given string
-    :rtype: tuple
-    """
-    try:
-        name, libraries = encoded_string.split(ENCODING_SEPARATOR_1)
-        return name, libraries.split(ENCODING_SEPARATOR_2)
-    except:
-        logging.error(f"Failed to decode combined tautulli libraries: {encoded_string}. Skipping...")
