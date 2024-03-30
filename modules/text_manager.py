@@ -1,4 +1,6 @@
-from typing import Dict, Any, Union
+from typing import Union
+
+from pydantic import BaseModel
 
 from modules import statics, utils
 from modules.emojis import EmojiManager
@@ -6,42 +8,38 @@ from modules.time_manager import TimeManager
 from modules.utils import limit_text_length
 
 
-class TextManager:
+class TextManager(BaseModel):
     """
     Manages text formatting and anonymization.
     """
-
-    def __init__(self, rules: Dict[str, Any]) -> None:
-        self._rules: dict = rules
-        self._anon_hide_usernames: bool = rules.get(statics.KEY_HIDE_USERNAMES, False)
-        self._anon_hide_player_names: bool = rules.get(statics.KEY_HIDE_PLAYER_NAMES, False)
-        self._anon_hide_platforms: bool = rules.get(statics.KEY_HIDE_PLATFORMS, False)
-        self._anon_hide_quality: bool = rules.get(statics.KEY_HIDE_QUALITY, False)
-        self._anon_hide_bandwidth: bool = rules.get(statics.KEY_HIDE_BANDWIDTH, False)
-        self._anon_hide_transcoding: bool = rules.get(statics.KEY_HIDE_TRANSCODING, False)
-        self._anon_hide_progress: bool = rules.get(statics.KEY_HIDE_PROGRESS, False)
-        self._anon_hide_eta: bool = rules.get(statics.KEY_HIDE_ETA, False)
-        self._use_friendly_names: bool = rules.get(statics.KEY_USE_FRIENDLY_NAMES, False)
-        self._time_manager: TimeManager = rules.get(statics.KEY_TIME_MANAGER, TimeManager(timezone="UTC",
-                                                                                          military_time=False))  # fallback should not be needed
+    hide_usernames: bool
+    hide_player_names: bool
+    hide_platforms: bool
+    hide_quality: bool
+    hide_bandwidth: bool
+    hide_transcoding: bool
+    hide_progress: bool
+    hide_eta: bool
+    use_friendly_names: bool
+    time_manager: TimeManager
 
     def _session_user_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
-        if self._anon_hide_usernames:
+        if self.hide_usernames:
             return None
 
         emoji = emoji_manager.get_emoji(key="person")
-        username = session.friendly_name if self._use_friendly_names else session.username
+        username = session.friendly_name if self.use_friendly_names else session.username
         stub = f"""{emoji} {utils.bold(username)}"""
 
         return stub
 
     def _session_player_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
-        if self._anon_hide_platforms and self._anon_hide_player_names:
+        if self.hide_platforms and self.hide_player_names:
             return None
 
         emoji = emoji_manager.get_emoji(key="device")
-        player = None if self._anon_hide_player_names else session.player
-        product = None if self._anon_hide_platforms else session.product
+        player = None if self.hide_player_names else session.player
+        product = None if self.hide_platforms else session.product
 
         stub = f"""{emoji}"""
         if player is not None:
@@ -53,12 +51,12 @@ class TextManager:
         return stub
 
     def _session_details_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
-        if self._anon_hide_quality and self._anon_hide_bandwidth and self._anon_hide_transcoding:
+        if self.hide_quality and self.hide_bandwidth and self.hide_transcodingd:
             return None
 
-        quality_profile = None if self._anon_hide_quality else session.quality_profile
-        bandwidth = None if self._anon_hide_bandwidth else session.bandwidth
-        transcoding = None if self._anon_hide_transcoding else session.transcoding_stub
+        quality_profile = None if self.hide_quality else session.quality_profile
+        bandwidth = None if self.hide_bandwidth else session.bandwidth
+        transcoding = None if self.hide_transcoding else session.transcoding_stub
 
         emoji = emoji_manager.get_emoji(key="resolution")
         stub = f"""{emoji}"""
@@ -73,13 +71,13 @@ class TextManager:
         return stub
 
     def _session_progress_message(self, session, emoji_manager: EmojiManager) -> Union[str, None]:
-        if self._anon_hide_progress:
+        if self.hide_progress:
             return None
 
         emoji = emoji_manager.get_emoji(key="progress")
         progress = session.progress_marker
         stub = f"""{emoji} {utils.bold(progress)}"""
-        if not self._anon_hide_eta:
+        if not self.hide_eta:
             eta = session.eta
             stub += f""" (ETA: {eta})"""
 
@@ -105,7 +103,7 @@ class TextManager:
 
     def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager,
                         add_termination_tip: bool) -> str:
-        timestamp = f"\n\nUpdated {self._time_manager.now_string()}"
+        timestamp = f"\n\nUpdated {self.time_manager.now_string()}"
 
         if no_connection or activity is None:
             return f"{utils.bold('Connection lost.')}\n\n{timestamp}"
@@ -117,12 +115,12 @@ class TextManager:
         stream_count_word = utils.make_plural(word='stream', count=stream_count)
         overview_message = f"""{stream_count} {stream_count_word}"""
 
-        if activity.transcode_count > 0 and not self._anon_hide_transcoding:
+        if activity.transcode_count > 0 and not self.hide_transcoding:
             transcode_count = activity.transcode_count
             transcode_count_word = utils.make_plural(word='transcode', count=transcode_count)
             overview_message += f""" ({transcode_count} {transcode_count_word})"""
 
-        if activity.total_bandwidth and not self._anon_hide_bandwidth:
+        if activity.total_bandwidth and not self.hide_bandwidth:
             bandwidth_emoji = emoji_manager.get_emoji(key='bandwidth')
             bandwidth = activity.total_bandwidth
             overview_message += f""" @ {bandwidth_emoji} {bandwidth}"""

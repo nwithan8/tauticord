@@ -62,7 +62,8 @@ def newer_version_available() -> bool:
 
 
 class VersionChecker:
-    def __init__(self):
+    def __init__(self, enable: bool):
+        self.enable = enable
         self._new_version_available = False
 
     async def check_for_new_version(self):
@@ -76,4 +77,7 @@ class VersionChecker:
                 exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
 
     def is_new_version_available(self) -> bool:
+        if not self.enable:
+            return False
+
         return self._new_version_available

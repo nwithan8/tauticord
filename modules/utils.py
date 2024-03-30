@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta
-from typing import List
+from typing import Optional, Any
 from urllib.parse import quote_plus
 
 from pytz import timezone
-
-from modules.statics import ENCODING_SEPARATOR_1, ENCODING_SEPARATOR_2
-import modules.logs as logging
 
 
 def make_plural(word, count: int, suffix_override: str = 's') -> str:
@@ -30,6 +27,23 @@ def minutes_to_hhmm(seconds: int) -> str:
 
 def status_code_is_success(status_code: int) -> bool:
     return 200 <= status_code < 300
+
+
+def extract_boolean(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ["true", "t", "yes", "y", "enable", "en", "on", "1"]:
+        return True
+    elif value.lower() in ["false", "f", "no", "n", "disable", "dis", "off", "0"]:
+        return False
+    else:
+        raise ValueError("Not a boolean: {}".format(value))
+
+
+def mark_exists(value: Optional[Any]) -> str:
+    if value:
+        return "Present"
+    return "Not Present"
 
 
 def format_decimal(number: float, denominator: int = 1, decimal_places: int = 1, no_zeros: bool = False) -> str:
@@ -445,34 +459,3 @@ def discord_text_channel_name_format(string: str) -> str:
     # lowercase and replace spaces with dashes
     string = string.lower().replace(" ", "-")
     return string
-
-
-def encode_combined_tautulli_libraries(name: str, libraries: List[str]) -> str:
-    """
-    Return a string encoded with the given name and libraries
-
-    :param name: name to encode
-    :type name: str
-    :param libraries: list of libraries to encode
-    :type libraries: list
-    :return: string encoded with the given name and libraries
-    :rtype: str
-    """
-    return f"{name}{ENCODING_SEPARATOR_1}{ENCODING_SEPARATOR_2.join(libraries)}"
-
-
-def decode_combined_tautulli_libraries(encoded_string: str) -> tuple[str, List[str]]:
-    """
-    Return a tuple of the name and libraries decoded from the given string
-
-    :param encoded_string: string to decode
-    :type encoded_string: str
-    :return: tuple of the name and libraries decoded from the given string
-    :rtype: tuple
-    """
-    try:
-        name, libraries = encoded_string.split(ENCODING_SEPARATOR_1)
-        return name, libraries.split(ENCODING_SEPARATOR_2)
-    except:
-        logging.error(f"Failed to decode combined tautulli libraries: {encoded_string}. Skipping...")
-
