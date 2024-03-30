@@ -17,7 +17,8 @@ class MigrationManager:
                          config_folder=self.config_directory,
                          logs_folder=self.logs_directory),
             # Convert old config.yaml (or migration file above) to new config.yaml schema
-            Migration002(number="002", migration_tracker_folder=self.config_directory,
+            Migration002(number="002",
+                         migration_data_directory=self.migration_data_directory,
                          config_folder=self.config_directory,
                          logs_folder=self.logs_directory),
         ]

@@ -60,12 +60,12 @@ class ConfigWriter:
 
 
 class Migration(BaseMigration):
-    def __init__(self, number: str, migration_tracker_folder: str, config_folder: str, logs_folder: str):
-        super().__init__(number=number, migration_tracker_folder=migration_tracker_folder)
+    def __init__(self, number: str, migration_data_directory: str, config_folder: str, logs_folder: str):
+        super().__init__(number=number, migration_data_directory=migration_data_directory)
         self.config_folder = config_folder
         self.logs_folder = logs_folder
         self.old_config_file = f"{self.config_folder}/{CONFIG_FILE}"
-        self.new_config_file = f"{self.config_folder}/{MIGRATION_002_CONFIG_FILE}"
+        self.new_config_file = f"{migration_data_directory}/{MIGRATION_002_CONFIG_FILE}"
 
     def pre_forward_check(self) -> bool:
         # Make sure we have the old config file and it's still the old schema
