@@ -9,15 +9,6 @@
       "instances": 1
     },
     {
-      "name": "migrate_env_vars",
-      "interpreter": "/bin/sh",
-      "script": "/app/migrations/001_env_var_to_config_yaml.sh",
-      // Only run migration once
-      "autorestart": false,
-      "exec_mode": "fork",
-      "instances": 1
-    },
-    {
       "name": "tauticord",
       "interpreter": "/app/venv/bin/python",
       "script": "run.py",
@@ -30,6 +21,7 @@
       "instances": 1,
       // 101 - Discord login failed
       // 102 - Missing privileged intents
+      // 201 - Migrations failed
       "stop_exit_codes": [101, 102]
     }
   ]

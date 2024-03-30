@@ -3,6 +3,7 @@
 # Tauticord is released as-is under the "GNU General Public License".
 # Please see the LICENSE file that should have been included as part of this package.
 import argparse
+import os
 
 import modules.discord.discord_connector as discord
 import modules.logs as logging
@@ -15,6 +16,7 @@ from consts import (
     CONSOLE_LOG_LEVEL,
     FILE_LOG_LEVEL,
 )
+from migrations.migration_manager import MigrationManager
 from modules import versioning
 from modules.analytics import GoogleAnalytics
 from modules.errors import determine_exit_code
@@ -44,6 +46,16 @@ args = parser.parse_args()
 # Set up logging
 logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log,
              file_log_level=FILE_LOG_LEVEL)
+
+# Run migrations
+config_directory = os.path.dirname(args.config)
+if config_directory == "":
+    config_directory = "./"
+migration_manager = MigrationManager(config_directory=config_directory,
+                                     logs_directory=args.log)
+if not migration_manager.run_migrations():
+    logging.fatal("Migrations failed. Exiting...")
+    exit(201)
 
 # Set up configuration
 kwargs = {

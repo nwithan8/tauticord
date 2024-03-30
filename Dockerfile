@@ -33,7 +33,6 @@ COPY . .
 
 # Delete unnecessary files in WORKDIR (/app) folder (not caught by .dockerignore)
 RUN echo "**** removing unneeded files ****"
-RUN rm -rf /app/requirements.txt
 
 # Run the app
 CMD [ "pm2-runtime", "start", "ecosystem.config.json"]
