@@ -492,11 +492,11 @@ class ConfigWriter:
 
 
 class Migration(BaseMigration):
-    def __init__(self, number: str, migration_tracker_folder: str, config_folder: str, logs_folder: str):
-        super().__init__(number=number, migration_tracker_folder=migration_tracker_folder)
+    def __init__(self, number: str, migration_data_directory: str, config_folder: str, logs_folder: str):
+        super().__init__(number=number, migration_data_directory=migration_data_directory)
         self.config_folder = config_folder
         self.logs_folder = logs_folder
-        self._new_config_file_path = f"{self.config_folder}/{MIGRATION_001_CONFIG_FILE}"
+        self._new_config_file_path = f"{migration_data_directory}/{MIGRATION_001_CONFIG_FILE}"
 
     def pre_forward_check(self) -> bool:
         # Always run this migration to make sure the migrated config file is created
