@@ -6,12 +6,12 @@ VERSION = "VERSIONADDEDBYGITHUB"
 COPYRIGHT = "Copyright © YEARADDEDBYGITHUB Nate Harris. All rights reserved."
 UNKNOWN_COMMIT_HASH = "unknown-commit"
 
-STANDARD_EMOJIS_FOLDER = "resources/emojis/standard"
-NITRO_EMOJIS_FOLDER = "resources/emojis/nitro"
+CUSTOM_EMOJIS_FOLDER = "resources/emojis"
 
 MONITORED_DISK_SPACE_FOLDER = "/monitor"
 
 BOT_PREFIX = "tc-"
+EMOJI_PREFIX = "tc"
 
 MAX_EMBED_FIELD_NAME_LENGTH = 200  # 256 - estimated emojis + flairs + safety margin
 

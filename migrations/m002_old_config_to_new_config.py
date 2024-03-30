@@ -113,7 +113,6 @@ class Migration(BaseMigration):
         new_config.migrate_value(value=old_config.discord.channel_name, to_path=["Discord", "ChannelName"])
         new_config.migrate_value(value=old_config.discord.enable_slash_commands,
                                  to_path=["Discord", "EnableSlashCommands"])
-        new_config.migrate_value(value=old_config.discord.has_discord_nitro, to_path=["Discord", "Nitro"])
 
         # Display
         new_config.migrate_value(value=old_config.tautulli.server_name, to_path=["Display", "ServerName"])

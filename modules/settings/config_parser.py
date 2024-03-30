@@ -64,7 +64,6 @@ class DiscordConfig(ConfigSection):
         channel_name = utils.discord_text_channel_name_format(string=channel_name)
         use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
         enable_slash_commands = utils.extract_boolean(self.get_value(key="EnableSlashCommands", default=False))
-        has_discord_nitro = utils.extract_boolean(self.get_value(key="Nitro", default=False))
 
         return settings_models.Discord(
             bot_token=bot_token,
@@ -73,7 +72,6 @@ class DiscordConfig(ConfigSection):
             channel_name=channel_name,
             use_summary_message=use_summary_message,
             enable_slash_commands=enable_slash_commands,
-            has_discord_nitro=has_discord_nitro
         )
 
 

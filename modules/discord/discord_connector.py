@@ -35,7 +35,6 @@ class DiscordConnector:
         self.tautulli: modules.tautulli.tautulli_connector.TautulliConnector = tautulli_connector
         self.token: str = discord_settings.bot_token
         self.guild_id: int = discord_settings.server_id
-        self.nitro: bool = discord_settings.has_discord_nitro
         self.admin_ids: list[int] = discord_settings.admin_ids
         self.refresh_time: int = tautulli_settings.refresh_interval_seconds
         self.library_refresh_time: int = stats_settings.library.refresh_interval_seconds
@@ -97,13 +96,18 @@ class DiscordConnector:
 
         logging.info("Uploading required resources...")
 
-        # Load normal emojis
-        await self.emoji_manager.load_emojis(source_folder=statics.STANDARD_EMOJIS_FOLDER, client=self.client,
-                                             guild_id=self.guild_id)
-        # Load extra emojis if Nitro is enabled
-        if self.nitro:
-            await self.emoji_manager.load_emojis(source_folder=statics.NITRO_EMOJIS_FOLDER, client=self.client,
-                                                 guild_id=self.guild_id)
+        # How many emoji slots are left (excluding any emojis that have already been uploaded; avoid re-uploading)
+        available_emoji_slots = await discord_utils.available_emoji_slots(client=self.client, guild_id=self.guild_id)
+        un_uploaded_emoji_count = len(await self.emoji_manager.get_un_uploaded_emoji_files(
+            client=self.client, guild_id=self.guild_id))
+
+        if un_uploaded_emoji_count > 0:
+            if available_emoji_slots < un_uploaded_emoji_count:
+                logging.fatal(
+                    f"Insufficient emoji slots to upload {un_uploaded_emoji_count} custom emojis, will use built-in emojis instead.")
+            else:
+                await self.emoji_manager.load_custom_emojis(client=self.client, guild_id=self.guild_id)
+                available_emoji_slots -= un_uploaded_emoji_count
 
         logging.info("Loading Tautulli summary service...")
 
@@ -112,9 +116,10 @@ class DiscordConnector:
             logging.info("Loading Tautulli text channel settings...")
 
             self.tautulli_summary_channel: discord.TextChannel = \
-                await discord_utils.get_or_create_discord_channel_by_name(client=self.client,
-                                                                          guild_id=self.guild_id,
-                                                                          channel_name=self.tautulli_summary_channel_name)
+                await discord_utils.get_or_create_discord_channel_by_name(
+                    client=self.client,
+                    guild_id=self.guild_id,
+                    channel_name=self.tautulli_summary_channel_name)
             if not self.tautulli_summary_channel:
                 raise Exception(f"Could not load {quote(self.tautulli_summary_channel_name)} channel. Exiting...")
 

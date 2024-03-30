@@ -4,21 +4,37 @@ from typing import Optional, Union, List
 
 import discord
 from discord import Emoji, PartialEmoji
+from pydantic import BaseModel
 
 import modules.logs as logging
 from modules import statics
 
 
-async def upload_new_emoji(file: str, name: str, client: discord.Client, guild_id: int) -> Union[discord.Emoji, None]:
+class EmojiFile(BaseModel):
+    path: str
+
+    @property
+    def name(self) -> str:
+        return Path(self.path).stem
+
+    @property
+    def name_with_prefix(self) -> str:
+        return f"{statics.EMOJI_PREFIX}_{self.name}"
+
+
+async def upload_new_emoji(emoji_file: EmojiFile, client: discord.Client, guild_id: int) -> Union[discord.Emoji, None]:
     guild = client.get_guild(guild_id)  # stupid positional-only parameters
 
     # Upload the new emoji
     try:
-        with open(file, 'rb') as f:
+        logging.info(f"Uploading emoji '{emoji_file.name_with_prefix}' to server")
+        with open(emoji_file.path, 'rb') as f:
             image_bytes: bytes = f.read()
-            return await guild.create_custom_emoji(name=name, image=image_bytes, reason="Tauticord emoji upload")
+            return await guild.create_custom_emoji(name=emoji_file.name_with_prefix, image=image_bytes,
+                                                   reason="Tauticord emoji upload")
     except Exception as e:
-        logging.error(f"Failed to upload emoji {name} to server: {e}. Will use default emoji instead.")
+        logging.error(
+            f"Failed to upload emoji '{emoji_file.name_with_prefix}' to server: {e}. Will use default emoji instead.")
         return None
 
 
@@ -26,6 +42,17 @@ async def collect_guild_emojis(client: discord.Client, guild_id: int) -> tuple[E
     guild = client.get_guild(guild_id)  # stupid positional-only parameters
 
     return guild.emojis
+
+
+async def get_corresponding_emoji_from_server(emoji_file: EmojiFile, client: discord.Client, guild_id: int) -> Union[
+    Emoji, None]:
+    existing_emojis = await collect_guild_emojis(client=client, guild_id=guild_id)
+
+    for emoji in existing_emojis:
+        if emoji.name == emoji_file.name_with_prefix:
+            return emoji
+
+    return None
 
 
 def max_controllable_stream_count_supported(max_streams_override: Optional[int] = None) -> int:
@@ -104,8 +131,6 @@ class Emoji(enum.Enum):
 
 class EmojiManager:
     def __init__(self) -> None:
-        self._emoji_prefix = "tc"
-
         # Additional emojis added/updated in the cache will be strings, so it all has to be strings
         self._emoji_aliases = {
             "1": Emoji.Number1.value,
@@ -210,8 +235,8 @@ class EmojiManager:
 
     def stream_number_from_emoji(self, emoji: PartialEmoji) -> Union[int, None]:
         # If using the Tauticord custom emojis, name corresponds to the stream number (e.g. tc_1 is 1, tc_2 is 2, etc.)
-        if emoji.name.startswith(self._emoji_prefix):
-            number = emoji.name.replace(f"{self._emoji_prefix}_", "")
+        if emoji.name.startswith(statics.EMOJI_PREFIX):
+            number = emoji.name.replace(f"{statics.EMOJI_PREFIX}_", "")
             return int(number)
 
         # Not using the Tauticord custom emojis, so we need to check the emoji itself
@@ -223,29 +248,34 @@ class EmojiManager:
     def is_valid_emoji_for_stream_number(self, emoji, number: int) -> bool:
         return str(emoji) == self.emoji_from_stream_number(number)
 
-    async def load_emojis(self, source_folder: str, client: discord.Client, guild_id: int) -> None:
+    def custom_emoji_files(self) -> List[EmojiFile]:
+        emoji_files = []
+        for file in Path(statics.CUSTOM_EMOJIS_FOLDER).glob("*.png"):
+            emoji_files.append(
+                EmojiFile(path=str(file))
+            )
+        return emoji_files
+
+    async def get_un_uploaded_emoji_files(self, client: discord.Client, guild_id: int) -> List[EmojiFile]:
+        emoji_files = self.custom_emoji_files()
+        uploaded_emojis = await collect_guild_emojis(client=client, guild_id=guild_id)
+        uploaded_emojis_names = [emoji.name for emoji in uploaded_emojis]
+
+        return [emoji_file for emoji_file in emoji_files if emoji_file.name_with_prefix not in uploaded_emojis_names]
+
+    async def load_custom_emojis(self, client: discord.Client, guild_id: int) -> None:
         # Upload PNG emojis from the source folder
-        for file in Path(source_folder).glob("*.png"):
-            await self.add_new_emoji(file=str(file), client=client, guild_id=guild_id)
+        for emoji_file in self.custom_emoji_files():
+            await self.upload_and_cache_emoji(emoji_file=emoji_file, client=client, guild_id=guild_id)
 
-    async def add_new_emoji(self, file: str, client: discord.Client, guild_id: int, name: Optional[str] = None) -> None:
-        name = name or Path(file).stem
-        name_with_prefix = f"{self._emoji_prefix}_{name}"
+    async def upload_and_cache_emoji(self, emoji_file: EmojiFile, client: discord.Client, guild_id: int) -> None:
+        emoji = await get_corresponding_emoji_from_server(emoji_file=emoji_file, client=client,
+                                                          guild_id=guild_id)
+        if not emoji:
+            emoji = await upload_new_emoji(emoji_file=emoji_file, client=client, guild_id=guild_id)
 
-        # Check if the emoji already exists
-        existing_emojis = await collect_guild_emojis(client=client, guild_id=guild_id)
-        for emoji in existing_emojis:
-            if emoji.name == name_with_prefix:
-                # Store the emoji in the cache if it already exists
-                self._emoji_aliases[str(name)] = f"<:{name_with_prefix}:{emoji.id}>"
-                return
+            if not emoji:  # Emoji upload failed
+                return  # Keep the default emoji
 
-        # Upload the new emoji
-        emoji = await upload_new_emoji(file=file, name=name_with_prefix, client=client, guild_id=guild_id)
-
-        if not emoji:  # Emoji upload failed
-            return  # Keep the default emoji
-
-        # Store the new emoji in the cache
-        self._emoji_aliases[name] = f"<:{name_with_prefix}:{emoji.id}>"
-        return
+        # Store the emoji in the cache
+        self._emoji_aliases[str(emoji_file.name)] = f"<:{emoji.name}:{emoji.id}>"

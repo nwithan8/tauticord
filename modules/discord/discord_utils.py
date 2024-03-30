@@ -13,6 +13,17 @@ async def get_guild(client: discord.Client, guild_id: int) -> discord.Guild:
     return guild
 
 
+async def available_emoji_slots(client: discord.Client, guild_id: int) -> int:
+    guild = await get_guild(client=client, guild_id=guild_id)
+    return max([guild.emoji_limit - len(guild.emojis), 0])  # Somehow this number can be negative
+
+
+async def filter_emoji_list_to_non_existent(client: discord.Client, guild_id: int, emoji_names: List[str]) -> List[str]:
+    guild = await get_guild(client=client, guild_id=guild_id)
+    guild_emojis = [emoji.name for emoji in guild.emojis]
+    return [emoji_name for emoji_name in emoji_names if emoji_name not in guild_emojis]
+
+
 async def create_discord_text_channel(client: discord.Client,
                                       guild_id: int,
                                       channel_name: str,
