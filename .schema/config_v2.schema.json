@@ -28,15 +28,10 @@
       "minimum": 0,
       "maximum": 0
     },
-    "ipAndPort": {
-      "id": "#/definitions/ipAndPort",
+    "hostWithIpAndOptionalPort": {
+      "id": "#/definitions/hostWithIpAndOptionalPort",
       "type": "string",
-      "pattern": "^(https?://)?[0-9.]+:[0-9]{1,5}$"
-    },
-    "domainWithOptionalPort": {
-      "id": "#/definitions/domainWithHttp",
-      "type": "string",
-      "pattern": "^https?://[a-zA-Z0-9.-]+(:[0-9]{1,5})?$"
+      "pattern": "^(https?://)?[a-zA-Z0-9.-]+(:[0-9]{1,5})?$"
     },
     "discordBotToken": {
       "id": "#/definitions/discordBotToken",
@@ -65,20 +60,20 @@
     },
     "discordTextChannelName": {
       "id": "#/definitions/discordTextChannelName",
-      "description": "A Discord text channel name",
+      "description": "A Discord text channel name. No emojis allowed.",
       "type": "string",
-      "pattern": "^[a-z0-9_-]{2,100}$",
+      "pattern": "^[a-z0-9-]{2,100}$",
       "$comment": "Cannot contain spaces or uppercase letters"
     },
     "discordVoiceChannelName": {
       "id": "#/definitions/discordVoiceChannelName",
-      "description": "A Discord voice channel name",
+      "description": "A Discord voice channel name. No emojis allowed.",
       "type": "string",
       "pattern": "^[a-zA-Z0-9-_ ]{2,100}$"
     },
     "discordCategoryName": {
       "id": "#/definitions/discordCategoryName",
-      "description": "A Discord category name",
+      "description": "A Discord category name. No emojis allowed.",
       "type": "string",
       "pattern": "^[a-zA-Z0-9-_ ]{2,100}$"
     },
@@ -91,14 +86,7 @@
     "tautulliUrl": {
       "id": "#/definitions/tautulliUrl",
       "description": "A Tautulli URL",
-      "oneOf": [
-        {
-          "$ref": "#/definitions/ipAndPort"
-        },
-        {
-          "$ref": "#/definitions/domainWithOptionalPort"
-        }
-      ]
+      "$ref": "#/definitions/hostWithIpAndOptionalPort"
     },
     "voiceChannel": {
       "id": "#/definitions/voiceChannel",
@@ -268,7 +256,9 @@
         "RefreshSeconds": {
           "title": "Activity data refresh interval",
           "description": "How often, in seconds, the bot pulls new live activity data. A 5-second minimum is built-in; it's for your own good",
-          "type": "integer"
+          "type": "integer",
+          "minimum": 5,
+          "multipleOf": 5
         },
         "TerminateMessage": {
           "title": "Stream termination message",
@@ -555,7 +545,9 @@
             "RefreshSeconds": {
               "title": "Library data refresh interval",
               "description": "How often, in seconds, the bot pulls new library data. A 5-minute minimum is built-in; it's for your own good",
-              "type": "integer"
+              "type": "integer",
+              "minimum": 300,
+              "multipleOf": 5
             },
             "Libraries": {
               "title": "Libraries",
