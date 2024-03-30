@@ -34,6 +34,8 @@ You will need to map the following volumes:
 
 ### Environmental Variables
 
+> :warning: ** Environmental variables are [going away in version 5.0.0](ANNOUNCEMENTS.md) in favor of a configuration file (see below table)! **
+
 You will need to set the following environment variables:
 
 | Environment Variable              | Required | Value                                                                                                                                                                       | Example/Default                                  |

@@ -13,4 +13,5 @@ Tauticord.log
 documentation
 templates
 on_host
-migrated_config.yaml
+00*.yaml
+.migration_*
