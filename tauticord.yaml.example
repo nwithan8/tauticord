@@ -1,0 +1,371 @@
+# Tautulli settings
+Tautulli:
+  # The URL of the Tautulli server
+  URL: "http://127.0.0.1:8181"
+  # The API key for the Tautulli server
+  APIKey: "thisismyapikey"
+  # Whether to use a self-signed certificate
+  UseSelfSignedCert: false
+  # How often (in seconds) the bot pulls new data. 5-second minimum built-in, it's for your own good
+  RefreshSeconds: 15
+  # The message to display when a stream is terminated
+  TerminateMessage: "Your stream has been terminated. Please contact the admin in the Discord."
+
+# Discord settings
+Discord:
+  # The token for the Discord bot
+  BotToken: "thisismydiscordbottoken"
+  # The ID of the server
+  ServerID: '000000000001' # Right-click on your server's icon -> "Copy ID"
+  # List of admin IDs
+  AdminIDs:
+    - '00000000000000000001' # Right-click on your profile picture -> "Copy ID"
+  # Whether to post a live stats summary message
+  PostSummaryMessage: true
+  # The name of the channel where the live stats summary message will be posted
+  ChannelName: "tautulli"
+  # Whether to enable slash commands
+  EnableSlashCommands: true
+
+# Display settings
+Display:
+  # Anonymization settings
+  Anonymize:
+    # Whether to hide bandwidth
+    HideBandwidth: false
+    # Whether to hide ETA
+    HideETA: false
+    # Whether to hide platforms
+    HidePlatforms: false
+    # Whether to hide player names
+    HidePlayerNames: false
+    # Whether to hide progress
+    HideProgress: false
+    # Whether to hide quality
+    HideQuality: false
+    # Whether to hide transcode
+    HideTranscode: false
+    # Whether to hide usernames
+    HideUsernames: false
+  # The name of the server
+  ServerName: ''
+  # The thousands separator
+  ThousandsSeparator: ''
+  # Time settings
+  Time:
+    # The time zone of the server
+    ServerTimeZone: America/Denver
+    # Whether to use 24 hour time
+    Use24HourTime: false
+  # Whether to use Plex users' names instead of usernames
+  UseFriendlyNames: true
+
+# Extra settings
+Extras:
+  # Whether to allow analytics. See README.md for details
+  AllowAnalytics: true
+  # Whether to enable reminders to update Tauticord
+  EnableUpdateReminders: true
+
+# Stats settings
+Stats:
+  # Activity stats about the Plex server
+  Activity:
+    # The name of the category
+    CategoryName: "Plex Stats"
+    # Whether to enable the stats
+    Enable: true
+    # The types of stats
+    StatTypes:
+      # Bandwidth settings
+      Bandwidth:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable bandwidth stats
+        Enable: false
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # Local bandwidth settings
+      LocalBandwidth:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable local bandwidth stats
+        Enable: false
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # Plex server availability settings
+      PlexServerAvailability:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable Plex server availability stats
+        Enable: true
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # Remote bandwidth settings
+      RemoteBandwidth:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable remote bandwidth stats
+        Enable: false
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # Stream count settings
+      StreamCount:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable stream count stats
+        Enable: false
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # Transcode count settings
+      TranscodeCount:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable transcode count stats
+        Enable: false
+        # The ID of the voice channel
+        VoiceChannelID: 0
+  # Stats about the Plex server's libraries
+  Libraries:
+    # Whether to enable library stats
+    Enable: true
+    # The name of the category
+    CategoryName: "Plex Libraries"
+    # How often (in seconds) to refresh the stats
+    RefreshSeconds: 3600
+    # The libraries
+    Libraries:
+      # Each key is the name of a library in Plex, as seen by Tautulli
+      "Audiobooks":
+        # A friendlier name for the library to use in Discord
+        AlternateName: "My Audiobooks"
+        # How to display stats for each type of media in this library
+        # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
+        Albums:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # Use a specific voice channel for this library's stats, rather than generating a new one
+          VoiceChannelID: 0
+        Artists:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Episodes:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Movies:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Series:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Tracks:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+      "Movies (4K)":
+        # A friendlier name for the library to use in Discord
+        AlternateName: "My 4K Movies"
+        # How to display stats for each type of media in this library
+        # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
+        Albums:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Artists:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Episodes:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Movies:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Series:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Tracks:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+      "TV Shows (Non-English)":
+        # A friendlier name for the library to use in Discord
+        AlternateName: "My Non-English TV Shows"
+        # How to display stats for each type of media in this library
+        # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
+        Albums:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Artists:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Episodes:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Movies:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Series:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Tracks:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+    # Libraries to combine into an aggregate library
+    CombinedLibraries:
+      "All Movies":
+        # Which Plex libraries to combine into this aggregate library
+        Libraries:
+          - Movies
+          - Movies (Non-English)
+          - Movies (4K)
+        # How to display stats for each type of media in this library
+        # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
+        Albums:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Artists:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Episodes:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Movies:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Series:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Tracks:
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+  # Stats about the Tauticord host's performance
+  Performance:
+    # The name of the category
+    CategoryName: "Performance"
+    # Whether to enable performance stats
+    Enable: true
+    # The metrics
+    Metrics:
+      # CPU settings
+      CPU:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable CPU stats
+        Enable: true
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # Disk space settings
+      DiskSpace:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable disk space stats
+        Enable: true
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # Memory settings
+      Memory:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable memory stats
+        Enable: true
+        # The ID of the voice channel
+        VoiceChannelID: 0
+      # User count settings
+      UserCount:
+        # The custom emoji
+        CustomEmoji: ''
+        # Whether to enable user count stats
+        Enable: true
+        # The ID of the voice channel
+        VoiceChannelID: 0
