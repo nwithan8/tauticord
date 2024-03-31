@@ -1,3 +1,5 @@
+import os
+
 import modules.logs as logging
 
 from migrations.m001_env_var_to_config_yaml import Migration as Migration001
@@ -8,6 +10,11 @@ class MigrationManager:
         self.migration_data_directory = migration_data_directory
         self.config_directory = config_directory
         self.logs_directory = logs_directory
+
+        # Verify directories exist
+        os.makedirs(self.migration_data_directory, exist_ok=True)
+        os.makedirs(self.config_directory, exist_ok=True)
+        os.makedirs(self.logs_directory, exist_ok=True)
 
         self.migrations = [
             # Copy environment variables to a YAML file (not config.yaml to avoid schema issues)
