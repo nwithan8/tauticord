@@ -18,7 +18,14 @@ jobs:
     name: Build & Publish to DockerHub and GitHub Packages
     runs-on: ubuntu-20.04  # Node issues with arm v7 with latest: https://github.com/parse-community/parse-server/pull/8905
     if: contains(github.event.head_commit.message, '[no build]') == false
+    strategy:
+      matrix:
+        arch: [ 'linux/amd64', 'linux/armhf', 'linux/arm64' ]
     steps:
+      - name: Matrix => (${{ matrix.arch }} )
+        run: |
+          echo ${{ matrix.arch }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -85,7 +92,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          platforms: linux/amd64,linux/armhf,linux/arm64
+          platforms: ${{ matrix.arch }}
           tags: |
             nwithan8/tauticord:latest
             nwithan8/tauticord:${{ steps.vars.outputs.version }}
