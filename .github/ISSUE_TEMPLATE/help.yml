@@ -49,8 +49,8 @@ body:
       description: |
         Please select how you are configuring Tauticord.
       options:
-        - Environment Variables
         - Configuration File
+        - Environment Variables (no longer supported)
         - Unknown
     validations:
       required: true

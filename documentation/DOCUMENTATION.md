@@ -45,6 +45,8 @@ You will need to map the following volumes:
 The example configuration file is commented to help you understand what each variable does. All variables are required,
 so please complete the file in its entirety.
 
+#### Configuration Schema
+
 If you are using an IDE with support
 for [YAML validation ](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) or JSON Schema Store, the
 file should automatically import and begin validating against the schema. Hovering over elements in the configuration
