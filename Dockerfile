@@ -1,9 +1,9 @@
-# Node.js 18.19 pre-installed on Alpine Linux 3.17 (Python 3.10.x)
-FROM node:18.19.0-alpine3.17
+# Node.js 18.19 pre-installed on Alpine Linux 3.19 (Python 3.11.x)
+FROM node:18.19.0-alpine3.19
 WORKDIR /app
 
 # Install Python utilities
-RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip
+RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip cargo
 
 # Install pm2
 RUN npm install pm2 -g
@@ -16,6 +16,7 @@ RUN python3 -m venv /app/venv
 RUN . /app/venv/bin/activate
 
 # Install Python requirements
+RUN /app/venv/bin/pip install --no-cache-dir setuptools_rust # https://github.com/docker/compose/issues/8105#issuecomment-775931324
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Make Docker /config volume for optional config file
