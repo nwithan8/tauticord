@@ -317,6 +317,9 @@ and the provided [configuration schema](../DOCUMENTATION.md#configuration-schema
 
 ## :warning: Migrating on Unraid
 
+> :pencil2: **This process is only needed for Unraid users who are using the `Variables` to configure Tauticord. If you
+are already using a config file, you can upgrade as normal.**
+
 Starting with v5.0.0, the Unraid Community Application template for Tauticord no longer provides environmental
 variable (Variable) configuration options. As a result, you will not be able to provide environmental variables to
 configure Tauticord from the Unraid web UI.
