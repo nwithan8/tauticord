@@ -1,8 +1,8 @@
-# Node.js 18.19 pre-installed on Alpine Linux 3.19
-FROM node:18.19.0-alpine3.19
+# Node.js 18.19 pre-installed on Alpine Linux 3.17 (Python 3.10.x)
+FROM node:18.19.0-alpine3.17
 WORKDIR /app
 
-# Install Python utilities (always installs the latest version of Python 3)
+# Install Python utilities
 RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip
 
 # Install pm2
