@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nwithan8/tauticord/master/.schema/config_v2.schema.json
+
 # Tautulli settings
 Tautulli:
   # The URL of the Tautulli server
@@ -16,7 +18,7 @@ Discord:
   # The token for the Discord bot
   BotToken: "thisismydiscordbottoken"
   # The ID of the server
-  ServerID: '000000000001' # Right-click on your server's icon -> "Copy ID"
+  ServerID: '000000000000000001' # Right-click on your server's icon -> "Copy ID"
   # List of admin IDs
   AdminIDs:
     - '00000000000000000001' # Right-click on your profile picture -> "Copy ID"
@@ -135,8 +137,8 @@ Stats:
     RefreshSeconds: 3600
     # The libraries
     Libraries:
-      # Each key is the name of a library in Plex, as seen by Tautulli
-      "Audiobooks":
+      # The name of the library in Plex
+      - Name: "Audiobooks"
         # A friendlier name for the library to use in Discord
         AlternateName: "My Audiobooks"
         # How to display stats for each type of media in this library
@@ -183,7 +185,8 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-      "Movies (4K)":
+        # The name of the library in Plex
+      - Name: "Movies (4K)"
         # A friendlier name for the library to use in Discord
         AlternateName: "My 4K Movies"
         # How to display stats for each type of media in this library
@@ -230,7 +233,8 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-      "TV Shows (Non-English)":
+        # The name of the library in Plex
+      - Name: "TV Shows (Non-English)"
         # A friendlier name for the library to use in Discord
         AlternateName: "My Non-English TV Shows"
         # How to display stats for each type of media in this library
@@ -279,7 +283,8 @@ Stats:
           VoiceChannelID: 0
     # Libraries to combine into an aggregate library
     CombinedLibraries:
-      "All Movies":
+      # The name of the aggregate library
+      - Name: "All Movies"
         # Which Plex libraries to combine into this aggregate library
         Libraries:
           - Movies

@@ -15,6 +15,7 @@ def _marker(undone: bool = False) -> str:
 class BaseMigration:
     def __init__(self, number: str, migration_data_directory: str):
         self.number = number
+        self.migration_data_directory = migration_data_directory
         self._migration_file = f"{migration_data_directory}/.migration_{self.number}"
 
     def log(self, message: str):

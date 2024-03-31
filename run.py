@@ -47,6 +47,8 @@ args = parser.parse_args()
 logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log,
              file_log_level=FILE_LOG_LEVEL)
 
+logging.info(splash_logo())
+
 # Run migrations
 config_directory = os.path.dirname(args.config)
 if config_directory == "":
@@ -74,7 +76,6 @@ analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
 
 
 def start():
-    logging.info(splash_logo())
     logging.info("Starting Tauticord...")
 
     # noinspection PyBroadException

@@ -6,7 +6,8 @@ import yaml
 import legacy.config_parser_v1 as config_parser
 from legacy.utils import decode_combined_tautulli_libraries
 from migrations.base import BaseMigration
-from migrations.migration_names import CONFIG_FILE, MIGRATION_001_CONFIG_FILE, MIGRATION_002_CONFIG_FILE
+from migrations.migration_names import V1_CONFIG_FILE, V2_CONFIG_FILE, MIGRATION_001_CONFIG_FILE, \
+    MIGRATION_002_CONFIG_FILE
 
 
 def json_to_yaml(json_data) -> str:
@@ -39,21 +40,12 @@ class ConfigWriter:
             current = current[key]
         current[key_path[-1]] = value
 
-    def migrate_value(self, value, to_path: list[str]):
-        if value is None:
-            return
+    def migrate_value(self, value, to_path: list[str], default=None):
+        if (value is None or value == "None") and default is not None:
+            value = default
         self.add(value=value, key_path=to_path)
 
-    def build_voice_channel_config(self, parent_path: list[str], channel_name: str, enabled: bool,
-                                   custom_emoji: str = "", voice_channel_id: int = 0, additional_pairs: dict = None):
-        self.migrate_value(value=enabled, to_path=parent_path + [channel_name, "Enable"])
-        self.migrate_value(value=custom_emoji, to_path=parent_path + [channel_name, "CustomEmoji"])
-        self.migrate_value(value=voice_channel_id, to_path=parent_path + [channel_name, "VoiceChannelID"])
-        additional_pairs = additional_pairs or {}
-        for key, value in additional_pairs.items():
-            self.migrate_value(value=value, to_path=parent_path + [channel_name, key])
-
-    def build_voice_channel_config(self, channel_name: str, enabled: bool, custom_emoji: str = "",
+    def build_voice_channel_config(self, enabled: bool, custom_emoji: str = "",
                                    voice_channel_id: int = 0, additional_pairs: dict = None) -> dict:
         config = {
             "Enable": enabled,
@@ -77,27 +69,44 @@ class Migration(BaseMigration):
         super().__init__(number=number, migration_data_directory=migration_data_directory)
         self.config_folder = config_folder
         self.logs_folder = logs_folder
-        self.old_config_file = f"{self.config_folder}/{CONFIG_FILE}"
+        self.old_config_file = f"{self.config_folder}/{V1_CONFIG_FILE}"
         self.new_config_file = f"{migration_data_directory}/{MIGRATION_002_CONFIG_FILE}"
 
+    def is_file_in_new_schema(self, file_path: str) -> bool:
+        with open(file_path, 'r') as f:
+            data = yaml.safe_load(f)
+            # This path is only in the new schema. If it exists, it's the new schema
+            return path_exists_in_yaml(yaml_data=data, path=["Stats", "Activity", "Enable"])
+
     def pre_forward_check(self) -> bool:
-        # Make sure we have the old config file and it's still the old schema
+        # If the new config file already exists, we don't need to do anything
+        if os.path.isfile(f"{self.config_folder}/{V2_CONFIG_FILE}"):
+            # Delete the old config file
+            try:
+                os.remove(f"{self.config_folder}/{V1_CONFIG_FILE}")
+            except FileNotFoundError:
+                pass
+            return False
+
+        # Make sure we have the old config file
         if os.path.isfile(self.old_config_file):
-            with open(self.old_config_file, 'r') as f:
-                data = yaml.safe_load(f)
-                # This path is only in the new schema. If it exists, it's the new schema
-                if path_exists_in_yaml(yaml_data=data, path=["Stats", "Activity", "Enable"]):
-                    self.log(f"Config file at {self.old_config_file} is already in the new schema")
-                    return False
+
+            # If the config.yaml file is already in the new schema, we just need to move it
+            if self.is_file_in_new_schema(file_path=self.old_config_file):
+                self.log(f"Config file at {self.old_config_file} is already in the new schema, moving...")
+                shutil.move(self.old_config_file, f"{self.config_folder}/{V2_CONFIG_FILE}")
+                return False
+
+            # Otherwise, we need to migrate the old config file
             return True
 
+        # If we don't have the old config file available, try using the migration 001 config file
         self.log(f"Could not find old config file at {self.old_config_file}, trying {MIGRATION_001_CONFIG_FILE}")
-
-        # Check if we have the migration 001 config file
-        if os.path.isfile(f"{self.config_folder}/{MIGRATION_001_CONFIG_FILE}"):
-            self.old_config_file = f"{self.config_folder}/{MIGRATION_001_CONFIG_FILE}"
+        if os.path.isfile(f"{self.migration_data_directory}/{MIGRATION_001_CONFIG_FILE}"):
+            self.old_config_file = f"{self.migration_data_directory}/{MIGRATION_001_CONFIG_FILE}"
             return True
 
+        # Otherwise, we can't migrate anything
         self.error(f"Could not find old config file to migrate")
         return False
 
@@ -109,51 +118,51 @@ class Migration(BaseMigration):
         new_config = ConfigWriter(config_file_path=self.new_config_file)
 
         # Tautulli
-        new_config.migrate_value(value=old_config.tautulli.url, to_path=["Tautulli", "URL"])
-        new_config.migrate_value(value=old_config.tautulli.api_key, to_path=["Tautulli", "APIKey"])
+        new_config.migrate_value(value=old_config.tautulli.url, to_path=["Tautulli", "URL"], default="")
+        new_config.migrate_value(value=old_config.tautulli.api_key, to_path=["Tautulli", "APIKey"], default="")
         new_config.migrate_value(value=old_config.tautulli.disable_ssl_verification,
-                                 to_path=["Tautulli", "UseSelfSignedCert"])
-        new_config.migrate_value(value=old_config.tautulli.refresh_interval, to_path=["Tautulli", "RefreshSeconds"])
-        new_config.migrate_value(value=old_config.tautulli.terminate_message, to_path=["Tautulli", "TerminateMessage"])
+                                 to_path=["Tautulli", "UseSelfSignedCert"], default=False)
+        new_config.migrate_value(value=old_config.tautulli.refresh_interval, to_path=["Tautulli", "RefreshSeconds"], default=15)
+        new_config.migrate_value(value=old_config.tautulli.terminate_message, to_path=["Tautulli", "TerminateMessage"], default="")
         # Plex Pass setting no longer used
 
         # Discord
-        new_config.migrate_value(value=old_config.discord.bot_token, to_path=["Discord", "BotToken"])
-        new_config.migrate_value(value=old_config.discord.server_id, to_path=["Discord", "ServerID"])
-        new_config.migrate_value(value=old_config.discord.admin_ids, to_path=["Discord", "AdminIDs"])
+        new_config.migrate_value(value=old_config.discord.bot_token, to_path=["Discord", "BotToken"], default="")
+        new_config.migrate_value(value=old_config.discord.server_id, to_path=["Discord", "ServerID"], default="0")
+        new_config.migrate_value(value=old_config.discord.admin_ids, to_path=["Discord", "AdminIDs"], default=[])
         new_config.migrate_value(value=old_config.discord.use_summary_text_message,
-                                 to_path=["Discord", "PostSummaryMessage"])
+                                 to_path=["Discord", "PostSummaryMessage"], default=True)
         new_config.migrate_value(value=old_config.discord.channel_name, to_path=["Discord", "ChannelName"])
         new_config.migrate_value(value=old_config.discord.enable_slash_commands,
-                                 to_path=["Discord", "EnableSlashCommands"])
+                                 to_path=["Discord", "EnableSlashCommands"], default=False)
 
         # Display
-        new_config.migrate_value(value=old_config.tautulli.server_name, to_path=["Display", "ServerName"])
-        new_config.migrate_value(value=old_config.tautulli._use_friendly_names, to_path=["Display", "UseFriendlyNames"])
+        new_config.migrate_value(value=old_config.tautulli.server_name, to_path=["Display", "ServerName"], default="Plex Server")
+        new_config.migrate_value(value=old_config.tautulli._use_friendly_names, to_path=["Display", "UseFriendlyNames"], default=False)
         new_config.migrate_value(value=old_config.tautulli.thousands_separator,
-                                 to_path=["Display", "ThousandsSeparator"])
+                                 to_path=["Display", "ThousandsSeparator"], default="")
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_usernames,
-                                 to_path=["Display", "Anonymize", "HideUsernames"])
+                                 to_path=["Display", "Anonymize", "HideUsernames"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_platforms,
-                                 to_path=["Display", "Anonymize", "HidePlatforms"])
+                                 to_path=["Display", "Anonymize", "HidePlatforms"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_player_names,
-                                 to_path=["Display", "Anonymize", "HidePlayerNames"])
+                                 to_path=["Display", "Anonymize", "HidePlayerNames"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_quality,
-                                 to_path=["Display", "Anonymize", "HideQuality"])
+                                 to_path=["Display", "Anonymize", "HideQuality"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_bandwidth,
-                                 to_path=["Display", "Anonymize", "HideBandwidth"])
+                                 to_path=["Display", "Anonymize", "HideBandwidth"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_transcode_decision,
-                                 to_path=["Display", "Anonymize", "HideTranscode"])
+                                 to_path=["Display", "Anonymize", "HideTranscode"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_progress,
-                                 to_path=["Display", "Anonymize", "HideProgress"])
+                                 to_path=["Display", "Anonymize", "HideProgress"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_eta,
-                                 to_path=["Display", "Anonymize", "HideETA"])
+                                 to_path=["Display", "Anonymize", "HideETA"], default=False)
         new_config.migrate_value(
             value=old_config.tautulli._customization._get_value(key='Use24HourTime', default=False),
-            to_path=["Display", "Time", "Use24HourTime"])
+            to_path=["Display", "Time", "Use24HourTime"], default=False)
         new_config.migrate_value(
-            value=old_config.tautulli._customization._get_value(key='ServerTimeZone', default=None),
-            to_path=["Display", "Time", "ServerTimeZone"])
+            value=old_config.tautulli._customization._get_value(key='ServerTimeZone', default="UTC"),
+            to_path=["Display", "Time", "ServerTimeZone"], default="UTC")
 
         # Stats
         new_config.add(value=any([
@@ -165,7 +174,7 @@ class Migration(BaseMigration):
             old_config.tautulli.display_plex_status
         ]), key_path=["Stats", "Activity", "Enable"])
         new_config.migrate_value(value=old_config.tautulli.stats_voice_channel_category_name,
-                                 to_path=["Stats", "Activity", "CategoryName"])
+                                 to_path=["Stats", "Activity", "CategoryName"], default="Plex Stats")
         channels = {
             'StreamCount': old_config.tautulli.display_stream_count,
             'TranscodeCount': old_config.tautulli.display_transcode_count,
@@ -176,17 +185,17 @@ class Migration(BaseMigration):
         }
         stat_types = {}
         for channel_type, enabled in channels.items():
-            channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+            channel_config = new_config.build_voice_channel_config(enabled=enabled,
                                                                    voice_channel_id=0)
             stat_types[channel_type] = channel_config
 
         new_config.add(value=stat_types, key_path=["Stats", "Activity", "StatTypes"])
         new_config.migrate_value(value=old_config.tautulli.display_library_stats,
-                                 to_path=["Stats", "Libraries", "Enable"])
+                                 to_path=["Stats", "Libraries", "Enable"], default=False)
         new_config.migrate_value(value=old_config.tautulli.libraries_voice_channel_category_name,
-                                 to_path=["Stats", "Libraries", "CategoryName"])
+                                 to_path=["Stats", "Libraries", "CategoryName"], default="Plex Libraries")
         new_config.migrate_value(value=old_config.tautulli.library_refresh_interval,
-                                 to_path=["Stats", "Libraries", "RefreshSeconds"])
+                                 to_path=["Stats", "Libraries", "RefreshSeconds"], default=3600)
 
         library_configs = []
         for library in old_config.tautulli.library_names:
@@ -203,7 +212,7 @@ class Migration(BaseMigration):
                 'Tracks': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
-                channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+                channel_config = new_config.build_voice_channel_config(enabled=enabled,
                                                                        voice_channel_id=0)
                 library_config[channel_type] = channel_config
             library_configs.append(library_config)
@@ -225,7 +234,7 @@ class Migration(BaseMigration):
                 'Tracks': old_config.tautulli.show_music_track_count
             }
             for channel_type, enabled in channels.items():
-                channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+                channel_config = new_config.build_voice_channel_config(enabled=enabled,
                                                                        voice_channel_id=0)
                 library_config[channel_type] = channel_config
             combined_library_configs.append(library_config)
@@ -238,7 +247,7 @@ class Migration(BaseMigration):
             old_config.extras._performance_monitor_memory
         ]), key_path=["Stats", "Performance", "Enable"])
         new_config.migrate_value(value=old_config.tautulli._performance_voice_channel_category_name,
-                                 to_path=["Stats", "Performance", "CategoryName"])
+                                 to_path=["Stats", "Performance", "CategoryName"], default="Performance")
         channels = {
             'UserCount': old_config.extras._performance_monitor_tautulli_user_count,
             'DiskSpace': old_config.extras._performance_monitor_disk_space,
@@ -246,23 +255,36 @@ class Migration(BaseMigration):
             'Memory': old_config.extras._performance_monitor_memory
         }
         for channel_type, enabled in channels.items():
-            channel_config = new_config.build_voice_channel_config(channel_name=channel_type, enabled=enabled,
+            channel_config = new_config.build_voice_channel_config(enabled=enabled,
                                                                    voice_channel_id=0)
             new_config.add(value=channel_config, key_path=["Stats", "Performance", "Metrics", channel_type])
 
         # Extras
-        new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "AllowAnalytics"])
+        new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "AllowAnalytics"], default=True)
         new_config.add(value=True, key_path=["Extras", "EnableUpdateReminders"])
 
         # Write config file to disk
         new_config.save()
 
-        # Copy the file to config.yaml
-        shutil.copy(self.new_config_file, f"{self.config_folder}/config.yaml")
+        # Add YAML language server link at the top of the file
+        with open(self.new_config_file, 'r') as f:
+            data = f.read()
+        with open(self.new_config_file, 'w') as f:
+            f.write(
+                "# yaml-language-server: $schema=https://raw.githubusercontent.com/nwithan8/tauticord/master/.schema/config_v2.schema.json\n\n")
+            f.write(data)
+
+        # Copy (not replace) the file to new config file location
+        shutil.copy(self.new_config_file, f"{self.config_folder}/{V2_CONFIG_FILE}")
+        # Delete the old config file
+        try:
+            os.remove(f"{self.config_folder}/{V1_CONFIG_FILE}")
+        except FileNotFoundError:
+            pass
 
     def post_forward_check(self) -> bool:
         # Make sure the new config file was created
-        return os.path.isfile(self.new_config_file) and os.path.isfile(f"{self.config_folder}/config.yaml")
+        return os.path.isfile(self.new_config_file) and os.path.isfile(f"{self.config_folder}/{V2_CONFIG_FILE}")
 
     def backwards(self):
         self.mark_undone()
