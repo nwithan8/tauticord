@@ -524,8 +524,6 @@ class Config:
                 raise FileNotFoundError(f"Config file not found: {config_path}")
             self.pull_from_env = True
             logging.debug(f"Config file not found: {config_path}, falling back to environment variables")
-            logging.info(
-                f"WARNING: Environment variable configuration is going away soon! Please use a config file instead.")
 
         self.tautulli = TautulliConfig(self.config, pull_from_env=self.pull_from_env)
         self.discord = DiscordConfig(self.config, pull_from_env=self.pull_from_env)
