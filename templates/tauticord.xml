@@ -29,7 +29,7 @@
 
         Template now uses dropdowns for boolean values. Please see the [GitHub page](https://github.com/nwithan8/tauticord/blob/master/documentation/ANNOUNCEMENTS.md#adding-dropdown-options-in-unraid-community-applications-template) for more information.
     </Changes>
-    <Config Name="Config Path" Target="/config" Default="/mnt/user/appdata/tauticord/config" Mode="rw" Description="Where optional config file will be stored" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/config</Config>
+    <Config Name="Config Path" Target="/config" Default="/mnt/user/appdata/tauticord/config" Mode="rw" Description="Where config file will be stored" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/config</Config>
     <Config Name="Log Path" Target="/logs" Default="/mnt/user/appdata/tauticord/logs" Mode="rw" Description="Where debug logs will be stored" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/logs</Config>
     <Config Name="Monitor Path" Target="/monitor" Default="/mnt/user/appdata/tauticord/monitor" Mode="ro" Description="Directory to monitor usage percentage of (e.g. your Plex library)" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/monitor</Config>
 </Container>

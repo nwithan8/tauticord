@@ -4,7 +4,7 @@ import yaml
 
 import legacy.config_parser_v1 as config_parser
 from migrations.base import BaseMigration
-from migrations.migration_names import MIGRATION_001_CONFIG_FILE
+from migrations.migration_names import MIGRATION_001_CONFIG_FILE, V2_CONFIG_FILE
 from legacy.utils import decode_combined_tautulli_libraries
 
 
@@ -499,7 +499,10 @@ class Migration(BaseMigration):
         self._new_config_file_path = f"{migration_data_directory}/{MIGRATION_001_CONFIG_FILE}"
 
     def pre_forward_check(self) -> bool:
-        # Always run this migration to make sure the migrated config file is created
+        # If the new config file already exists, we don't need to do anything
+        if os.path.isfile(f"{self.config_folder}/{V2_CONFIG_FILE}"):
+            return False
+
         return True
 
     def forward(self):

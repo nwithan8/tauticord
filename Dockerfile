@@ -21,10 +21,6 @@ RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 # Make Docker /config volume for optional config file
 VOLUME /config
 
-# Copy example config file from build machine to Docker /config folder
-# Also copies any existing config.yaml file from build machine to Docker /config folder, (will cause the bot to use the existing config file if it exists)
-COPY config.yaml* /config/
-
 # Make Docker /logs volume for log file
 VOLUME /logs
 

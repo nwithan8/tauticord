@@ -139,6 +139,7 @@ cython_debug/
 
 # Custom
 config.yaml
+tauticord.yaml
 /docker-compose_test.yml
 /scratch.py
 /on_host/
