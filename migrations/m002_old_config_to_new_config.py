@@ -45,10 +45,11 @@ class ConfigWriter:
             value = default
         self.add(value=value, key_path=to_path)
 
-    def build_voice_channel_config(self, enabled: bool, custom_emoji: str = "",
+    def build_voice_channel_config(self, enabled: bool, custom_name: str = "", custom_emoji: str = "",
                                    voice_channel_id: int = 0, additional_pairs: dict = None) -> dict:
         config = {
             "Enable": enabled,
+            "CustomName": custom_name,
             "CustomEmoji": custom_emoji,
             "VoiceChannelID": voice_channel_id
         }

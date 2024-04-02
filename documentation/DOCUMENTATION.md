@@ -104,6 +104,7 @@ Tauticord currently offers three different types of statistics to display in voi
 All statistic voice channels have the following customization options:
 
 - Enable/Disable the voice channel (if disabled, Tauticord will not create/update the channel)
+- Custom name (overrides the default name for the statistic)
 - Custom emoji (overrides the default emoji for the statistic)
 - Voice channel ID specification (rather than letting Tauticord auto-generate the channel)
 
@@ -150,6 +151,7 @@ Libraries:
   - Name: Audiobooks  # The name of the library in Plex
     AlternateName: My Audiobooks  # The name to display in the statistics voice channels
     Albums: # Settings for the "Albums" statistic
+      CustomName: 'Books'  # Custom name to use for the statistic
       CustomEmoji: '📻'  # Custom emoji to use for the statistic
       Enable: true
       VoiceChannelID: 0  # The ID of the voice channel to update (0 for auto-management)

@@ -92,6 +92,17 @@
       "id": "#/definitions/voiceChannel",
       "type": "object",
       "properties": {
+        "CustomName": {
+          "description": "The custom name to use for the voice channel (overrides the default name)",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/discordVoiceChannelName"
+            },
+            {
+              "$ref": "#/definitions/emptyString"
+            }
+          ]
+        },
         "CustomEmoji": {
           "description": "The custom emoji to use for the voice channel (overrides the default emoji)",
           "type": "string"
