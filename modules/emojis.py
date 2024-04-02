@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union, List
 
 import discord
-from discord import Emoji, PartialEmoji
+from discord import PartialEmoji as DiscordPartialEmoji, Emoji as DiscordEmoji
 from pydantic import BaseModel
 
 import modules.logs as logging
@@ -38,14 +38,14 @@ async def upload_new_emoji(emoji_file: EmojiFile, client: discord.Client, guild_
         return None
 
 
-async def collect_guild_emojis(client: discord.Client, guild_id: int) -> tuple[Emoji, ...]:
+async def collect_guild_emojis(client: discord.Client, guild_id: int) -> tuple[DiscordEmoji, ...]:
     guild = client.get_guild(guild_id)  # stupid positional-only parameters
 
     return guild.emojis
 
 
 async def get_corresponding_emoji_from_server(emoji_file: EmojiFile, client: discord.Client, guild_id: int) -> Union[
-    Emoji, None]:
+    DiscordEmoji, None]:
     existing_emojis = await collect_guild_emojis(client=client, guild_id=guild_id)
 
     for emoji in existing_emojis:
@@ -60,56 +60,56 @@ def max_controllable_stream_count_supported(max_streams_override: Optional[int] 
 
 
 class Emoji(enum.Enum):
-    Number1 = "1️⃣"
-    Number2 = "2️⃣"
-    Number3 = "3️⃣"
-    Number4 = "4️⃣"
-    Number5 = "5️⃣"
-    Number6 = "6️⃣"
-    Number7 = "7️⃣"
-    Number8 = "8️⃣"
-    Number9 = "9️⃣"
-    Number10 = "🔟"
-    LetterA = "🇦"
-    LetterB = "🇧"
-    LetterC = "🇨"
-    LetterD = "🇩"
-    LetterE = "🇪"
-    LetterF = "🇫"
-    LetterG = "🇬"
-    LetterH = "🇭"
-    LetterI = "🇮"
-    LetterJ = "🇯"
-    LetterK = "🇰"
-    LetterL = "🇱"
-    LetterM = "🇲"
-    LetterN = "🇳"
-    LetterO = "🇴"
-    LetterP = "🇵"
-    LetterQ = "🇶"
-    LetterR = "🇷"
-    LetterS = "🇸"
-    LetterT = "🇹"
-    LetterU = "🇺"
-    LetterV = "🇻"
-    LetterW = "🇼"
-    LetterX = "🇽"
-    LetterY = "🇾"
-    LetterZ = "🇿"
+    Number1 = "1⃣"
+    Number2 = "2⃣"
+    Number3 = "3⃣"
+    Number4 = "4⃣"
+    Number5 = "5⃣"
+    Number6 = "6⃣"
+    Number7 = "7⃣"
+    Number8 = "8⃣"
+    Number9 = "9⃣"
+    Number10 = "10⃣"
+    LetterA = "A⃣"
+    LetterB = "B⃣"
+    LetterC = "C⃣"
+    LetterD = "D⃣"
+    LetterE = "E⃣"
+    LetterF = "F⃣"
+    LetterG = "G⃣"
+    LetterH = "H⃣"
+    LetterI = "I⃣"
+    LetterJ = "J⃣"
+    LetterK = "K⃣"
+    LetterL = "L⃣"
+    LetterM = "M⃣"
+    LetterN = "N⃣"
+    LetterO = "O⃣"
+    LetterP = "P⃣"
+    LetterQ = "Q⃣"
+    LetterR = "R⃣"
+    LetterS = "S⃣"
+    LetterT = "T⃣"
+    LetterU = "U⃣"
+    LetterV = "V⃣"
+    LetterW = "W⃣"
+    LetterX = "X⃣"
+    LetterY = "Y⃣"
+    LetterZ = "Z⃣"
     Bandwidth = "📶"
     LocalBandwidth = "🏠"
     RemoteBandwidth = "🌐"
     Buffering = "⏳"
     Clip = "🎞"
     Episode = "🧩"
-    Error = "⚠️"
+    Error = "⚠"
     Home = "🏠"
     Live = "📡"
     Movie = "🎥"
     Paused = "⏸"
     Person = "👤"
     Photo = "🖼"
-    Playing = "▶️"
+    Playing = "▶"
     Stopped = "⏹"
     Device = "📱"
     Resolution = "🖥"
@@ -233,7 +233,7 @@ class EmojiManager:
         number_str = str(number)
         return self._emoji_aliases.get(number_str, "❓")  # Return a question mark if the emoji is not found
 
-    def stream_number_from_emoji(self, emoji: PartialEmoji) -> Union[int, None]:
+    def stream_number_from_emoji(self, emoji: DiscordPartialEmoji) -> Union[int, None]:
         # If using the Tauticord custom emojis, name corresponds to the stream number (e.g. tc_1 is 1, tc_2 is 2, etc.)
         if emoji.name.startswith(statics.EMOJI_PREFIX):
             number = emoji.name.replace(f"{statics.EMOJI_PREFIX}_", "")
