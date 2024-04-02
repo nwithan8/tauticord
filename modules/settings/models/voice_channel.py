@@ -9,7 +9,7 @@ class VoiceChannel(BaseConfig):
 
     @property
     def prefix(self) -> str:
-        return f"{self.emoji} {self.name}"
+        return f"{self.emoji.strip()} {self.name}"
 
     @property
     def channel_id_set(self) -> bool:
@@ -22,7 +22,7 @@ class VoiceChannel(BaseConfig):
         return {
             "name": self.name,
             "enable": self.enable,
-            "emoji": self.emoji,
+            "emoji": self.emoji.strip(),
             "channel_id": self.channel_id
         }
 
