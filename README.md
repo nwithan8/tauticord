@@ -11,7 +11,7 @@ A Discord bot that displays live data from Tautulli
 <a href="https://www.buymeacoffee.com/nwithan8" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="19" width="95"></a>
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/nwithan8?style=flat-square)](https://github.com/sponsors/nwithan8)
 
-<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/logo.png" alt="logo">
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/logo.png" alt="logo">
 
 </div>
 
