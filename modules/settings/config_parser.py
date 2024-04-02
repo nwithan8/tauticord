@@ -38,6 +38,10 @@ class VoiceChannelConfig(ConfigSection):
 
     def to_model(self) -> settings_models.VoiceChannel:
         enable: bool = utils.extract_boolean(self.get_value(key="Enable", default=False))
+        name: str = self.get_value(key="CustomName", default="")
+        if not name:
+            # Fall back to the default channel name if a custom name is not provided
+            name: str = self.channel_name
         emoji: str = self.get_value(key="CustomEmoji", default="")
         if not emoji:
             # Fall back to the default emoji if a custom emoji is not provided
@@ -45,7 +49,7 @@ class VoiceChannelConfig(ConfigSection):
         channel_id: int = self.get_value(key="VoiceChannelID", default="0")
 
         return settings_models.VoiceChannel(
-            name=self.channel_name,
+            name=name.strip(),
             enable=enable,
             emoji=emoji.strip(),
             channel_id=channel_id
