@@ -19,6 +19,10 @@ def url_encode(string: str) -> str:
     return quote_plus(string)
 
 
+def strip_phantom_space(string: str) -> str:
+    return string.replace('️', "").replace("\u200b", "").strip()
+
+
 def minutes_to_hhmm(seconds: int) -> str:
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)

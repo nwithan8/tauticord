@@ -1,4 +1,5 @@
 from modules.settings.models.base import BaseConfig
+from modules.utils import strip_phantom_space
 
 
 class VoiceChannel(BaseConfig):
@@ -9,7 +10,8 @@ class VoiceChannel(BaseConfig):
 
     @property
     def prefix(self) -> str:
-        return f"{self.emoji.strip()} {self.name}"
+        emoji = strip_phantom_space(string=self.emoji)
+        return f"{emoji} {self.name}"
 
     @property
     def channel_id_set(self) -> bool:

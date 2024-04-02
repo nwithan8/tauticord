@@ -49,9 +49,9 @@ class VoiceChannelConfig(ConfigSection):
         channel_id: int = self.get_value(key="VoiceChannelID", default="0")
 
         return settings_models.VoiceChannel(
-            name=name.strip(),
+            name=utils.strip_phantom_space(string=name),
             enable=enable,
-            emoji=emoji.strip(),
+            emoji=utils.strip_phantom_space(string=emoji),
             channel_id=channel_id
         )
 
