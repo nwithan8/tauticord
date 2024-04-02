@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union, List
 
 import discord
-from discord import Emoji, PartialEmoji
+from discord import PartialEmoji as DiscordPartialEmoji, Emoji as DiscordEmoji
 from pydantic import BaseModel
 
 import modules.logs as logging
@@ -38,14 +38,14 @@ async def upload_new_emoji(emoji_file: EmojiFile, client: discord.Client, guild_
         return None
 
 
-async def collect_guild_emojis(client: discord.Client, guild_id: int) -> tuple[Emoji, ...]:
+async def collect_guild_emojis(client: discord.Client, guild_id: int) -> tuple[DiscordEmoji, ...]:
     guild = client.get_guild(guild_id)  # stupid positional-only parameters
 
     return guild.emojis
 
 
 async def get_corresponding_emoji_from_server(emoji_file: EmojiFile, client: discord.Client, guild_id: int) -> Union[
-    Emoji, None]:
+    DiscordEmoji, None]:
     existing_emojis = await collect_guild_emojis(client=client, guild_id=guild_id)
 
     for emoji in existing_emojis:
@@ -233,7 +233,7 @@ class EmojiManager:
         number_str = str(number)
         return self._emoji_aliases.get(number_str, "❓")  # Return a question mark if the emoji is not found
 
-    def stream_number_from_emoji(self, emoji: PartialEmoji) -> Union[int, None]:
+    def stream_number_from_emoji(self, emoji: DiscordPartialEmoji) -> Union[int, None]:
         # If using the Tauticord custom emojis, name corresponds to the stream number (e.g. tc_1 is 1, tc_2 is 2, etc.)
         if emoji.name.startswith(statics.EMOJI_PREFIX):
             number = emoji.name.replace(f"{statics.EMOJI_PREFIX}_", "")
