@@ -50,7 +50,7 @@ async def create_discord_category(client: discord.Client,
 async def create_discord_channel(client: discord.Client,
                                  guild_id: int,
                                  channel_name: str,
-                                 channel_type: discord.ChannelType = discord.ChannelType.text,
+                                 channel_type: discord.ChannelType,
                                  category: discord.CategoryChannel = None) -> \
         Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]:
     match channel_type:
@@ -94,7 +94,7 @@ async def get_all_discord_channels(client: discord.Client,
 async def get_or_create_discord_channel_by_name(client: discord.Client,
                                                 guild_id: int,
                                                 channel_name: str,
-                                                channel_type: discord.ChannelType = None,
+                                                channel_type: discord.ChannelType,
                                                 category: discord.CategoryChannel = None) -> \
         Union[discord.VoiceChannel, discord.TextChannel, discord.CategoryChannel, None]:
     channels = await get_all_discord_channels(client=client, guild_id=guild_id, channel_type=channel_type)
@@ -115,7 +115,7 @@ async def get_or_create_discord_channel_by_name(client: discord.Client,
 async def get_or_create_discord_channel_by_starting_name(client: discord.Client,
                                                          guild_id: int,
                                                          starting_channel_name: str,
-                                                         channel_type: discord.ChannelType = None,
+                                                         channel_type: discord.ChannelType,
                                                          category: discord.CategoryChannel = None) -> \
         Union[discord.VoiceChannel, discord.TextChannel, None]:
     channels = await get_all_discord_channels(client=client, guild_id=guild_id, channel_type=channel_type)

@@ -31,7 +31,8 @@ class CommandManager:
     def _cogs_to_add(self):
         return [
             Most(bot=self._bot, tautulli=self._tautulli, admin_check=self.is_admin),
-            Summary(bot=self._bot, tautulli=self._tautulli, emoji_manager=self._emoji_manager, admin_check=self.is_admin),
+            Summary(bot=self._bot, tautulli=self._tautulli, emoji_manager=self._emoji_manager,
+                    admin_check=self.is_admin),
             Recently(bot=self._bot, tautulli=self._tautulli, admin_check=self.is_admin),
         ]
 
@@ -58,6 +59,7 @@ class CommandManager:
             logging.info("Slash commands not enabled. Skipping registration...")
 
         # Need to sync regardless (either adding newly-registered cogs or syncing/removing existing ones)
+        logging.info("Syncing slash commands...")
         if not self._synced:
             await self._bot.tree.sync(guild=self._guild)
             self._synced = True

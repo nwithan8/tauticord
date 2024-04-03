@@ -119,7 +119,8 @@ class DiscordConnector:
                 await discord_utils.get_or_create_discord_channel_by_name(
                     client=self.client,
                     guild_id=self.guild_id,
-                    channel_name=self.tautulli_summary_channel_name)
+                    channel_name=self.tautulli_summary_channel_name,
+                    channel_type=discord.ChannelType.text)
             if not self.tautulli_summary_channel:
                 raise Exception(f"Could not load {quote(self.tautulli_summary_channel_name)} channel. Exiting...")
 
