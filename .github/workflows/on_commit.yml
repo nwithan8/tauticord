@@ -17,5 +17,5 @@ jobs:
       - name: Install dependencies
         run: pip install -r ci/requirements.txt
       - name: Validate Config
-        run: make validate-example-config-unix
+        run: python ci/validate_example_config.py .schema/config_v2.schema.json tauticord.yaml.example
 
