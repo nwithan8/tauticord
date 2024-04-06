@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Optional
 
 import discord
 
@@ -174,6 +174,43 @@ async def send_embed_message(embed: discord.Embed = None, message: discord.Messa
             return await channel.send(content="Something went wrong.")
         else:
             return await channel.send(content=None, embed=embed)
+
+
+async def update_presence(client: discord.Client,
+                          line_one: str,
+                          activity_name: Optional[str] = None,
+                          large_image: Optional[str] = None,
+                          large_image_text: Optional[str] = None,
+                          small_image: Optional[str] = None,
+                          small_image_text: Optional[str] = None,
+                          status: Optional[discord.Status] = discord.Status.online):
+    # ref: https://discord.com/developers/docs/rich-presence/how-to#updating-presence-update-presence-payload-fields
+    # ref: https://discord.com/developers/docs/game-sdk/activities#updateactivity
+    use_custom_activity_type = activity_name is None
+    if use_custom_activity_type:
+        activity_type = discord.ActivityType.custom
+        name = line_one
+        details = None
+        state = None
+    else:
+        activity_type = discord.ActivityType.watching
+        name = activity_name
+        details = None
+        state = line_one
+
+    activity = discord.Activity(
+        name=name,
+        type=activity_type,
+        details=details,
+        state=state,
+        assets={
+            'large_image': large_image,
+            'large_text': large_image_text,
+            'small_image': small_image,
+            'small_text': small_image_text
+        }
+    )
+    await client.change_presence(activity=activity, status=status)
 
 
 def is_valid_reaction(reaction_emoji: discord.PartialEmoji,

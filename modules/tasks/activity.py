@@ -19,6 +19,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
                  tautulli_connector: TautulliConnector,
                  guild_id: int,
                  message: discord.Message,
+                 discord_status_settings: modules.settings.models.DiscordStatusMessage,
                  emoji_manager: EmojiManager,
                  version_checker: VersionChecker,
                  voice_category: discord.CategoryChannel = None):
@@ -28,6 +29,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
                          voice_category=voice_category)
         self.message = message
         self.stats_settings = settings
+        self.discord_status_settings = discord_status_settings
         self.tautulli = tautulli_connector
         self.emoji_manager = emoji_manager
         self.version_checker = version_checker
@@ -172,6 +174,13 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
 
         if self.stats_settings.enable:
             await self.update_activity_stats(summary=summary)
+
+        if self.discord_status_settings.should_update_with_activity:
+            activity_name = self.discord_status_settings.activity_name
+            message = self.discord_status_settings.message(stream_count=0)
+            await discord_utils.update_presence(client=self.discord_client,
+                                                activity_name=activity_name,
+                                                line_one=message)
 
         if self.message:  # Set in the constructor, indicates that a summary message should be sent
             await self.update_activity_summary_message(summary=summary)

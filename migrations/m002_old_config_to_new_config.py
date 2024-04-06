@@ -123,8 +123,10 @@ class Migration(BaseMigration):
         new_config.migrate_value(value=old_config.tautulli.api_key, to_path=["Tautulli", "APIKey"], default="")
         new_config.migrate_value(value=old_config.tautulli.disable_ssl_verification,
                                  to_path=["Tautulli", "UseSelfSignedCert"], default=False)
-        new_config.migrate_value(value=old_config.tautulli.refresh_interval, to_path=["Tautulli", "RefreshSeconds"], default=15)
-        new_config.migrate_value(value=old_config.tautulli.terminate_message, to_path=["Tautulli", "TerminateMessage"], default="")
+        new_config.migrate_value(value=old_config.tautulli.refresh_interval, to_path=["Tautulli", "RefreshSeconds"],
+                                 default=15)
+        new_config.migrate_value(value=old_config.tautulli.terminate_message, to_path=["Tautulli", "TerminateMessage"],
+                                 default="")
         # Plex Pass setting no longer used
 
         # Discord
@@ -136,10 +138,18 @@ class Migration(BaseMigration):
         new_config.migrate_value(value=old_config.discord.channel_name, to_path=["Discord", "ChannelName"])
         new_config.migrate_value(value=old_config.discord.enable_slash_commands,
                                  to_path=["Discord", "EnableSlashCommands"], default=False)
+        status_message_settings = {
+            "Enable": True,
+            "CustomMessage": "",
+            "ShowStreamCount": True,
+        }
+        new_config.add(value=status_message_settings, key_path=["Discord", "StatusMessage"])
 
         # Display
-        new_config.migrate_value(value=old_config.tautulli.server_name, to_path=["Display", "ServerName"], default="Plex Server")
-        new_config.migrate_value(value=old_config.tautulli._use_friendly_names, to_path=["Display", "UseFriendlyNames"], default=False)
+        new_config.migrate_value(value=old_config.tautulli.server_name, to_path=["Display", "ServerName"],
+                                 default="Plex Server")
+        new_config.migrate_value(value=old_config.tautulli._use_friendly_names, to_path=["Display", "UseFriendlyNames"],
+                                 default=False)
         new_config.migrate_value(value=old_config.tautulli.thousands_separator,
                                  to_path=["Display", "ThousandsSeparator"], default="")
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_usernames,
@@ -261,7 +271,8 @@ class Migration(BaseMigration):
             new_config.add(value=channel_config, key_path=["Stats", "Performance", "Metrics", channel_type])
 
         # Extras
-        new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "AllowAnalytics"], default=True)
+        new_config.migrate_value(value=old_config.extras.allow_analytics, to_path=["Extras", "AllowAnalytics"],
+                                 default=True)
         new_config.add(value=True, key_path=["Extras", "EnableUpdateReminders"])
 
         # Write config file to disk

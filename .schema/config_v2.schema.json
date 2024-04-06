@@ -322,6 +322,28 @@
           "title": "Enable slash commands",
           "description": "Whether to enable slash commands for the bot",
           "type": "boolean"
+        },
+        "StatusMessage": {
+          "title": "Bot Discord activity status",
+          "description": "Settings regarding the bot's Discord status/activity",
+          "type": "object",
+          "properties": {
+            "Enable": {
+              "title": "Enable bot activity status",
+              "description": "Whether to enable the bot's activity status",
+              "type": "boolean"
+            },
+            "CustomMessage": {
+              "title": "Custom activity status message",
+              "description": "Display a custom activity status message. Overrides default if not-empty",
+              "$ref": "#/definitions/emptyableString"
+            },
+            "ShowStreamCount": {
+              "title": "Show active stream count",
+              "description": "Whether to display current active stream count in activity status message",
+              "type": "boolean"
+            }
+          }
         }
       },
       "required": [
