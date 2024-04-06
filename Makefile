@@ -6,3 +6,9 @@ install-unix:
 
 install-win:
 	${WINDOWS_BIN}\pip.exe install -r .\requirements.txt
+
+validate-example-config-unix:
+	${UNIX_BIN}/python ci/validate_example_config.py .schema/config_v2.schema.json tauticord.yaml.example
+
+validate-example-config-win:
+	${WINDOWS_BIN}\python.exe ci\validate_example_config.py .schema\config_v2.schema.json tauticord.yaml.example

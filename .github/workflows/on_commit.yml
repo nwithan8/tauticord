@@ -4,8 +4,8 @@ on:
   workflow_dispatch: ~
 
 jobs:
-  placeholder:
-    name: Placeholder
+  config_validation:
+    name: Config Validation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -14,3 +14,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r ci/requirements.txt
+      - name: Validate Config
+        run: python ci/validate_example_config.py .schema/config_v2.schema.json tauticord.yaml.example
+

@@ -336,7 +336,7 @@
             "CustomMessage": {
               "title": "Custom activity status message",
               "description": "Display a custom activity status message. Overrides default if not-empty",
-              "$ref": "#/definitions/emptyableString"
+              "type": "string"
             },
             "ShowStreamCount": {
               "title": "Show active stream count",
