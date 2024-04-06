@@ -28,6 +28,14 @@ Discord:
   ChannelName: "tautulli"
   # Whether to enable slash commands
   EnableSlashCommands: true
+  # Settings for the activity/status message
+  StatusMessage:
+    # Whether to enable the status message
+    Enable: true
+    # A custom message to display in the status message, overriding the default message
+    CustomMessage: ''
+    # Whether to display the number of streams in the default message
+    ShowStreamCount: true
 
 # Display settings
 Display:
