@@ -8,6 +8,7 @@ Dockerfile
 .idea
 docker-compose.yml
 venv
+.venv
 __pycache__
 Tauticord.log
 documentation
