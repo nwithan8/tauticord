@@ -66,7 +66,7 @@ class VersionChecker:
         self.enable = enable
         self._new_version_available = False
 
-    async def check_for_new_version(self):
+    async def monitor_for_new_version(self):
         while True:
             try:
                 self._new_version_available = newer_version_available()

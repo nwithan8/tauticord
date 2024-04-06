@@ -44,6 +44,8 @@ class DiscordConnector:
         self.thousands_separator: str = display_settings.thousands_separator
         self.analytics: GoogleAnalytics = analytics
 
+        self.discord_status_settings: settings_models.DiscordStatusMessage = discord_settings.status_message_settings
+
         self.tautulli_summary_channel_name: str = discord_settings.channel_name
         self.tautulli_summary_channel: discord.TextChannel = None
 
@@ -89,10 +91,15 @@ class DiscordConnector:
 
         await self.command_manager.register_slash_commands()
 
-        logging.info("Setting bot status...")
-
-        await self.client.change_presence(
-            activity=discord.Activity(type=discord.ActivityType.watching, name='for Tautulli stats'))
+        if self.discord_status_settings.should_update_on_startup:
+            logging.info("Setting bot status...")
+            activity_name = self.discord_status_settings.activity_name
+            message = self.discord_status_settings.message(
+                stream_count=0,  # No streams on startup, use fallback
+                fallback="Starting up...")
+            await discord_utils.update_presence(client=self.client,
+                                                activity_name=activity_name,
+                                                line_one=message)
 
         logging.info("Uploading required resources...")
 
@@ -156,6 +163,7 @@ class DiscordConnector:
         # This handles both text channel updates AND activity stats voice channel updates
         self.activity_monitor = ActivityStatsAndSummaryMessage(discord_client=self.client,
                                                                settings=self.stats_settings.activity,
+                                                               discord_status_settings=self.discord_status_settings,
                                                                tautulli_connector=self.tautulli,
                                                                guild_id=self.guild_id,
                                                                message=summary_message,
@@ -200,7 +208,7 @@ class DiscordConnector:
         if self.version_checker and self.version_checker.enable:
             logging.info("Starting version checking service...")
             # noinspection PyAsyncCall
-            asyncio.create_task(self.version_checker.check_for_new_version())
+            asyncio.create_task(self.version_checker.monitor_for_new_version())
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         if not self.tautulli_summary_channel or not self.activity_monitor:

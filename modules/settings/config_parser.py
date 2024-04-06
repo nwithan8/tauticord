@@ -21,12 +21,14 @@ class ConfigSection:
         except KeyError:
             return default
 
-    def get_subsection_data(self, key: str) -> dict:
+    def get_subsection_data(self, key: str, optional: bool = False) -> dict:
         try:
             data = self.data[key]
             assert isinstance(data, dict)
             return data
         except KeyError:
+            if optional:
+                return {}
             raise KeyError(f"Subsection '{key}' not found in section")
 
 
@@ -56,6 +58,26 @@ class VoiceChannelConfig(ConfigSection):
         )
 
 
+class DiscordStatusMessageConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.DiscordStatusMessage:
+        enable = utils.extract_boolean(self.get_value(key="Enable", default=True))
+        activity_name = "Tautulli stats"  # "Watching Tautulli Stats"
+        custom_message = self.get_value(key="CustomMessage", default=None)
+        if custom_message:
+            activity_name = None  # Will trigger a custom status message rather than a "Watching" status
+        show_stream_count = utils.extract_boolean(self.get_value(key="ShowStreamCount", default=True))
+
+        return settings_models.DiscordStatusMessage(
+            enable=enable,
+            custom_message=custom_message,
+            activity_name=activity_name,
+            show_stream_count=show_stream_count
+        )
+
+
 class DiscordConfig(ConfigSection):
     def __init__(self, data: dict):
         super().__init__(data=data)
@@ -69,6 +91,9 @@ class DiscordConfig(ConfigSection):
         use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
         enable_slash_commands = utils.extract_boolean(self.get_value(key="EnableSlashCommands", default=False))
 
+        status_message_settings_data = self.get_subsection_data(key="StatusMessage", optional=True)
+        status_message_settings = DiscordStatusMessageConfig(data=status_message_settings_data).to_model()
+
         return settings_models.Discord(
             bot_token=bot_token,
             server_id=server_id,
@@ -76,6 +101,7 @@ class DiscordConfig(ConfigSection):
             channel_name=channel_name,
             use_summary_message=use_summary_message,
             enable_slash_commands=enable_slash_commands,
+            status_message_settings=status_message_settings
         )
 
 

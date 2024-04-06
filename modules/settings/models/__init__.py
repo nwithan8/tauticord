@@ -1,5 +1,5 @@
 from modules.settings.models.anonymity import Anonymity
-from modules.settings.models.discord import Discord
+from modules.settings.models.discord import Discord, StatusMessage as DiscordStatusMessage
 from modules.settings.models.display import Display
 from modules.settings.models.extras import Extras
 from modules.settings.models.libraries import BaseLibrary, Library, CombinedLibrary
