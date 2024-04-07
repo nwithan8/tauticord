@@ -13,6 +13,10 @@ from modules.versioning import VersionChecker
 
 
 class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
+    """
+    A cron-based service loop that updates the live activity voice channel stats and summary text message.
+    """
+
     def __init__(self,
                  discord_client,
                  settings: modules.settings.models.ActivityStats,

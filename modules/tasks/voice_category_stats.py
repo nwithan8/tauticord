@@ -9,6 +9,10 @@ from modules.settings.models import VoiceChannel
 
 
 class VoiceCategoryStatsMonitor:
+    """
+    Base class for a cron-based service loop that updates voice channels in a category with stats.
+    """
+
     def __init__(self,
                  discord_client,
                  guild_id: int,

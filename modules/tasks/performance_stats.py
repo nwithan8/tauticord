@@ -9,6 +9,10 @@ from modules.utils import quote
 
 
 class PerformanceMonitor(VoiceCategoryStatsMonitor):
+    """
+    A cron-based service loop that updates the performance stats voice channels.
+    """
+
     def __init__(self,
                  discord_client,
                  settings: modules.settings.models.PerformanceStats,

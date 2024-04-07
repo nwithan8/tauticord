@@ -8,6 +8,10 @@ from modules.tautulli.tautulli_connector import TautulliConnector
 
 
 class LibraryStats(VoiceCategoryStatsMonitor):
+    """
+    A cron-based service loop that updates the library stats voice channels.
+    """
+
     def __init__(self,
                  discord_client,
                  settings: modules.settings.models.LibraryStats,
