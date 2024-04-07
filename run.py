@@ -2,8 +2,6 @@ import argparse
 import os
 import threading
 
-from flask import Flask
-
 import modules.logs as logging
 import modules.tautulli.tautulli_connector as tautulli
 from consts import (
@@ -136,19 +134,16 @@ bot = Bot(
     emoji_manager=emoji_manager,
 )
 
+
 # Set up Flask for webhooks
-flask_app = Flask(__name__)
-
-
-def run_flask():
-    flask_app.run(host='0.0.0.0', port=8080)
-
+# flask_app = Flask(__name__)
 
 def start():
     # Start Flask first (in separate thread)
-    logging.info("Starting Flask server")
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
+    # logging.info("Starting Flask server")
+    # flask_thread = threading.Thread(
+    #    target=lambda: flask_app.run(host=host_name, port=port, debug=True, use_reloader=False))
+    # flask_thread.start()
 
     # Connect the bot to Discord (last step, since it will block and trigger all the sub-services)
     bot.connect()

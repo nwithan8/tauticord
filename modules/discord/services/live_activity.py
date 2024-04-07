@@ -66,7 +66,7 @@ class LiveActivityMonitor(BaseService):
             if not self.tautulli_summary_channel:
                 raise Exception(f"Could not load {quote(self.tautulli_summary_channel_name)} channel. Exiting...")
 
-            logging.info(f"{quote(self.tautulli_summary_channel_name)} channel collected.")
+            logging.debug(f"{quote(self.tautulli_summary_channel_name)} channel collected.")
 
             # If the very last message in the channel is from Tauticord, use it
             async for msg in self.tautulli_summary_channel.history(limit=1):

@@ -49,7 +49,7 @@ class BaseService:
                                              category_name: str) -> discord.CategoryChannel:
         assert self.bot, "Bot not registered. Exiting..."
 
-        logging.info(f"Getting {quote(category_name)} voice category")
+        logging.debug(f"Getting {quote(category_name)} voice category")
 
         category = await discord_utils.get_or_create_discord_category_by_name(client=self.bot,
                                                                               guild_id=guild_id,
@@ -58,7 +58,7 @@ class BaseService:
         if not category:
             raise Exception(f"Could not load {quote(category_name)} voice category. Exiting...")
 
-        logging.info(f"{quote(category_name)} voice category collected.")
+        logging.debug(f"{quote(category_name)} voice category collected.")
         return category
 
     async def collect_discord_text_channel(self,
@@ -66,7 +66,7 @@ class BaseService:
                                            channel_name: str) -> discord.TextChannel:
         assert self.bot, "Bot not registered. Exiting..."
 
-        logging.info(f"Getting {quote(channel_name)} text channel")
+        logging.debug(f"Getting {quote(channel_name)} text channel")
 
         channel = await discord_utils.get_or_create_discord_channel_by_name(client=self.bot,
                                                                             guild_id=guild_id,
@@ -76,7 +76,7 @@ class BaseService:
         if not channel:
             raise Exception(f"Could not load {quote(channel_name)} text channel. Exiting...")
 
-        logging.info(f"{quote(channel_name)} text channel collected.")
+        logging.debug(f"{quote(channel_name)} text channel collected.")
         return channel
 
     async def collect_discord_voice_channel(self,
@@ -84,7 +84,7 @@ class BaseService:
                                             channel_name: str) -> discord.VoiceChannel:
         assert self.bot, "Bot not registered. Exiting..."
 
-        logging.info(f"Getting {quote(channel_name)} voice channel")
+        logging.debug(f"Getting {quote(channel_name)} voice channel")
 
         channel = await discord_utils.get_or_create_discord_channel_by_name(client=self.bot,
                                                                             guild_id=guild_id,
@@ -94,5 +94,5 @@ class BaseService:
         if not channel:
             raise Exception(f"Could not load {quote(channel_name)} voice channel. Exiting...")
 
-        logging.info(f"{quote(channel_name)} voice channel collected.")
+        logging.debug(f"{quote(channel_name)} voice channel collected.")
         return channel

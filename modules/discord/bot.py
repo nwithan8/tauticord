@@ -37,7 +37,7 @@ class Bot:
     async def on_ready(self):
         # Set bot status if required
         if self.discord_status_settings.should_update_on_startup:
-            logging.info("Setting bot status...")
+            logging.debug("Setting bot status...")
             activity_name = self.discord_status_settings.activity_name
             message = self.discord_status_settings.message(
                 stream_count=0,  # No streams on startup, use fallback
@@ -46,7 +46,7 @@ class Bot:
                                                 activity_name=activity_name,
                                                 line_one=message)
 
-        logging.info("Uploading required resources...")
+        logging.debug("Uploading required resources...")
 
         # How many emoji slots are left (excluding any emojis that have already been uploaded; avoid re-uploading)
         available_emoji_slots = await discord_utils.available_emoji_slots(client=self.client, guild_id=self.guild_id)

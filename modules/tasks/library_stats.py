@@ -59,10 +59,6 @@ class LibraryStats(VoiceCategoryStatsMonitor):
                                                        stat=item_counts.tracks)
 
     async def update_library_stats(self) -> None:
-        logging.info("Updating library stats...")
-
-        # Only got here because library stats are enabled, no need to check
-
         """
         Update the individual stat voice channels for each regular library and each combined library
         """

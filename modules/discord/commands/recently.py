@@ -65,7 +65,7 @@ class Recently(commands.GroupCog, name="recently"):
         self._tautulli = tautulli
         self._admin_check = admin_check
         super().__init__()  # This is required for the cog to work.
-        logging.info("Recently cog loaded.")
+        logging.debug("Recently cog loaded.")
 
     @app_commands.command(name="added", description="Show recently added media.")
     @app_commands.describe(

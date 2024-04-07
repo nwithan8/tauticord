@@ -18,7 +18,7 @@ class Summary(commands.Cog):
         self._emoji_manager = emoji_manager
         self._admin_check = admin_check
         super().__init__()  # This is required for the cog to work.
-        logging.info("Summary cog loaded.")
+        logging.debug("Summary cog loaded.")
 
     async def check_admin(self, interaction: discord.Interaction) -> bool:
         if self._admin_check and not self._admin_check(interaction):

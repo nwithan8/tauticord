@@ -36,7 +36,7 @@ class PerformanceMonitor(VoiceCategoryStatsMonitor):
         if self.stats_settings.user_count.enable:
             settings = self.stats_settings.user_count
             user_count = self.tautulli.get_user_count()
-            logging.info(f"Updating Users voice channel with new user count: {user_count}")
+            logging.debug(f"Updating Users voice channel with new user count: {user_count}")
             await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                stat=user_count)
 
@@ -49,20 +49,20 @@ class PerformanceMonitor(VoiceCategoryStatsMonitor):
             else:
                 stat = system_stats.disk_usage_display(path)
 
-            logging.info(f"Updating Disk voice channel with new disk space: {stat}")
+            logging.debug(f"Updating Disk voice channel with new disk space: {stat}")
             await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                stat=stat)
 
         if self.stats_settings.cpu.enable:
             settings = self.stats_settings.cpu
             cpu_percent = system_stats.cpu_usage_display()
-            logging.info(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
+            logging.debug(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
             await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                stat=cpu_percent)
 
         if self.stats_settings.memory.enable:
             settings = self.stats_settings.memory
             memory_percent = system_stats.ram_usage_display()
-            logging.info(f"Updating Memory voice channel with new Memory percent: {memory_percent}")
+            logging.debug(f"Updating Memory voice channel with new Memory percent: {memory_percent}")
             await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                stat=memory_percent)
