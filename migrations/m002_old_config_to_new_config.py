@@ -212,6 +212,7 @@ class Migration(BaseMigration):
         for library in old_config.tautulli.library_names:
             library_config = {
                 "Name": library,
+                "ID": 0,
                 "AlternateName": "",
             }
             channels = {
@@ -232,9 +233,15 @@ class Migration(BaseMigration):
         combined_library_configs = []
         for encoded in old_config.tautulli.combined_library_names:
             name, libraries = decode_combined_tautulli_libraries(encoded_string=encoded)
+            libraries_config = []
+            for library in libraries:
+                libraries_config.append({
+                    "Name": library,
+                    "ID": 0
+                })
             library_config = {
                 "Name": name,
-                "Libraries": libraries,
+                "Libraries": libraries_config,
             }
             channels = {
                 'Movies': True,
