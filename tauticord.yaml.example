@@ -161,6 +161,8 @@ Stats:
       - Name: "Audiobooks"
         # A friendlier name for the library to use in Discord
         AlternateName: "My Audiobooks"
+        # The ID of the library in Tautulli, to differentiate between libraries with the same name. Set to 0 to ignore
+        ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
         Albums:
@@ -221,6 +223,8 @@ Stats:
       - Name: "Movies (4K)"
         # A friendlier name for the library to use in Discord
         AlternateName: "My 4K Movies"
+        # The ID of the library in Tautulli, to differentiate between libraries with the same name. Set to 0 to ignore
+        ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
         Albums:
@@ -281,6 +285,8 @@ Stats:
       - Name: "TV Shows (Non-English)"
         # A friendlier name for the library to use in Discord
         AlternateName: "My Non-English TV Shows"
+        # The ID of the library in Tautulli, to differentiate between libraries with the same name. Set to 0 to ignore
+        ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
         Albums:
@@ -343,9 +349,16 @@ Stats:
       - Name: "All Movies"
         # Which Plex libraries to combine into this aggregate library
         Libraries:
-          - Movies
-          - Movies (Non-English)
-          - Movies (4K)
+          # The name of the library in Plex
+          - Name: "Movies"
+            # The ID of the library in Tautulli, to differentiate between libraries with the same name. Set to 0 to ignore
+            ID: 0
+          - Name: "Movies (Non-English)"
+            # The ID of the library in Tautulli, to differentiate between libraries with the same name. Set to 0 to ignore
+            ID: 0
+          - Name: "Movies (4K)"
+            # The ID of the library in Tautulli, to differentiate between libraries with the same name. Set to 0 to ignore
+            ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
         Albums:

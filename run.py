@@ -1,11 +1,6 @@
-# Copyright 2023, Nathan Harris.
-# All rights reserved.
-# Tauticord is released as-is under the "GNU General Public License".
-# Please see the LICENSE file that should have been included as part of this package.
 import argparse
 import os
 
-import modules.discord.discord_connector as discord
 import modules.logs as logging
 import modules.tautulli.tautulli_connector as tautulli
 from consts import (
@@ -19,7 +14,13 @@ from consts import (
 from migrations.migration_manager import MigrationManager
 from modules import versioning
 from modules.analytics import GoogleAnalytics
-from modules.errors import determine_exit_code
+from modules.discord.bot import Bot
+from modules.discord.services.library_stats import LibraryStatsMonitor
+from modules.discord.services.live_activity import LiveActivityMonitor
+from modules.discord.services.performance_stats import PerformanceStatsMonitor
+from modules.discord.services.slash_commands import SlashCommandManager
+from modules.discord.services.tagged_message import TaggedMessagesManager
+from modules.emojis import EmojiManager
 from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
@@ -27,7 +28,7 @@ from modules.statics import (
     KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH, KEY_RUN_ARGS_MONITOR_PATH,
 )
 
-# Parse arguments
+# Parse CLI arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
 
 """
@@ -40,13 +41,11 @@ parser.add_argument("-c", "--config", help="Path to config file", default=DEFAUL
 parser.add_argument("-l", "--log", help="Log file directory", default=DEFAULT_LOG_DIR)
 parser.add_argument("-u", "--usage", help="Path to directory to monitor for disk usage",
                     default=MONITORED_DISK_SPACE_FOLDER)
-
 args = parser.parse_args()
 
 # Set up logging
 logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log,
              file_log_level=FILE_LOG_LEVEL)
-
 logging.info(splash_logo())
 
 # Run migrations
@@ -74,39 +73,81 @@ analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
                             anonymous_ip=True,
                             do_not_track=not config.extras.allow_analytics)
 
+# Set up Tautulli connection
+logging.info("Setting up Tautulli connection")
+tautulli_connector = tautulli.TautulliConnector(
+    tautulli_settings=config.tautulli,
+    display_settings=config.display,
+    stats_settings=config.stats,
+    analytics=analytics,
+)
+
+# Set up emoji manager
+emoji_manager = EmojiManager()
+
+# Set up Discord bot
+services = [
+    # Services start in the order they are added
+    SlashCommandManager(
+        enable_slash_commands=config.discord.enable_slash_commands,
+        guild_id=config.discord.server_id,
+        tautulli=tautulli_connector,
+        emoji_manager=emoji_manager,
+        admin_ids=config.discord.admin_ids,
+    ),
+    TaggedMessagesManager(
+        guild_id=config.discord.server_id,
+        emoji_manager=emoji_manager,
+        admin_ids=config.discord.admin_ids,
+    ),
+    LiveActivityMonitor(
+        tautulli_connector=tautulli_connector,
+        discord_settings=config.discord,
+        tautulli_settings=config.tautulli,
+        stats_settings=config.stats,
+        emoji_manager=emoji_manager,
+        analytics=analytics,
+        version_checker=versioning.VersionChecker(enable=config.extras.update_reminders)
+    ),
+    LibraryStatsMonitor(
+        tautulli_connector=tautulli_connector,
+        discord_settings=config.discord,
+        stats_settings=config.stats,
+        emoji_manager=emoji_manager,
+        analytics=analytics,
+    ),
+    PerformanceStatsMonitor(
+        tautulli_connector=tautulli_connector,
+        discord_settings=config.discord,
+        stats_settings=config.stats,
+        run_args_settings=config.run_args,
+        emoji_manager=emoji_manager,
+        analytics=analytics,
+    ),
+]
+logging.info("Setting up Discord connection")
+bot = Bot(
+    bot_token=config.discord.bot_token,
+    services=services,
+    discord_status_settings=config.discord.status_message_settings,
+    guild_id=config.discord.server_id,
+    emoji_manager=emoji_manager,
+)
+
+
+# Set up Flask for webhooks
+# flask_app = Flask(__name__)
 
 def start():
-    logging.info("Starting Tauticord...")
+    # Start Flask first (in separate thread)
+    # logging.info("Starting Flask server")
+    # flask_thread = threading.Thread(
+    #    target=lambda: flask_app.run(host=host_name, port=port, debug=True, use_reloader=False))
+    # flask_thread.start()
 
-    # noinspection PyBroadException
-    try:
-        logging.info("Setting up Tautulli connector")
-        tautulli_connector = tautulli.TautulliConnector(
-            tautulli_settings=config.tautulli,
-            display_settings=config.display,
-            stats_settings=config.stats,
-            analytics=analytics,
-        )
-
-        logging.info("Setting up Discord connector")
-        discord_connector = discord.DiscordConnector(
-            tautulli_connector=tautulli_connector,
-            discord_settings=config.discord,
-            tautulli_settings=config.tautulli,
-            display_settings=config.display,
-            stats_settings=config.stats,
-            run_args_settings=config.run_args,
-            analytics=analytics,
-            version_checker=versioning.VersionChecker(enable=config.extras.update_reminders),
-        )
-
-        discord_connector.connect()
-    except Exception as e:
-        logging.fatal(f"Fatal error occurred. Shutting down: {e}")
-        exit_code = determine_exit_code(exception=e)
-        logging.fatal(f"Exiting with code {exit_code}")
-        exit(exit_code)  # Exit the script if an error bubbles up (like an internet connection error)
+    # Connect the bot to Discord (last step, since it will block and trigger all the sub-services)
+    bot.connect()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start()

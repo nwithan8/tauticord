@@ -170,15 +170,23 @@ class TautulliConnector:
         logging.error(f"Could not get ID for library {library_name}")
         return None
 
-    def get_library_info(self, library_name: str) -> Union[dict, None]:
+    def get_library_info(self, library_name: str, library_id: int = None) -> Union[dict, None]:
         logging.info(f"Collecting stats about library \"{library_name}\"")
-        library_id = self.get_library_id(library_name=library_name)
+
+        # Use library ID if provided, otherwise get it from the name
+
+        if not library_id:
+            library_id = self.get_library_id(library_name=library_name)
+
         if not library_id:
             return None
+
         return self.api.get_library(section_id=library_id)
 
-    def get_item_counts_for_a_single_library(self, library_name: str) -> LibraryItemCounts | None:
-        library_info = self.get_library_info(library_name=library_name)
+    def get_item_counts_for_a_single_library(self,
+                                             library_name: str,
+                                             library_id: int = None) -> LibraryItemCounts | None:
+        library_info = self.get_library_info(library_name=library_name, library_id=library_id)
         logging.debug(f"JSON returned by GET request: {library_info}")
 
         if not library_info:
@@ -215,8 +223,10 @@ class TautulliConnector:
             tracks=tracks
         )
 
-    def get_item_counts_for_multiple_combined_libraries(self, combined_library_name: str,
-                                                        sub_library_names: List[str]) -> LibraryItemCounts | None:
+    def get_item_counts_for_multiple_combined_libraries(self,
+                                                        combined_library_name: str,
+                                                        sub_libraries: List[
+                                                            settings_models.CombinedLibrarySubLibrary]) -> LibraryItemCounts | None:
         rolling_library_type = None
 
         movies = 0
@@ -226,15 +236,16 @@ class TautulliConnector:
         albums = 0
         tracks = 0
 
-        for library_name in sub_library_names:
-            library_item_counts = self.get_item_counts_for_a_single_library(library_name=library_name)
+        for library in sub_libraries:
+            library_item_counts = self.get_item_counts_for_a_single_library(library_name=library.name,
+                                                                            library_id=library.library_id)
 
             if not library_item_counts:
                 continue
 
             if rolling_library_type and rolling_library_type != library_item_counts.library_type:
                 logging.error(
-                    f"Library types do not match: {library_name} ({library_item_counts.library_type}) and {combined_library_name} ({rolling_library_type}). Cannot combine stats for different types of libraries.")
+                    f"Library types do not match: {library.name} ({library_item_counts.library_type}) and {combined_library_name} ({rolling_library_type}). Cannot combine stats for different types of libraries.")
                 return None
 
             rolling_library_type = library_item_counts.library_type

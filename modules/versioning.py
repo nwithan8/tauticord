@@ -16,7 +16,7 @@ from modules.statics import (
 
 
 def _get_latest_github_release() -> Union[str, None]:
-    logging.info('Retrieving latest version information from GitHub')
+    logging.debug('Retrieving latest version information from GitHub')
 
     url = f'https://api.github.com/repos/{GITHUB_REPO}/releases/latest'
     data = objectrest.get_json(url)
@@ -33,7 +33,7 @@ def _newer_github_release_available(current_version: str) -> bool:
 
 
 def _get_latest_github_commit() -> Union[str, None]:
-    logging.info('Retrieving latest commit information from GitHub')
+    logging.debug('Retrieving latest commit information from GitHub')
 
     url = f'https://api.github.com/repos/{GITHUB_REPO}/commits/{GITHUB_REPO_MASTER_BRANCH}'
     data = objectrest.get_json(url)

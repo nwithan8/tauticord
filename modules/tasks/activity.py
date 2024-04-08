@@ -13,6 +13,10 @@ from modules.versioning import VersionChecker
 
 
 class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
+    """
+    A cron-based service loop that updates the live activity voice channel stats and summary text message.
+    """
+
     def __init__(self,
                  discord_client,
                  settings: modules.settings.models.ActivityStats,
@@ -44,7 +48,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
         if self.stats_settings.plex_availability.enable:
             settings = self.stats_settings.plex_availability
             status_emoji = self.emoji_manager.get_emoji(key="online" if summary.plex_online else "offline")
-            logging.info(f"Updating {settings.name} voice channel with new status: {status_emoji}")
+            logging.debug(f"Updating {settings.name} voice channel with new status: {status_emoji}")
             await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                stat=status_emoji)  # Always use an emoji for status
 
@@ -55,35 +59,35 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
             if self.stats_settings.stream_count.enable:
                 settings = self.stats_settings.stream_count
                 count = activity.stream_count
-                logging.info(f"Updating {settings.name} voice channel with new stream count: {count}")
+                logging.debug(f"Updating {settings.name} voice channel with new stream count: {count}")
                 await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                    stat=count)
 
             if self.stats_settings.transcode_count.enable:
                 settings = self.stats_settings.transcode_count
                 count = activity.transcode_count
-                logging.info(f"Updating {settings.name} voice channel with new transcode count: {count}")
+                logging.debug(f"Updating {settings.name} voice channel with new transcode count: {count}")
                 await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                    stat=count)
 
             if self.stats_settings.bandwidth.enable:
                 settings = self.stats_settings.bandwidth
                 bandwidth = activity.total_bandwidth
-                logging.info(f"Updating {settings.name} voice channel with new bandwidth: {bandwidth}")
+                logging.debug(f"Updating {settings.name} voice channel with new bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                    stat=bandwidth)
 
             if self.stats_settings.local_bandwidth.enable:
                 settings = self.stats_settings.local_bandwidth
                 bandwidth = activity.lan_bandwidth
-                logging.info(f"Updating {settings.name} voice channel with new local bandwidth: {bandwidth}")
+                logging.debug(f"Updating {settings.name} voice channel with new local bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                    stat=bandwidth)
 
             if self.stats_settings.remote_bandwidth.enable:
                 settings = self.stats_settings.remote_bandwidth
                 bandwidth = activity.wan_bandwidth
-                logging.info(f"Updating {settings.name} voice channel with new remote bandwidth: {bandwidth}")
+                logging.debug(f"Updating {settings.name} voice channel with new remote bandwidth: {bandwidth}")
                 await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                    stat=bandwidth)
 

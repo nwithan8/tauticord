@@ -32,7 +32,7 @@ class Most(commands.GroupCog, name="most"):
         self._tautulli = tautulli
         self._admin_check = admin_check
         super().__init__()  # This is required for the cog to work.
-        logging.info("Most cog loaded.")
+        logging.debug("Most cog loaded.")
 
     async def check_admin(self, interaction: discord.Interaction) -> bool:
         if self._admin_check and not self._admin_check(interaction):

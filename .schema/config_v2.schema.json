@@ -28,6 +28,11 @@
       "minimum": 0,
       "maximum": 0
     },
+    "positiveInteger": {
+      "id": "#/definitions/positiveInteger",
+      "type": "integer",
+      "minimum": 1
+    },
     "hostWithIpAndOptionalPort": {
       "id": "#/definitions/hostWithIpAndOptionalPort",
       "type": "string",
@@ -137,6 +142,17 @@
           "description": "The name of the library as it appears in Plex",
           "type": "string"
         },
+        "ID": {
+          "description": "The ID of the library as it appears in Tautulli. Use if the library name is not unique",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/positiveInteger"
+            },
+            {
+              "$ref": "#/definitions/numberZero"
+            }
+          ]
+        },
         "AlternateName": {
           "description": "An alternate name for the library (used as the voice channel name)",
           "oneOf": [
@@ -184,6 +200,30 @@
         "Tracks"
       ]
     },
+    "combinedLibrarySubLibrary": {
+      "id": "#/definitions/combinedLibrarySubLibrary",
+      "type": "object",
+      "properties": {
+        "Name": {
+          "description": "The name of the library as it appears in Tautulli",
+          "type": "string"
+        },
+        "ID": {
+          "description": "The ID of the library as it appears in Tautulli. Use if the library name is not unique",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/positiveInteger"
+            },
+            {
+              "$ref": "#/definitions/numberZero"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Name"
+      ]
+    },
     "combinedLibrary": {
       "id": "#/definitions/combinedLibrary",
       "type": "object",
@@ -200,10 +240,10 @@
           ]
         },
         "Libraries": {
-          "description": "The names of the Plex libraries to combine",
+          "description": "The libraries to combine",
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/definitions/combinedLibrarySubLibrary"
           }
         },
         "Albums": {

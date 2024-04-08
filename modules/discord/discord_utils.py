@@ -138,7 +138,7 @@ async def get_or_create_discord_channel_by_starting_name(client: discord.Client,
 async def get_or_create_discord_category_by_name(client: discord.Client,
                                                  guild_id: int,
                                                  category_name: str) -> discord.CategoryChannel:
-    logging.info(f"Getting {quote(category_name)} category")
+    logging.debug(f"Getting {quote(category_name)} category")
     categories = await get_all_discord_channels(client=client, guild_id=guild_id,
                                                 channel_type=discord.ChannelType.category)
     for category in categories:

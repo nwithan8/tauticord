@@ -27,7 +27,7 @@ async def upload_new_emoji(emoji_file: EmojiFile, client: discord.Client, guild_
 
     # Upload the new emoji
     try:
-        logging.info(f"Uploading emoji '{emoji_file.name_with_prefix}' to server")
+        logging.debug(f"Uploading emoji '{emoji_file.name_with_prefix}' to server")
         with open(emoji_file.path, 'rb') as f:
             image_bytes: bytes = f.read()
             return await guild.create_custom_emoji(name=emoji_file.name_with_prefix, image=image_bytes,

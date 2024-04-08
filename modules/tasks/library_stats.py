@@ -8,6 +8,10 @@ from modules.tautulli.tautulli_connector import TautulliConnector
 
 
 class LibraryStats(VoiceCategoryStatsMonitor):
+    """
+    A cron-based service loop that updates the library stats voice channels.
+    """
+
     def __init__(self,
                  discord_client,
                  settings: modules.settings.models.LibraryStats,
@@ -55,10 +59,6 @@ class LibraryStats(VoiceCategoryStatsMonitor):
                                                        stat=item_counts.tracks)
 
     async def update_library_stats(self) -> None:
-        logging.info("Updating library stats...")
-
-        # Only got here because library stats are enabled, no need to check
-
         """
         Update the individual stat voice channels for each regular library and each combined library
         """
@@ -68,20 +68,18 @@ class LibraryStats(VoiceCategoryStatsMonitor):
 
         # Regular libraries
         for library_settings in self.stats_settings.libraries:
-            library_name = library_settings.name
-
             item_counts: modules.tautulli.tautulli_connector.LibraryItemCounts = (
                 self.tautulli.get_item_counts_for_a_single_library(
-                    library_name=library_name))
+                    library_name=library_settings.name,
+                    library_id=library_settings.library_id))
 
             await self.update_library_stats_for_library(library_settings=library_settings, item_counts=item_counts)
 
         # Combined libraries
         for library_settings in self.stats_settings.combined_libraries:
-            library_name = library_settings.name
-
             item_counts: modules.tautulli.tautulli_connector.LibraryItemCounts = (
                 self.tautulli.get_item_counts_for_multiple_combined_libraries(
-                    combined_library_name=library_name, sub_library_names=library_settings.libraries))
+                    combined_library_name=library_settings.name,
+                    sub_libraries=library_settings.libraries))
 
             await self.update_library_stats_for_library(library_settings=library_settings, item_counts=item_counts)

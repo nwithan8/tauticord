@@ -68,7 +68,7 @@ class Session:
             key = 'live'
         emoji = emoji_manager.get_emoji(key=key)
         if not emoji:
-            logging.info(
+            logging.debug(
                 "New media_type to pick icon for: {}: {}".format(self._data['title'], self._data['media_type']))
             return '🎁'
         return emoji

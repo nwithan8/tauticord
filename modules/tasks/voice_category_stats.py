@@ -9,6 +9,10 @@ from modules.settings.models import VoiceChannel
 
 
 class VoiceCategoryStatsMonitor:
+    """
+    Base class for a cron-based service loop that updates voice channels in a category with stats.
+    """
+
     def __init__(self,
                  discord_client,
                  guild_id: int,
@@ -55,6 +59,6 @@ class VoiceCategoryStatsMonitor:
         try:
             new_name = voice_channel_settings.build_channel_name(value=stat)
             await channel.edit(name=f"{new_name}")
-            logging.info(f"Updated {channel.name} successfully")
+            logging.debug(f"Updated {channel.name} successfully")
         except Exception as voice_channel_edit_error:
             logging.error(f"Error editing {channel.name} voice channel: {voice_channel_edit_error}")
