@@ -16,10 +16,12 @@ class ConfigSection:
         self.data = data
 
     def get_value(self, key: str, default: Any = None) -> Any:
-        try:
-            return self.data[key]
-        except KeyError:
+        value = self.data.get(key, default)
+
+        if value is None or value == "":
             return default
+
+        return value
 
     def get_subsection_data(self, key: str, optional: bool = False) -> dict:
         try:
@@ -220,6 +222,20 @@ class StatsActivityConfig(ConfigSection):
         )
 
 
+class CombinedLibrariesSubLibraryConfig(ConfigSection):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def to_model(self) -> settings_models.CombinedLibrarySubLibrary:
+        name = self.get_value(key="Name")
+        _id = self.get_value(key="ID")
+
+        return settings_models.CombinedLibrarySubLibrary(
+            name=name,
+            id=_id
+        )
+
+
 class StatsLibrariesConfig(ConfigSection):
     def __init__(self, data: dict):
         super().__init__(data=data)
@@ -234,6 +250,7 @@ class StatsLibrariesConfig(ConfigSection):
             details_config = ConfigSection(data=library_details)
 
             library_name = details_config.get_value(key="Name", default="")
+            library_id = details_config.get_value(key="ID", default=None)
             alternate_name = details_config.get_value(key="AlternateName", default="")
             voice_channel_name = alternate_name if alternate_name else library_name
             movie = VoiceChannelConfig(channel_name=voice_channel_name,
@@ -258,6 +275,7 @@ class StatsLibrariesConfig(ConfigSection):
             libraries.append(
                 settings_models.Library(
                     name=library_name,
+                    id=library_id,
                     alternate_name=alternate_name,
                     voice_channels=settings_models.LibraryVoiceChannels(
                         movie=movie,
@@ -275,8 +293,23 @@ class StatsLibrariesConfig(ConfigSection):
         for combined_library_details in combined_libraries_data:
             details_config = ConfigSection(data=combined_library_details)
 
-            combined_library_name = details_config.get_value(key="Name", default="")
-            combined_library_names = details_config.get_value(key="Libraries", default=[])
+            combined_library_name: str = details_config.get_value(key="Name", default="")
+            combined_library_id: int = details_config.get_value(key="ID", default=None)
+
+            sub_libraries: list[settings_models.CombinedLibrarySubLibrary] = []
+            sub_library_data: list[dict] = details_config.get_value(key="Libraries", default=[])
+            # TODO: Remove in next major release as schema has changed
+            # Skip if the sub-library data is a list of strings
+            if all(isinstance(sub_library, str) for sub_library in sub_library_data):
+                logging.warning(
+                    f"Skipping combined libraries as the sub-library data is invalid.")
+                continue
+            else:
+                for sub_library_details in sub_library_data:
+                    sub_library_config: CombinedLibrariesSubLibraryConfig = CombinedLibrariesSubLibraryConfig(
+                        data=sub_library_details)
+                    sub_libraries.append(sub_library_config.to_model())
+
             movie = VoiceChannelConfig(channel_name=combined_library_name,
                                        emoji=Emoji.Movie,
                                        data=details_config.get_subsection_data("Movies")).to_model()
@@ -299,7 +332,8 @@ class StatsLibrariesConfig(ConfigSection):
             combined_libraries.append(
                 settings_models.CombinedLibrary(
                     name=combined_library_name,
-                    libraries=combined_library_names,
+                    id=combined_library_id,
+                    libraries=sub_libraries,
                     voice_channels=settings_models.LibraryVoiceChannels(
                         movie=movie,
                         album=album,

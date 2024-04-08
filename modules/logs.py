@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from typing import Optional
+
 from pytz import timezone
 
 _nameToLevel = {
@@ -61,6 +62,10 @@ def init(app_name: str,
 
 def level_name_to_level(level_name: str):
     return _nameToLevel.get(level_name, _nameToLevel['NOTSET'])
+
+
+def warning(message: str, specific_logger: Optional[str] = None):
+    logging.getLogger(specific_logger if specific_logger else _DEFAULT_LOGGER_NAME).warning(msg=message)
 
 
 def info(message: str, specific_logger: Optional[str] = None):

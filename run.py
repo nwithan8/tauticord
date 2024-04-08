@@ -1,6 +1,5 @@
 import argparse
 import os
-import threading
 
 import modules.logs as logging
 import modules.tautulli.tautulli_connector as tautulli
@@ -75,7 +74,7 @@ analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
                             do_not_track=not config.extras.allow_analytics)
 
 # Set up Tautulli connection
-logging.info("Setting up Tautulli connector")
+logging.info("Setting up Tautulli connection")
 tautulli_connector = tautulli.TautulliConnector(
     tautulli_settings=config.tautulli,
     display_settings=config.display,
@@ -126,6 +125,7 @@ services = [
         analytics=analytics,
     ),
 ]
+logging.info("Setting up Discord connection")
 bot = Bot(
     bot_token=config.discord.bot_token,
     services=services,

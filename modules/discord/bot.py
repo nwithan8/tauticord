@@ -61,8 +61,6 @@ class Bot:
                 await self.emoji_manager.load_custom_emojis(client=self.client, guild_id=self.guild_id)
                 available_emoji_slots -= un_uploaded_emoji_count
 
-        print('Bot is ready.')
-
         # Activate services
         for service in self._services:
             await service.register_bot(bot=self.client)

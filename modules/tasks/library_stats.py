@@ -68,20 +68,18 @@ class LibraryStats(VoiceCategoryStatsMonitor):
 
         # Regular libraries
         for library_settings in self.stats_settings.libraries:
-            library_name = library_settings.name
-
             item_counts: modules.tautulli.tautulli_connector.LibraryItemCounts = (
                 self.tautulli.get_item_counts_for_a_single_library(
-                    library_name=library_name))
+                    library_name=library_settings.name,
+                    library_id=library_settings.library_id))
 
             await self.update_library_stats_for_library(library_settings=library_settings, item_counts=item_counts)
 
         # Combined libraries
         for library_settings in self.stats_settings.combined_libraries:
-            library_name = library_settings.name
-
             item_counts: modules.tautulli.tautulli_connector.LibraryItemCounts = (
                 self.tautulli.get_item_counts_for_multiple_combined_libraries(
-                    combined_library_name=library_name, sub_library_names=library_settings.libraries))
+                    combined_library_name=library_settings.name,
+                    sub_libraries=library_settings.libraries))
 
             await self.update_library_stats_for_library(library_settings=library_settings, item_counts=item_counts)
