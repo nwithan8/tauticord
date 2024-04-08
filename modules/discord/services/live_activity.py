@@ -10,6 +10,7 @@ from modules.analytics import GoogleAnalytics
 from modules.discord import discord_utils
 from modules.discord.services.base_service import BaseService
 from modules.emojis import EmojiManager
+from modules.errors import TauticordSetupFailure
 from modules.tasks.activity import ActivityStatsAndSummaryMessage
 from modules.utils import quote
 
@@ -86,6 +87,9 @@ class LiveActivityMonitor(BaseService):
                                 inline=False)
                 summary_message = await discord_utils.send_embed_message(embed=embed,
                                                                          channel=self.tautulli_summary_channel)
+
+        if not summary_message:
+            raise TauticordSetupFailure("Could not prepare activity summary message")
 
         activity_stats_voice_category = None
         if self.stats_settings.activity.enable:

@@ -21,8 +21,8 @@
       "instances": 1,
       // 101 - Discord login failed
       // 102 - Missing privileged intents
-      // 201 - Migrations failed
-      "stop_exit_codes": [101, 102]
+      // 301 - Migrations failed
+      "stop_exit_codes": [101, 102, 301]
     }
   ]
 }

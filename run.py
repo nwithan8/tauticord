@@ -21,6 +21,7 @@ from modules.discord.services.performance_stats import PerformanceStatsMonitor
 from modules.discord.services.slash_commands import SlashCommandManager
 from modules.discord.services.tagged_message import TaggedMessagesManager
 from modules.emojis import EmojiManager
+from modules.errors import determine_exit_code, TauticordMigrationFailure
 from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
@@ -43,102 +44,135 @@ parser.add_argument("-u", "--usage", help="Path to directory to monitor for disk
                     default=MONITORED_DISK_SPACE_FOLDER)
 args = parser.parse_args()
 
-# Set up logging
-logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log,
-             file_log_level=FILE_LOG_LEVEL)
-logging.info(splash_logo())
-
-# Run migrations
 config_directory = os.path.dirname(args.config)
 if config_directory == "":
     config_directory = "./"
-migration_manager = MigrationManager(
-    migration_data_directory=os.path.join(config_directory, "migration_data"),
-    config_directory=config_directory,
-    logs_directory=args.log)
-if not migration_manager.run_migrations():
-    logging.fatal("Migrations failed. Exiting...")
-    exit(201)
 
-# Set up configuration
-kwargs = {
-    KEY_RUN_ARGS_MONITOR_PATH: args.usage,
-    KEY_RUN_ARGS_CONFIG_PATH: config_directory,
-    KEY_RUN_ARGS_LOG_PATH: args.log,
-}
-config = Config(config_path=f"{args.config}", **kwargs)
 
-# Set up analytics
-analytics = GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
-                            anonymous_ip=True,
-                            do_not_track=not config.extras.allow_analytics)
+def run_with_potential_exit_on_error(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logging.fatal(f"Fatal error occurred. Shutting down: {e}")
+            exit_code = determine_exit_code(exception=e)
+            logging.fatal(f"Exiting with code {exit_code}")
+            exit(exit_code)
 
-# Set up Tautulli connection
-logging.info("Setting up Tautulli connection")
-tautulli_connector = tautulli.TautulliConnector(
-    tautulli_settings=config.tautulli,
-    display_settings=config.display,
-    stats_settings=config.stats,
-    analytics=analytics,
-)
+    return wrapper
 
-# Set up emoji manager
-emoji_manager = EmojiManager()
 
-# Set up Discord bot
-services = [
-    # Services start in the order they are added
-    SlashCommandManager(
-        enable_slash_commands=config.discord.enable_slash_commands,
-        guild_id=config.discord.server_id,
-        tautulli=tautulli_connector,
-        emoji_manager=emoji_manager,
-        admin_ids=config.discord.admin_ids,
-    ),
-    TaggedMessagesManager(
-        guild_id=config.discord.server_id,
-        emoji_manager=emoji_manager,
-        admin_ids=config.discord.admin_ids,
-    ),
-    LiveActivityMonitor(
-        tautulli_connector=tautulli_connector,
-        discord_settings=config.discord,
+@run_with_potential_exit_on_error
+def set_up_logging():
+    logging.init(app_name=APP_NAME, console_log_level=CONSOLE_LOG_LEVEL, log_to_file=True, log_file_dir=args.log,
+                 file_log_level=FILE_LOG_LEVEL)
+    logging.info(splash_logo())
+
+
+@run_with_potential_exit_on_error
+def run_migrations() -> None:
+    # Run migrations
+    migration_manager = MigrationManager(
+        migration_data_directory=os.path.join(config_directory, "migration_data"),
+        config_directory=config_directory,
+        logs_directory=args.log)
+    if not migration_manager.run_migrations():
+        raise TauticordMigrationFailure("Migrations failed.")
+
+
+@run_with_potential_exit_on_error
+def set_up_configuration() -> Config:
+    # Set up configuration
+    kwargs = {
+        KEY_RUN_ARGS_MONITOR_PATH: args.usage,
+        KEY_RUN_ARGS_CONFIG_PATH: config_directory,
+        KEY_RUN_ARGS_LOG_PATH: args.log,
+    }
+    return Config(config_path=f"{args.config}", **kwargs)
+
+
+@run_with_potential_exit_on_error
+def set_up_analytics(config: Config) -> GoogleAnalytics:
+    # Set up analytics
+    return GoogleAnalytics(analytics_id=GOOGLE_ANALYTICS_ID,
+                           anonymous_ip=True,
+                           do_not_track=not config.extras.allow_analytics)
+
+
+@run_with_potential_exit_on_error
+def set_up_tautulli_connection(config: Config, analytics: GoogleAnalytics) -> tautulli.TautulliConnector:
+    # Set up Tautulli connection
+    return tautulli.TautulliConnector(
         tautulli_settings=config.tautulli,
+        display_settings=config.display,
         stats_settings=config.stats,
-        emoji_manager=emoji_manager,
         analytics=analytics,
-        version_checker=versioning.VersionChecker(enable=config.extras.update_reminders)
-    ),
-    LibraryStatsMonitor(
-        tautulli_connector=tautulli_connector,
-        discord_settings=config.discord,
-        stats_settings=config.stats,
-        emoji_manager=emoji_manager,
-        analytics=analytics,
-    ),
-    PerformanceStatsMonitor(
-        tautulli_connector=tautulli_connector,
-        discord_settings=config.discord,
-        stats_settings=config.stats,
-        run_args_settings=config.run_args,
-        emoji_manager=emoji_manager,
-        analytics=analytics,
-    ),
-]
-logging.info("Setting up Discord connection")
-bot = Bot(
-    bot_token=config.discord.bot_token,
-    services=services,
-    discord_status_settings=config.discord.status_message_settings,
-    guild_id=config.discord.server_id,
-    emoji_manager=emoji_manager,
-)
+    )
 
 
-# Set up Flask for webhooks
-# flask_app = Flask(__name__)
+@run_with_potential_exit_on_error
+def set_up_emoji_manager() -> EmojiManager:
+    # Set up emoji manager
+    return EmojiManager()
 
-def start():
+
+@run_with_potential_exit_on_error
+def set_up_discord_bot(config: Config,
+                       tautulli_connector: tautulli.TautulliConnector,
+                       emoji_manager: EmojiManager,
+                       analytics: GoogleAnalytics) -> Bot:
+    # Set up Discord bot
+    services = [
+        # Services start in the order they are added
+        SlashCommandManager(
+            enable_slash_commands=config.discord.enable_slash_commands,
+            guild_id=config.discord.server_id,
+            tautulli=tautulli_connector,
+            emoji_manager=emoji_manager,
+            admin_ids=config.discord.admin_ids,
+        ),
+        TaggedMessagesManager(
+            guild_id=config.discord.server_id,
+            emoji_manager=emoji_manager,
+            admin_ids=config.discord.admin_ids,
+        ),
+        LiveActivityMonitor(
+            tautulli_connector=tautulli_connector,
+            discord_settings=config.discord,
+            tautulli_settings=config.tautulli,
+            stats_settings=config.stats,
+            emoji_manager=emoji_manager,
+            analytics=analytics,
+            version_checker=versioning.VersionChecker(enable=config.extras.update_reminders)
+        ),
+        LibraryStatsMonitor(
+            tautulli_connector=tautulli_connector,
+            discord_settings=config.discord,
+            stats_settings=config.stats,
+            emoji_manager=emoji_manager,
+            analytics=analytics,
+        ),
+        PerformanceStatsMonitor(
+            tautulli_connector=tautulli_connector,
+            discord_settings=config.discord,
+            stats_settings=config.stats,
+            run_args_settings=config.run_args,
+            emoji_manager=emoji_manager,
+            analytics=analytics,
+        ),
+    ]
+    logging.info("Setting up Discord connection")
+    return Bot(
+        bot_token=config.discord.bot_token,
+        services=services,
+        discord_status_settings=config.discord.status_message_settings,
+        guild_id=config.discord.server_id,
+        emoji_manager=emoji_manager,
+    )
+
+
+@run_with_potential_exit_on_error
+def start(discord_bot: Bot) -> None:
     # Start Flask first (in separate thread)
     # logging.info("Starting Flask server")
     # flask_thread = threading.Thread(
@@ -146,8 +180,18 @@ def start():
     # flask_thread.start()
 
     # Connect the bot to Discord (last step, since it will block and trigger all the sub-services)
-    bot.connect()
+    discord_bot.connect()
 
 
 if __name__ == "__main__":
-    start()
+    set_up_logging()
+    run_migrations()
+    _config: Config = set_up_configuration()
+    _analytics: GoogleAnalytics = set_up_analytics(config=_config)
+    _emoji_manager: EmojiManager = set_up_emoji_manager()
+    _tautulli_connector: tautulli.TautulliConnector = set_up_tautulli_connection(config=_config, analytics=_analytics)
+    _discord_bot: Bot = set_up_discord_bot(config=_config,
+                                           tautulli_connector=_tautulli_connector,
+                                           emoji_manager=_emoji_manager,
+                                           analytics=_analytics)
+    start(discord_bot=_discord_bot)
