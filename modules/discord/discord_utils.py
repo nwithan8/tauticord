@@ -189,9 +189,10 @@ async def update_presence(client: discord.Client,
     use_custom_activity_type = activity_name is None
     if use_custom_activity_type:
         activity_type = discord.ActivityType.custom
+        # For a custom message, all three fields need to be populated
         name = line_one
-        details = None
-        state = None
+        details = line_one
+        state = line_one
     else:
         activity_type = discord.ActivityType.watching
         name = activity_name
