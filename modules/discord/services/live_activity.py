@@ -49,11 +49,13 @@ class LiveActivityMonitor(BaseService):
         self.on_raw_reaction_add = self.bot.event(self.on_raw_reaction_add)
 
     async def enabled(self) -> bool:
-        return self.stats_settings.activity.enable
+        # Enable if voice channel activity stats are enabled and/or if the summary message is enabled
+        return self.stats_settings.activity.enable or self.use_summary_message
 
     async def on_ready(self):
         logging.info("Loading Tautulli summary service...")
 
+        # Prepare the summary message to be used for activity stats if enabled
         summary_message = None
         if self.use_summary_message:
             logging.info("Loading Tautulli text channel settings...")
@@ -88,9 +90,16 @@ class LiveActivityMonitor(BaseService):
                 summary_message = await discord_utils.send_embed_message(embed=embed,
                                                                          channel=self.tautulli_summary_channel)
 
-        if not summary_message:
-            raise TauticordSetupFailure("Could not prepare activity summary message")
+            if not summary_message:
+                raise TauticordSetupFailure("Could not prepare activity summary message")
 
+            # Start the version checking service if enabled (to add to the summary message)
+            if self.version_checker and self.version_checker.enable:
+                logging.info("Starting version checking service...")
+                # noinspection PyAsyncCall
+                asyncio.create_task(self.version_checker.monitor_for_new_version())
+
+        # Prepare the voice category for activity stats if enabled
         activity_stats_voice_category = None
         if self.stats_settings.activity.enable:
             logging.info("Loading Tautulli activity stats settings...")
@@ -98,6 +107,7 @@ class LiveActivityMonitor(BaseService):
                 guild_id=self.guild_id,
                 category_name=self.stats_settings.activity.category_name)
 
+        # Run the activity stats updater
         # minimum 5-second sleep time hard-coded, trust me, don't DDoS your server
         refresh_time = max([5, self.refresh_time])
         # This handles both text channel updates AND activity stats voice channel updates
@@ -112,11 +122,6 @@ class LiveActivityMonitor(BaseService):
                                                                voice_category=activity_stats_voice_category)
         # noinspection PyAsyncCall
         asyncio.create_task(self.activity_monitor.run_service(interval_seconds=refresh_time))
-
-        if self.version_checker and self.version_checker.enable:
-            logging.info("Starting version checking service...")
-            # noinspection PyAsyncCall
-            asyncio.create_task(self.version_checker.monitor_for_new_version())
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         if not self.tautulli_summary_channel or not self.activity_monitor:

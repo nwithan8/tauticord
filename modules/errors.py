@@ -30,6 +30,15 @@ class TauticordSetupFailure(TauticordException):
         super().__init__(code=302, message=message)
 
 
+class TauticordDiscordCollectionFailure(TauticordException):
+    """
+    Raised when an error occurs during collecting a Discord object
+    """
+
+    def __init__(self, message: str):
+        super().__init__(code=303, message=message)
+
+
 def determine_exit_code(exception: Exception) -> int:
     """
     Determine the exit code based on the exception that was thrown

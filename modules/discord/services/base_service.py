@@ -3,6 +3,7 @@ from discord.ext import commands
 
 import modules.logs as logging
 from modules.discord import discord_utils
+from modules.errors import TauticordDiscordCollectionFailure
 from modules.utils import quote
 
 
@@ -56,7 +57,7 @@ class BaseService:
                                                                               category_name=category_name)
 
         if not category:
-            raise Exception(f"Could not load {quote(category_name)} voice category. Exiting...")
+            raise TauticordDiscordCollectionFailure(f"Could not load {quote(category_name)} voice category. Exiting...")
 
         logging.debug(f"{quote(category_name)} voice category collected.")
         return category
@@ -74,7 +75,7 @@ class BaseService:
                                                                             channel_type=discord.ChannelType.text)
 
         if not channel:
-            raise Exception(f"Could not load {quote(channel_name)} text channel. Exiting...")
+            raise TauticordDiscordCollectionFailure(f"Could not load {quote(channel_name)} text channel. Exiting...")
 
         logging.debug(f"{quote(channel_name)} text channel collected.")
         return channel
@@ -92,7 +93,7 @@ class BaseService:
                                                                             channel_type=discord.ChannelType.voice)
 
         if not channel:
-            raise Exception(f"Could not load {quote(channel_name)} voice channel. Exiting...")
+            raise TauticordDiscordCollectionFailure(f"Could not load {quote(channel_name)} voice channel. Exiting...")
 
         logging.debug(f"{quote(channel_name)} voice channel collected.")
         return channel
