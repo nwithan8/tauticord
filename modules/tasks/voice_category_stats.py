@@ -23,8 +23,9 @@ class VoiceCategoryStatsMonitor:
         self.voice_category = voice_category
         self.service_entrypoint = service_entrypoint
 
-    async def run_service(self, interval_seconds: int) -> None:
-        if not self.voice_category:
+    async def run_service(self, interval_seconds: int, override_voice_channel_check: bool = False) -> None:
+        if not self.voice_category and not override_voice_channel_check:
+            logging.debug("No voice category set, skipping service run...")
             return  # No performance voice category set, so don't bother
 
         while True:
