@@ -121,7 +121,9 @@ class LiveActivityMonitor(BaseService):
                                                                version_checker=self.version_checker,
                                                                voice_category=activity_stats_voice_category)
         # noinspection PyAsyncCall
-        asyncio.create_task(self.activity_monitor.run_service(interval_seconds=refresh_time))
+        # Want the service to run even if the voice channel is not found (e.g. text summary only)
+        asyncio.create_task(self.activity_monitor.run_service(interval_seconds=refresh_time,
+                                                              override_voice_channel_check=True))
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         if not self.tautulli_summary_channel or not self.activity_monitor:
