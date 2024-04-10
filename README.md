@@ -81,7 +81,7 @@ channel in my Discord server below.
 
 [![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=120&v=4)](https://github.com/JetBrainsOfficial)
 
-<!-- github-sponsors --><!-- github-sponsors -->
+<!-- github-sponsors --><a href="https://github.com/upamanyudas"><img src="https://github.com/upamanyudas.png" width="80px" alt="upamanyudas" /></a>&nbsp;&nbsp;<a href="https://github.com/l33xu"><img src="https://github.com/l33xu.png" width="80px" alt="l33xu" /></a>&nbsp;&nbsp;<!-- github-sponsors -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
