@@ -14,7 +14,8 @@
     <Project>https://github.com/nwithan8/tauticord</Project>
     <Overview>Tauticord is a Discord bot that displays live data from Tautulli, including stream summaries, bandwidth and library statistics.</Overview>
     <Category>Tools: MediaServer Status:Stable</Category>
-    <Icon>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/logo.png</Icon>
+    <Icon>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/icon.png</Icon>
+    <Banner>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/banner.png</Banner>
     <TemplateURL>https://raw.githubusercontent.com/nwithan8/unraid_templates/main/templates/tauticord.xml</TemplateURL>
     <Maintainer>
         <WebPage>https://github.com/nwithan8</WebPage>
