@@ -15,7 +15,7 @@ A Discord bot that displays live data from Tautulli
 
 </div>
 
-# Features
+# Features ⚙️
 
 Tauticord uses the Tautulli API to pull information from Tautulli and display them in a Discord channel, including:
 
@@ -50,25 +50,23 @@ library name with item counts every hour.
 
 <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/libraries.png">
 
-# Announcements
+# Announcements 📢
 
 See [ANNOUNCEMENTS](documentation/ANNOUNCEMENTS.md).
 
-# Documentation
+# Documentation 📄
 
 See [DOCUMENTATION](documentation/DOCUMENTATION.md).
 
-# Development
+# Development 🛠️
 
 See [DEVELOPMENT](documentation/DEVELOPMENT.md).
 
-# Contact
+# Contact 📧
 
 Please leave a pull request if you would like to contribute.
 
-Follow me on Twitter: [@nwithan8](https://twitter.com/nwithan8)
-
-Also feel free to check out my other projects here on [GitHub](https://github.com/nwithan8) or join the #developer
+Also feel free to check out my other projects here on [GitHub](https://github.com/nwithan8) or join the `#developer`
 channel in my Discord server below.
 
 <div align="center">
@@ -77,9 +75,13 @@ channel in my Discord server below.
 	</p>
 </div>
 
-## Contributors ✨
+## Shout-outs 🎉
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+### Sponsors
+
+[![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=120&v=4)](https://github.com/JetBrainsOfficial)
+
+<!-- github-sponsors --><!-- github-sponsors -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->

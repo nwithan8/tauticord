@@ -1,0 +1,30 @@
+name: Update sponsors
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 30 2 * * *  # Run every day at 2:30am
+
+jobs:
+  update_sponsors:
+    name: Add all sponsors to README
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: '0'
+
+      - name: Generate sponsors list
+        uses: JamesIves/github-sponsors-readme-action@v1
+        with:
+          token: ${{ secrets.AC_PAT }}
+          file: 'README.md'
+          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="80px" alt="{{{ login }}}" /></a>&nbsp;&nbsp;'
+          marker: 'github-sponsors'
+          active-only: false
+
+      - name: Deploy changes
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: master
+          folder: '.'

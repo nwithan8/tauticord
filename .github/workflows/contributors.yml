@@ -5,7 +5,7 @@ on:
       - master
 jobs:
   update_contributors:
-    name: Add all Contributors to README
+    name: Add all contributors to README
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -13,7 +13,8 @@ jobs:
         with:
           fetch-depth: '0'
 
-      - uses: BobAnkh/add-contributors@master
+      - name: Generate contributors list
+        uses: BobAnkh/add-contributors@master
         with:
           CONTRIBUTOR: '### Contributors'
           COLUMN_PER_ROW: '4'
