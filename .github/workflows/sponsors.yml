@@ -23,8 +23,31 @@ jobs:
           marker: 'github-sponsors'
           active-only: false
 
-      - name: Deploy changes
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
         with:
-          branch: master
-          folder: '.'
+          add-paths: |
+            README.md
+          commit-message: 'docs(README): update sponsors'
+          branch: 'automated/update-sponsors'
+          delete-branch: true
+          title: 'docs(README): update sponsors'
+          body: 'This pull request updates the list of sponsors in the README.'
+          assignees: 'nwithan8'
+          labels: |
+            Automated PR
+
+      - name: Display pull request information
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
+      - name: Enable Pull Request Automerge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.AC_PAT }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
