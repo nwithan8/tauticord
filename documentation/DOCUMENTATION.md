@@ -1,5 +1,11 @@
 # Installation and setup
 
+## Compatibility
+
+Tauticord is compatible with the following versions of Tautulli:
+- v2.12.x
+- v2.13.x
+
 ## Requirements
 
 - A Plex Media Server
