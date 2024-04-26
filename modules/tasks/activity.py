@@ -135,7 +135,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
                 del (msg_emoji[msg_emoji.index(e)])
 
         for i in range(1, count + 1):
-            emoji = emoji_manager.emoji_from_stream_number(i)
+            emoji = emoji_manager.reaction_from_stream_number(i)
             if emoji not in msg_emoji:
                 await self.message.add_reaction(emoji)
 

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, Union, List
 
 import discord
+import emoji as emoji_module
 from discord import PartialEmoji as DiscordPartialEmoji, Emoji as DiscordEmoji
 from pydantic import BaseModel
 
@@ -60,6 +61,7 @@ def max_controllable_stream_count_supported(max_streams_override: Optional[int] 
 
 
 class Emoji(enum.Enum):
+    Number0 = "0⃣"
     Number1 = "1⃣"
     Number2 = "2⃣"
     Number3 = "3⃣"
@@ -69,33 +71,6 @@ class Emoji(enum.Enum):
     Number7 = "7⃣"
     Number8 = "8⃣"
     Number9 = "9⃣"
-    Number10 = "10⃣"
-    LetterA = "A⃣"
-    LetterB = "B⃣"
-    LetterC = "C⃣"
-    LetterD = "D⃣"
-    LetterE = "E⃣"
-    LetterF = "F⃣"
-    LetterG = "G⃣"
-    LetterH = "H⃣"
-    LetterI = "I⃣"
-    LetterJ = "J⃣"
-    LetterK = "K⃣"
-    LetterL = "L⃣"
-    LetterM = "M⃣"
-    LetterN = "N⃣"
-    LetterO = "O⃣"
-    LetterP = "P⃣"
-    LetterQ = "Q⃣"
-    LetterR = "R⃣"
-    LetterS = "S⃣"
-    LetterT = "T⃣"
-    LetterU = "U⃣"
-    LetterV = "V⃣"
-    LetterW = "W⃣"
-    LetterX = "X⃣"
-    LetterY = "Y⃣"
-    LetterZ = "Z⃣"
     Bandwidth = "📶"
     LocalBandwidth = "🏠"
     RemoteBandwidth = "🌐"
@@ -127,11 +102,30 @@ class Emoji(enum.Enum):
     CPU = "🧠"
     Memory = "🐏"
     Disk = "💾"
+    RedSquare = "🟥"
+    OrangeSquare = "🟧"
+    YellowSquare = "🟨"
+    GreenSquare = "🟩"
+    BlueSquare = "🟦"
+    PurpleSquare = "🟪"
+    BrownSquare = "🟫"
+    BlackSquare = "⬛"
+    WhiteSquare = "⬜"
+    RedCircle = "🔴"
+    OrangeCircle = "🟠"
+    YellowCircle = "🟡"
+    GreenCircle = "🟢"
+    BlueCircle = "🔵"
+    PurpleCircle = "🟣"
+    BrownCircle = "🟤"
+    BlackCircle = "⚫"
+    WhiteCircle = "⚪"
 
 
 class EmojiManager:
     def __init__(self) -> None:
         # Additional emojis added/updated in the cache will be strings, so it all has to be strings
+        # Custom emojis stored as <:name:id>, unicode emojis stored as their unicode string or as :name:
         self._emoji_aliases = {
             "1": Emoji.Number1.value,
             "2": Emoji.Number2.value,
@@ -142,33 +136,25 @@ class EmojiManager:
             "7": Emoji.Number7.value,
             "8": Emoji.Number8.value,
             "9": Emoji.Number9.value,
-            "10": Emoji.Number10.value,
-            "11": Emoji.LetterA.value,
-            "12": Emoji.LetterB.value,
-            "13": Emoji.LetterC.value,
-            "14": Emoji.LetterD.value,
-            "15": Emoji.LetterE.value,
-            "16": Emoji.LetterF.value,
-            "17": Emoji.LetterG.value,
-            "18": Emoji.LetterH.value,
-            "19": Emoji.LetterI.value,
-            "20": Emoji.LetterJ.value,
-            "21": Emoji.LetterK.value,
-            "22": Emoji.LetterL.value,
-            "23": Emoji.LetterM.value,
-            "24": Emoji.LetterN.value,
-            "25": Emoji.LetterO.value,
-            "26": Emoji.LetterP.value,
-            "27": Emoji.LetterQ.value,
-            "28": Emoji.LetterR.value,
-            "29": Emoji.LetterS.value,
-            "30": Emoji.LetterT.value,
-            "31": Emoji.LetterU.value,
-            "32": Emoji.LetterV.value,
-            "33": Emoji.LetterW.value,
-            "34": Emoji.LetterX.value,
-            "35": Emoji.LetterY.value,
-            "36": Emoji.LetterZ.value,
+            "10": Emoji.Number0.value,
+            "11": Emoji.RedSquare.value,
+            "12": Emoji.OrangeSquare.value,
+            "13": Emoji.YellowSquare.value,
+            "14": Emoji.GreenSquare.value,
+            "15": Emoji.BlueSquare.value,
+            "16": Emoji.PurpleSquare.value,
+            "17": Emoji.BrownSquare.value,
+            "18": Emoji.BlackSquare.value,
+            "19": Emoji.WhiteSquare.value,
+            "20": Emoji.RedCircle.value,
+            "21": Emoji.OrangeCircle.value,
+            "22": Emoji.YellowCircle.value,
+            "23": Emoji.GreenCircle.value,
+            "24": Emoji.BlueCircle.value,
+            "25": Emoji.PurpleCircle.value,
+            "26": Emoji.BrownCircle.value,
+            "27": Emoji.BlackCircle.value,
+            "28": Emoji.WhiteCircle.value,
             "bandwidth": Emoji.Bandwidth.value,
             "buffering": Emoji.Buffering.value,
             "clip": Emoji.Clip.value,
@@ -231,7 +217,27 @@ class EmojiManager:
 
     def emoji_from_stream_number(self, number: int) -> str:
         number_str = str(number)
-        return self._emoji_aliases.get(number_str, "❓")  # Return a question mark if the emoji is not found
+        emoji_name = self._emoji_aliases.get(number_str, None)
+
+        if not emoji_name:
+            return "❓"  # Return a question mark if the emoji is not found
+
+        return emoji_name
+
+    def reaction_from_stream_number(self, number: int) -> Union[str, DiscordPartialEmoji]:
+        name = self.emoji_from_stream_number(number=number)
+
+        if name.startswith("<:"):  # Custom emoji
+            parts = name.split(":")
+            name = parts[2]
+            _id = int(parts[1])
+            return DiscordPartialEmoji(name=name, id=_id, animated=False)
+
+        if name.startswith(":"):  # Unicode emoji name
+            emoji = emoji_module.emojize(name, language="alias")
+            return DiscordPartialEmoji(name=emoji, id=None, animated=False)
+
+        return DiscordPartialEmoji(name=name, id=None, animated=False)  # Unicode emoji string
 
     def stream_number_from_emoji(self, emoji: DiscordPartialEmoji) -> Union[int, None]:
         # If using the Tauticord custom emojis, name corresponds to the stream number (e.g. tc_1 is 1, tc_2 is 2, etc.)

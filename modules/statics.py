@@ -19,7 +19,7 @@ KEY_RUN_ARGS_MONITOR_PATH = "run_args_monitor_path"
 KEY_RUN_ARGS_CONFIG_PATH = "run_args_config_path"
 KEY_RUN_ARGS_LOG_PATH = "run_args_log_path"
 
-MAX_STREAM_COUNT = 36
+MAX_STREAM_COUNT = 20  # max number of emojis one user can post on a single message
 
 ASCII_ART = """___________________  ______________________________________________ 
 ___  __/__    |_  / / /__  __/___  _/_  ____/_  __ \__  __ \__  __ \\
