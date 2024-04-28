@@ -57,7 +57,14 @@ class TautulliConnector:
         logging.error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
+    def plex_pass_feature_is_allowed(self, feature: bool) -> bool:
+        if not self.has_plex_pass:
+            return False
+
+        return feature
+
     def refresh_data(self,
+                     enable_stream_termination_if_possible: bool,
                      emoji_manager: EmojiManager,
                      additional_embed_fields: List[dict] = None,
                      additional_embed_footers: List[str] = None) -> TautulliActivitySummary:
@@ -67,6 +74,12 @@ class TautulliConnector:
         """
         # Erase session ID mappings from last refresh
         self.session_id_mappings = {}
+
+        # Add termination tip if enabled
+        if self.plex_pass_feature_is_allowed(feature=enable_stream_termination_if_possible):
+            additional_embed_footers = additional_embed_footers or []
+            additional_embed_footers.append(
+                f"To terminate a stream, react with the stream number.")
 
         data = self.api.activity()
 
@@ -88,7 +101,6 @@ class TautulliConnector:
                                            emoji_manager=emoji_manager,
                                            text_manager=self.text_manager,
                                            streams=session_details,
-                                           has_plex_pass=self.has_plex_pass,
                                            server_name=self.server_name,
                                            additional_embed_fields=additional_embed_fields,
                                            additional_embed_footers=additional_embed_footers)
@@ -100,7 +112,6 @@ class TautulliConnector:
                                        emoji_manager=emoji_manager,
                                        text_manager=self.text_manager,
                                        error_occurred=True,
-                                       has_plex_pass=False,  # Tautulli is unreachable, so we can't know check
                                        server_name=self.server_name,
                                        additional_embed_fields=additional_embed_fields,
                                        additional_embed_footers=additional_embed_footers)

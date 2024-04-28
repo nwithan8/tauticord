@@ -136,6 +136,7 @@ class Migration(BaseMigration):
         new_config.migrate_value(value=old_config.discord.use_summary_text_message,
                                  to_path=["Discord", "PostSummaryMessage"], default=True)
         new_config.migrate_value(value=old_config.discord.channel_name, to_path=["Discord", "ChannelName"])
+        new_config.add(value=True, key_path=["Discord", "EnableTermination"])
         new_config.migrate_value(value=old_config.discord.enable_slash_commands,
                                  to_path=["Discord", "EnableSlashCommands"], default=False)
         status_message_settings = {

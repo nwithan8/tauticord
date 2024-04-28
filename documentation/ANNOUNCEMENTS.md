@@ -4,11 +4,11 @@
 
 **Latest Release**: *v5.3.4*
 
-**Affected Release**: *v5.4.0+*
+**Affected Release**: *v5.x.0+*
 
 **Affected Users**: Those using Tauticord with Tautulli versions v2.12.x and v2.13.x
 
-The next minor release of Tauticord will drop support for Tautulli versions v2.12.x and v2.13.x. This is due to the
+An upcoming minor release of Tauticord will drop support for Tautulli versions v2.12.x and v2.13.x. This is due to the
 release of Tautulli v2.14.0, which introduced breaking changes to the API.
 
 Because Tauticord enforces strict compatibility checking with Tautulli, the underlying `tautulli` API library will need
