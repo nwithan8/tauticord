@@ -26,6 +26,8 @@ Discord:
   PostSummaryMessage: true
   # The name of the channel where the live stats summary message will be posted
   ChannelName: "tautulli"
+  # Whether to enable termination capabilities (requires Plex Pass)
+  EnableTermination: true
   # Whether to enable slash commands
   EnableSlashCommands: true
   # Settings for the activity/status message

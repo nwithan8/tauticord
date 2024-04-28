@@ -45,6 +45,7 @@ class Discord(BaseConfig):
     channel_name: str
     enable_slash_commands: bool
     use_summary_message: bool
+    enable_termination: bool
     server_id: int
     status_message_settings: StatusMessage
 
@@ -55,6 +56,7 @@ class Discord(BaseConfig):
             "channel_name": self.channel_name,
             "enable_slash_commands": self.enable_slash_commands,
             "use_summary_message": self.use_summary_message,
+            "enable_termination": self.enable_termination,
             "server_id": self.server_id,
             "status_message_settings": self.status_message_settings.as_dict()
         }

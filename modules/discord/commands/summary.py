@@ -35,6 +35,6 @@ class Summary(commands.Cog):
         if not await self.check_admin(interaction):
             return
 
-        # Does NOT include new version reminder.
-        summary = self._tautulli.refresh_data(emoji_manager=self._emoji_manager)
+        # Does NOT include new version reminder or stream termination.
+        summary = self._tautulli.refresh_data(enable_stream_termination_if_possible=False, emoji_manager=self._emoji_manager)
         await interaction.response.send_message(embed=summary.embed, ephemeral=not share)

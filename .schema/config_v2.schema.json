@@ -358,6 +358,11 @@
           "description": "The name of the channel where the bot will post messages",
           "$ref": "#/definitions/discordTextChannelName"
         },
+        "EnableTermination": {
+          "title": "Enable stream termination",
+          "description": "Whether to enable stream termination",
+          "type": "boolean"
+        },
         "EnableSlashCommands": {
           "title": "Enable slash commands",
           "description": "Whether to enable slash commands for the bot",

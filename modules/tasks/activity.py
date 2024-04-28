@@ -23,6 +23,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
                  tautulli_connector: TautulliConnector,
                  guild_id: int,
                  message: discord.Message,
+                 enable_stream_termination_if_possible: bool,
                  discord_status_settings: modules.settings.models.DiscordStatusMessage,
                  emoji_manager: EmojiManager,
                  version_checker: VersionChecker,
@@ -32,6 +33,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
                          service_entrypoint=self.update_activity_details,
                          voice_category=voice_category)
         self.message = message
+        self.enable_stream_termination_if_possible = enable_stream_termination_if_possible
         self.stats_settings = settings
         self.discord_status_settings = discord_status_settings
         self.tautulli = tautulli_connector
@@ -158,7 +160,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
         # update the message regardless of whether the content has changed
         self.message = await discord_utils.send_embed_message(embed=summary.embed, message=self.message)
 
-        if summary.has_plex_pass:
+        if self.tautulli.plex_pass_feature_is_allowed(feature=self.enable_stream_termination_if_possible):
             await self.add_stream_number_emoji_reactions(count=len(summary.streams),
                                                          emoji_manager=self.emoji_manager)
             # on_raw_reaction_add will handle the rest
@@ -174,7 +176,9 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
                 {"name": "🔔 New Version Available",
                  "value": f"A new version of Tauticord is available! [Click here]({consts.GITHUB_REPO_FULL_LINK}) to download it."})
 
-        summary = self.tautulli.refresh_data(emoji_manager=self.emoji_manager, additional_embed_fields=embed_fields)
+        summary = self.tautulli.refresh_data(
+            enable_stream_termination_if_possible=self.enable_stream_termination_if_possible,
+            emoji_manager=self.emoji_manager, additional_embed_fields=embed_fields)
 
         if self.stats_settings.enable:
             await self.update_activity_stats(summary=summary)

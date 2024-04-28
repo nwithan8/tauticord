@@ -34,6 +34,7 @@ class LiveActivityMonitor(BaseService):
         self.admin_ids: list[int] = discord_settings.admin_ids
         self.refresh_time: int = tautulli_settings.refresh_interval_seconds
         self.use_summary_message: bool = discord_settings.use_summary_message
+        self.enable_stream_termination_if_possible: bool = discord_settings.enable_termination
         self.stats_settings: settings_models.Stats = stats_settings
         self.emoji_manager: EmojiManager = emoji_manager
         self.version_checker: versioning.VersionChecker = version_checker
@@ -117,6 +118,7 @@ class LiveActivityMonitor(BaseService):
                                                                tautulli_connector=self.tautulli,
                                                                guild_id=self.guild_id,
                                                                message=summary_message,
+                                                               enable_stream_termination_if_possible=self.enable_stream_termination_if_possible,
                                                                emoji_manager=self.emoji_manager,
                                                                version_checker=self.version_checker,
                                                                voice_category=activity_stats_voice_category)

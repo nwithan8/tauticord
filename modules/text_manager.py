@@ -101,8 +101,7 @@ class TextManager(BaseModel):
         stubs = [stub for stub in stubs if stub is not None]
         return "\n".join(stubs)
 
-    def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager,
-                        add_termination_tip: bool) -> str:
+    def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager) -> str:
         timestamp = f"\n\nUpdated {self.time_manager.now_string()}"
 
         if no_connection or activity is None:
@@ -129,9 +128,6 @@ class TextManager(BaseModel):
                 lan_bandwidth = activity.lan_bandwidth
                 overview_message += f""" {lan_bandwidth_emoji} {lan_bandwidth}"""
 
-        overview_message += f"\n\n{timestamp}"
-
-        if add_termination_tip:
-            overview_message += f"\n\nTo terminate a stream, react with the stream number."
+        overview_message += f"{timestamp}\n"
 
         return overview_message

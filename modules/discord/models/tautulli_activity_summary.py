@@ -16,13 +16,11 @@ class TautulliActivitySummary:
                  emoji_manager: EmojiManager,
                  text_manager: TextManager,
                  streams: List[TautulliStreamInfo] = None,
-                 has_plex_pass: bool = False,
                  error_occurred: bool = False,
                  additional_embed_fields: List[dict] = None,
                  additional_embed_footers: List[str] = None):
         self.activity = activity
         self.plex_online = plex_online
-        self.has_plex_pass = has_plex_pass
         self.error_occurred = error_occurred
         self.additional_embed_fields = additional_embed_fields or []
         self.additional_embed_footers = additional_embed_footers or []
@@ -48,8 +46,7 @@ class TautulliActivitySummary:
 
         footer_text = self._text_manager.overview_footer(no_connection=self.error_occurred,
                                                          activity=self.activity,
-                                                         emoji_manager=self._emoji_manager,
-                                                         add_termination_tip=self.has_plex_pass)
+                                                         emoji_manager=self._emoji_manager)
         if self.additional_embed_footers:
             footer_text += "\n"
         for additional_footer in self.additional_embed_footers:
