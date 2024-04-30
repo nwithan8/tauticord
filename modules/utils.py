@@ -1,8 +1,23 @@
+import json
 from datetime import datetime, timedelta
 from typing import Optional, Any
 from urllib.parse import quote_plus
 
 from pytz import timezone
+
+
+def pretty_print_json(json_data: dict, sort: bool = False) -> str:
+    """
+    Return a pretty printed JSON string
+
+    :param json_data: JSON data to pretty print
+    :type json_data: dict
+    :param sort: (Optional) sort the keys in the JSON data
+    :type sort: bool, optional
+    :return: pretty printed JSON string
+    :rtype: str
+    """
+    return json.dumps(json_data, indent=4, sort_keys=sort)
 
 
 def make_plural(word, count: int, suffix_override: str = 's') -> str:
