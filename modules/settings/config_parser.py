@@ -458,6 +458,8 @@ class Config:
         self.yaml_data = yaml.load(open(config_path), Loader=yaml.FullLoader)
         self.json_data = json.loads(json.dumps(self.yaml_data, indent=4))
 
+        logging.debug(f"Parsing config data:\n{utils.pretty_print_json(json_data=self.json_data)}")
+
         start = ConfigSection(data=self.json_data)
 
         self.tautulli = TautulliConfig(data=start.get_subsection_data(key="Tautulli")).to_model()
@@ -466,6 +468,8 @@ class Config:
         self.display = DisplayConfig(data=start.get_subsection_data(key="Display")).to_model()
         self.stats = StatsConfig(data=start.get_subsection_data(key="Stats")).to_model()
         self.run_args = RunArgsConfig(data=docker_kwargs).to_model()
+
+        logging.debug(f"Config loaded. Using the following settings:\n{self.__repr__()}")
 
     def as_json(self) -> dict:
         return {
@@ -481,7 +485,4 @@ class Config:
         return yaml.dump(self.as_json(), default_flow_style=False, sort_keys=False)
 
     def __repr__(self) -> str:
-        return self.as_yaml()
-
-    def print(self) -> str:
-        return self.as_yaml()
+        return utils.pretty_print_json(self.as_json(), sort=True)

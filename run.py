@@ -1,6 +1,8 @@
 import argparse
 import os
 
+from pydantic import ValidationError as PydanticValidationError
+
 import modules.logs as logging
 import modules.tautulli.tautulli_connector as tautulli
 from consts import (
@@ -21,7 +23,7 @@ from modules.discord.services.performance_stats import PerformanceStatsMonitor
 from modules.discord.services.slash_commands import SlashCommandManager
 from modules.discord.services.tagged_message import TaggedMessagesManager
 from modules.emojis import EmojiManager
-from modules.errors import determine_exit_code, TauticordMigrationFailure
+from modules.errors import determine_exit_code, TauticordMigrationFailure, TauticordSetupFailure
 from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
@@ -88,7 +90,10 @@ def set_up_configuration() -> Config:
         KEY_RUN_ARGS_CONFIG_PATH: config_directory,
         KEY_RUN_ARGS_LOG_PATH: args.log,
     }
-    return Config(config_path=f"{args.config}", **kwargs)
+    try:
+        return Config(config_path=f"{args.config}", **kwargs)
+    except PydanticValidationError as e:  # Redirect Pydantic validation errors during config parsing
+        raise TauticordSetupFailure(f"Configuration error: {e}")
 
 
 @run_with_potential_exit_on_error
