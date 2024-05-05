@@ -78,6 +78,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to Gitea Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: git.nateharr.is
+          username: ${{ github.GITEA_USERNAME }}
+          password: ${{ secrets.GITEA_TOKEN }}
+
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -91,6 +98,8 @@ jobs:
             nwithan8/tauticord:${{ steps.vars.outputs.version }}
             ghcr.io/nwithan8/tauticord:latest
             ghcr.io/nwithan8/tauticord:${{ steps.vars.outputs.version }}
+            git.nateharr.is/nwithan8/tauticord:latest
+            git.nateharr.is/nwithan8/tauticord:${{ steps.vars.outputs.version }}
           labels: |
             org.opencontainers.image.title=tauticord
             org.opencontainers.image.version=${{ steps.vars.outputs.version }}
