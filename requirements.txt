@@ -6,4 +6,5 @@ PyYAML==6.0.*
 objectrest~=2.0.0
 psutil==5.9.8
 emoji==2.11.1
+Flask~=3.0.2
 matplotlib==3.9.2

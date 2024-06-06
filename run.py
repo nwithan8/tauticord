@@ -1,6 +1,11 @@
 import argparse
 import os
+import threading
 
+from flask import (
+    Flask,
+    request as flask_request,
+)
 from pydantic import ValidationError as PydanticValidationError
 
 import modules.logs as logging
@@ -12,6 +17,8 @@ from consts import (
     DEFAULT_LOG_DIR,
     CONSOLE_LOG_LEVEL,
     FILE_LOG_LEVEL,
+    FLASK_ADDRESS,
+    FLASK_PORT,
 )
 from migrations.migration_manager import MigrationManager
 from modules import versioning
@@ -30,6 +37,7 @@ from modules.statics import (
     MONITORED_DISK_SPACE_FOLDER,
     KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH, KEY_RUN_ARGS_MONITOR_PATH,
 )
+from modules.webhook_processor import WebhookProcessor
 
 # Parse CLI arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
@@ -177,13 +185,35 @@ def set_up_discord_bot(config: Config,
 
 
 @run_with_potential_exit_on_error
-def start(discord_bot: Bot) -> None:
-    # Start Flask first (in separate thread)
-    # logging.info("Starting Flask server")
-    # flask_thread = threading.Thread(
-    #    target=lambda: flask_app.run(host=host_name, port=port, debug=True, use_reloader=False))
-    # flask_thread.start()
+def start_api(config: Config, discord_bot: Bot) -> [Flask, threading.Thread]:
+    api = Flask(APP_NAME)
 
+    @api.route('/ping', methods=['GET'])
+    def ping():
+        return 'Pong!', 200
+
+    @api.route('/hello', methods=['GET'])
+    def hello_world():
+        return 'Hello, World!', 200
+
+    @api.route('/health', methods=['GET'])
+    def health_check():
+        return 'OK', 200
+
+    @api.route('/webhook', methods=['POST'])
+    def webhook():
+        return WebhookProcessor.process_tautulli_webhook(request=flask_request, bot=discord_bot)
+
+    flask_thread = threading.Thread(
+        target=lambda: api.run(host=FLASK_ADDRESS, port=FLASK_PORT, debug=True, use_reloader=False))
+    logging.info("Starting Flask server")
+    flask_thread.start()
+
+    return api, flask_thread
+
+
+@run_with_potential_exit_on_error
+def start(discord_bot: Bot) -> None:
     # Connect the bot to Discord (last step, since it will block and trigger all the sub-services)
     discord_bot.connect()
 
@@ -199,4 +229,5 @@ if __name__ == "__main__":
                                            tautulli_connector=_tautulli_connector,
                                            emoji_manager=_emoji_manager,
                                            analytics=_analytics)
+    _api, _flask_thread = start_api(config=_config, discord_bot=_discord_bot)
     start(discord_bot=_discord_bot)
