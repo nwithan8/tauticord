@@ -14,6 +14,9 @@ release of Tautulli v2.14.0, which introduced breaking changes to the API.
 Because Tauticord enforces strict compatibility checking with Tautulli, the underlying `tautulli` API library will need
 to be updated to accommodate v2.14.0. Doing so will drop v2.12.x and v2.13.x support at the same time.
 
+If you need to continue using Tauticord with Tautulli versions v2.12.x or v2.13.x, you will need to pin your Tauticord 
+version to an earlier version using Docker tags: https://hub.docker.com/r/nwithan8/tauticord/tags
+
 ---
 
 ## Removing Environmental Variables in Unraid Community Applications Template
