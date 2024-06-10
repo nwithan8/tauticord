@@ -4,7 +4,7 @@
 
 **Latest Release**: *v5.3.4*
 
-**Affected Release**: *v5.x.0+*
+**Affected Release**: *v5.5.0+*
 
 **Affected Users**: Those using Tauticord with Tautulli versions v2.12.x and v2.13.x
 
@@ -32,9 +32,8 @@ variables.
 Instead, Tauticord will be configured using a `tauticord.yaml` file located in the `/config` directory.
 
 `v4.2.0` and `v4.2.1` of Tauticord include a built-in migration system that automatically converts existing
-environmental
-variable configurations to a YAML configuration file. The bot still operates using environmental variables; the
-migration output will be used by additional migrations in the upcoming `v5.0.0` release.
+environmental variable configurations to a YAML configuration file. The bot still operates using environmental 
+variables; the migration output will be used by additional migrations in the upcoming `v5.0.0` release.
 
 As a result, the **Unraid Community Applications** template will no longer include the option to configure Tauticord
 using environmental variables. The template already requires users to provide a `/config` directory path mapping, so
