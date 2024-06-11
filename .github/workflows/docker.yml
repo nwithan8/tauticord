@@ -82,7 +82,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: git.nateharr.is
-          username: ${{ github.GITEA_USERNAME }}
+          username: ${{ secrets.GITEA_USERNAME }}
           password: ${{ secrets.GITEA_TOKEN }}
 
       - name: Build and push
