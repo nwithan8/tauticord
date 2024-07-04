@@ -3,6 +3,7 @@
 ## Compatibility
 
 Tauticord is compatible with the following versions of Tautulli:
+
 - v2.14.x
 
 ## Requirements
@@ -238,14 +239,21 @@ Tauticord will attempt to query the system it is running on for these metrics ev
 
 ### System Access
 
-Tautulli does not currently offer a way to query performance statistics from its API. As a result, this data is **not
-Tautulli-specific performance data**, but rather **the performance of the system that Tauticord is running on**.
+Tautulli does not currently offer a way to query Plex Media Server performance statistics from its API. Instead,
+Tauticord establishes a connection directly to the Plex Media Server to collect this information.
 
-If Tauticord is running on the same system as Tautulli, then this data may reflect the performance of Tautulli (+
-Tauticord and all other processes running on the system).
+In order to establish a connection to the Plex Media Server, Tauticord attempts to retrieve a Plex token stored in
+Tautulli's database. In order to retrieve this token, SQL queries must be enabled for Tautulli's API.
 
-If Tauticord is running on a different system than Tautulli, or is running isolated in a Docker container, then this
-data will not reflect the performance of Tautulli.
+To enable SQL queries in Tautulli, you must set `api_sql = 1` in Tautulli's `config.ini` file while Tautulli is not
+running.
+
+If Tauticord is unable to retrieve this token and establish a connection to the Plex Media Server, metrics will instead
+report "N/A".
+
+Please be aware of the potential risks of allowing raw SQL queries to be run directly on your Tautulli database via the
+API. If you do not intend on using the performance monitoring feature, it is recommended to keep SQL queries
+disabled (`api_sql = 0` in Tautulli's `config.ini` file).
 
 #### Disk Space Monitoring
 
