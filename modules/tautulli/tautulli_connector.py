@@ -45,8 +45,12 @@ class TautulliConnector:
         self.time_manager = display_settings.time.time_manager
         self.stats_settings = stats_settings
 
-        self.plex_details = self.api.server_info
-        self.has_plex_pass = False if not self.plex_details else self.plex_details.get('pms_plexpass', 0) == 1
+        self.has_plex_pass = self.api.shortcuts.has_plex_pass
+        self.plex_api = None
+        try:
+            self.plex_api = self.api.shortcuts.plex_api
+        except Exception as e:  # Could not prepare Plex API
+            logging.error(f"Could not prepare Plex API: {e}")
 
         tautulli_version = self.api.shortcuts.api_version
         logging.debug(f"Connected to Tautulli version: {tautulli_version}")
