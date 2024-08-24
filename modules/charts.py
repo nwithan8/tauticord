@@ -23,6 +23,7 @@ class ChartMaker:
         self._enable_grid_lines: bool = grid_line_color is not None
 
         # Set up initial figure and single plot
+        # TODO: Set minimum dimensions for plot
         self._figure: Figure = plt.figure()
         self._plot: Axes = self._figure.add_subplot(1, 1, 1)
         if background_color:

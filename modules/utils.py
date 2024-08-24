@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timedelta
 from typing import Optional, Any
 from urllib.parse import quote_plus
@@ -478,3 +479,26 @@ def discord_text_channel_name_format(string: str) -> str:
     # lowercase and replace spaces with dashes
     string = string.lower().replace(" ", "-")
     return string
+
+
+def get_temporary_file_path(sub_directory: str = None, parent_directory: str = None, file_extension: str = None) -> str:
+    """
+    Return a temporary file path
+
+    :param sub_directory: (Optional) subdirectory to use
+    :type sub_directory: str, optional
+    :param parent_directory: (Optional) parent directory to use
+    :type parent_directory: str, optional
+    :param file_extension: (Optional) file extension to use
+    :type file_extension: str, optional
+    :return: temporary file path
+    :rtype: str
+    """
+    base = parent_directory or "/tmp"
+
+    if sub_directory:
+        base = os.path.join(base, sub_directory)
+
+    os.makedirs(base, exist_ok=True)
+
+    return os.path.join(base, f"{os.urandom(24).hex()}{file_extension or '.tmp'}")

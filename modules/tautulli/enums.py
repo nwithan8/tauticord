@@ -42,7 +42,7 @@ class StatChartType(enum.Enum):
     # DAILY_CONCURRENT_BY_STREAM_TYPE = 'daily_concurrent_by_stream_type'
     BY_HOUR_OF_DAY = 'play_count_by_hourofday'
     BY_DAY_OF_WEEK = 'play_count_by_dayofweek'
-    # BY_MONTH = 'play_count_by_month'
+    BY_MONTH = 'play_count_by_month'
     BY_TOP_10_PLATFORMS = 'top_10_platforms'
     BY_TOP_10_USERS = 'top_10_users'
     # BY_SOURCE_RESOLUTION = 'by_source_resolution'

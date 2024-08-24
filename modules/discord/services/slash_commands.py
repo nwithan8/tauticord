@@ -6,6 +6,7 @@ from modules.discord.commands import (
     Most,
     Summary,
     Recently,
+    Stats,
 )
 from modules.discord.services.base_service import BaseService
 from modules.emojis import EmojiManager
@@ -54,6 +55,7 @@ class SlashCommandManager(BaseService):
             Summary(bot=self.bot, tautulli=self._tautulli, emoji_manager=self._emoji_manager,
                     admin_check=self.is_admin),
             Recently(bot=self.bot, tautulli=self._tautulli, admin_check=self.is_admin),
+            Stats(bot=self.bot, tautulli=self._tautulli, admin_check=self.is_admin),
         ]
 
     @property

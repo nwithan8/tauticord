@@ -10,7 +10,7 @@ from modules.analytics import GoogleAnalytics
 from modules.discord.models.tautulli_activity_summary import TautulliActivitySummary
 from modules.discord.models.tautulli_stream_info import TautulliStreamInfo
 from modules.emojis import EmojiManager
-from modules.tautulli.enums import LibraryType, HomeStatType, StatMetricType, StatChartType, StatMetric
+from modules.tautulli.enums import LibraryType, HomeStatType, StatMetricType, StatChartType
 from modules.tautulli.models.activity import Activity
 from modules.tautulli.models.library_item_counts import LibraryItemCounts
 from modules.tautulli.models.recently_added_media_item import RecentlyAddedMediaItem
@@ -320,18 +320,18 @@ class TautulliConnector:
 
         match chart_type:
             case StatChartType.DAILY_BY_MEDIA_TYPE:
-                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetric.PLAYS.value, user_ids=user_ids)
+                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetricType.PLAYS.value, user_ids=user_ids)
             case StatChartType.BY_HOUR_OF_DAY:
-                data = self.api.get_plays_by_hour_of_day(time_range=days, y_axis=StatMetric.PLAYS.value,
+                data = self.api.get_plays_by_hour_of_day(time_range=days, y_axis=StatMetricType.PLAYS.value,
                                                          user_ids=user_ids)
             case StatChartType.BY_DAY_OF_WEEK:
-                data = self.api.get_plays_by_day_of_week(time_range=days, y_axis=StatMetric.PLAYS.value,
+                data = self.api.get_plays_by_day_of_week(time_range=days, y_axis=StatMetricType.PLAYS.value,
                                                          user_ids=user_ids)
             case StatChartType.BY_TOP_10_PLATFORMS:
-                data = self.api.get_plays_by_top_10_platforms(time_range=days, y_axis=StatMetric.PLAYS.value,
+                data = self.api.get_plays_by_top_10_platforms(time_range=days, y_axis=StatMetricType.PLAYS.value,
                                                               user_ids=user_ids)
             case StatChartType.BY_TOP_10_USERS:
-                data = self.api.get_plays_by_top_10_users(time_range=days, y_axis=StatMetric.PLAYS.value,
+                data = self.api.get_plays_by_top_10_users(time_range=days, y_axis=StatMetricType.PLAYS.value,
                                                           user_ids=user_ids)
 
         if not data:
@@ -345,18 +345,18 @@ class TautulliConnector:
 
         match chart_type:
             case StatChartType.DAILY_BY_MEDIA_TYPE:
-                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetric.DURATION.value, user_ids=user_ids)
+                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetricType.DURATION.value, user_ids=user_ids)
             case StatChartType.BY_HOUR_OF_DAY:
-                data = self.api.get_plays_by_hour_of_day(time_range=days, y_axis=StatMetric.DURATION.value,
+                data = self.api.get_plays_by_hour_of_day(time_range=days, y_axis=StatMetricType.DURATION.value,
                                                          user_ids=user_ids)
             case StatChartType.BY_DAY_OF_WEEK:
-                data = self.api.get_plays_by_day_of_week(time_range=days, y_axis=StatMetric.DURATION.value,
+                data = self.api.get_plays_by_day_of_week(time_range=days, y_axis=StatMetricType.DURATION.value,
                                                          user_ids=user_ids)
             case StatChartType.BY_TOP_10_PLATFORMS:
-                data = self.api.get_plays_by_top_10_platforms(time_range=days, y_axis=StatMetric.DURATION.value,
+                data = self.api.get_plays_by_top_10_platforms(time_range=days, y_axis=StatMetricType.DURATION.value,
                                                               user_ids=user_ids)
             case StatChartType.BY_TOP_10_USERS:
-                data = self.api.get_plays_by_top_10_users(time_range=days, y_axis=StatMetric.DURATION.value,
+                data = self.api.get_plays_by_top_10_users(time_range=days, y_axis=StatMetricType.DURATION.value,
                                                           user_ids=user_ids)
 
         if not data:
