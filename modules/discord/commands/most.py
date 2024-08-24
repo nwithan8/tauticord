@@ -9,7 +9,7 @@ from modules.discord.views import EmbedColor
 from modules.tautulli.tautulli_connector import (
     TautulliConnector,
     HomeStatType,
-    HomeStatMetricType,
+    StatMetricType,
 )
 from modules.utils import minutes_to_hhmm
 
@@ -84,7 +84,7 @@ class Most(commands.GroupCog, name="most"):
         embed = _build_response_embed(stats=stats,
                                       title=f"Most {title_prefix} for past {days} day(s), by {metric}",
                                       name_key=name_key,
-                                      convert_time=metric == HomeStatMetricType.DURATION.value)
+                                      convert_time=metric == StatMetricType.DURATION.value)
         await interaction.response.send_message(embed=embed, ephemeral=not share)
 
     @app_commands.command(name="watched-movies", description="Show most watched movies for a number of days.")
@@ -94,8 +94,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def watched_movies(self,
                              interaction: discord.Interaction,
@@ -118,8 +118,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def popular_movies(self,
                              interaction: discord.Interaction,
@@ -143,8 +143,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def watched_shows(self,
                             interaction: discord.Interaction,
@@ -167,8 +167,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def popular_shows(self,
                             interaction: discord.Interaction,
@@ -190,8 +190,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def played_artists(self,
                              interaction: discord.Interaction,
@@ -214,8 +214,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def popular_artists(self,
                               interaction: discord.Interaction,
@@ -238,8 +238,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def active_libraries(self,
                                interaction: discord.Interaction,
@@ -262,8 +262,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def active_users(self,
                            interaction: discord.Interaction,
@@ -286,8 +286,8 @@ class Most(commands.GroupCog, name="most"):
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
-        app_commands.Choice(name="plays", value=HomeStatMetricType.PLAYS.value),
-        app_commands.Choice(name="duration", value=HomeStatMetricType.DURATION.value)
+        app_commands.Choice(name="plays", value=StatMetricType.PLAYS.value),
+        app_commands.Choice(name="duration", value=StatMetricType.DURATION.value)
     ])
     async def active_platforms(self,
                                interaction: discord.Interaction,

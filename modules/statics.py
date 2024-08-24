@@ -7,6 +7,8 @@ COPYRIGHT = "Copyright © YEARADDEDBYGITHUB Nate Harris. All rights reserved."
 UNKNOWN_COMMIT_HASH = "unknown-commit"
 
 CUSTOM_EMOJIS_FOLDER = "resources/emojis"
+CHART_FOLDER = "generated/charts"
+CHART_IMAGE_PATH = f"{CHART_FOLDER}/chart.png"
 
 MONITORED_DISK_SPACE_FOLDER = "/monitor"
 

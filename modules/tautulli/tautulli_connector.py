@@ -10,10 +10,11 @@ from modules.analytics import GoogleAnalytics
 from modules.discord.models.tautulli_activity_summary import TautulliActivitySummary
 from modules.discord.models.tautulli_stream_info import TautulliStreamInfo
 from modules.emojis import EmojiManager
-from modules.tautulli.enums import LibraryType, HomeStatType, HomeStatMetricType
+from modules.tautulli.enums import LibraryType, HomeStatType, StatMetricType, StatChartType, StatMetric
 from modules.tautulli.models.activity import Activity
 from modules.tautulli.models.library_item_counts import LibraryItemCounts
 from modules.tautulli.models.recently_added_media_item import RecentlyAddedMediaItem
+from modules.tautulli.models.stats import PlayCountStats, PlayDurationStats
 from modules.utils import status_code_is_success
 
 
@@ -286,6 +287,12 @@ class TautulliConnector:
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)
 
+    def get_user_id_by_username(self, username: str) -> Union[str, None]:
+        for user in self.api.users:
+            if user.get('username') == username:
+                return user.get('user_id')
+        return None
+
     def get_stats_for_x_days(self, stat_type: HomeStatType, metric: str, days: int, limit: int) -> List[dict]:
         stats = self.api.get_home_stats(
             stats_type=metric,
@@ -301,11 +308,61 @@ class TautulliConnector:
         new_data = []
         for item in old_data:
             copy = item
-            copy['total'] = item.get('total_plays' if metric == HomeStatMetricType.PLAYS.value else 'total_duration', 0)
+            copy['total'] = item.get('total_plays' if metric == StatMetricType.PLAYS.value else 'total_duration', 0)
             new_data.append(copy)
 
         # noinspection PyUnresolvedReferences
         return new_data
+
+    def get_play_count_chart_data(self, chart_type: StatChartType, days: int,
+                                  user_ids: List[str] = None) -> PlayCountStats | None:
+        data = None
+
+        match chart_type:
+            case StatChartType.DAILY_BY_MEDIA_TYPE:
+                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetric.PLAYS.value, user_ids=user_ids)
+            case StatChartType.BY_HOUR_OF_DAY:
+                data = self.api.get_plays_by_hour_of_day(time_range=days, y_axis=StatMetric.PLAYS.value,
+                                                         user_ids=user_ids)
+            case StatChartType.BY_DAY_OF_WEEK:
+                data = self.api.get_plays_by_day_of_week(time_range=days, y_axis=StatMetric.PLAYS.value,
+                                                         user_ids=user_ids)
+            case StatChartType.BY_TOP_10_PLATFORMS:
+                data = self.api.get_plays_by_top_10_platforms(time_range=days, y_axis=StatMetric.PLAYS.value,
+                                                              user_ids=user_ids)
+            case StatChartType.BY_TOP_10_USERS:
+                data = self.api.get_plays_by_top_10_users(time_range=days, y_axis=StatMetric.PLAYS.value,
+                                                          user_ids=user_ids)
+
+        if not data:
+            return None
+
+        return PlayCountStats(data=data)
+
+    def get_play_duration_chart_data(self, chart_type: StatChartType, days: int,
+                                     user_ids: List[str] = None) -> PlayDurationStats | None:
+        data = None
+
+        match chart_type:
+            case StatChartType.DAILY_BY_MEDIA_TYPE:
+                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetric.DURATION.value, user_ids=user_ids)
+            case StatChartType.BY_HOUR_OF_DAY:
+                data = self.api.get_plays_by_hour_of_day(time_range=days, y_axis=StatMetric.DURATION.value,
+                                                         user_ids=user_ids)
+            case StatChartType.BY_DAY_OF_WEEK:
+                data = self.api.get_plays_by_day_of_week(time_range=days, y_axis=StatMetric.DURATION.value,
+                                                         user_ids=user_ids)
+            case StatChartType.BY_TOP_10_PLATFORMS:
+                data = self.api.get_plays_by_top_10_platforms(time_range=days, y_axis=StatMetric.DURATION.value,
+                                                              user_ids=user_ids)
+            case StatChartType.BY_TOP_10_USERS:
+                data = self.api.get_plays_by_top_10_users(time_range=days, y_axis=StatMetric.DURATION.value,
+                                                          user_ids=user_ids)
+
+        if not data:
+            return None
+
+        return PlayDurationStats(data=data)
 
     def get_recently_added_media(self, count: int, media_type: Optional[str] = None) -> list[RecentlyAddedMediaItem]:
         data = self.api.get_recently_added(count=count, media_type=media_type)
