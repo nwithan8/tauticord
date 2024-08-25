@@ -31,5 +31,5 @@ COPY . .
 # Delete unnecessary files in WORKDIR (/app) folder (not caught by .dockerignore)
 RUN echo "**** removing unneeded files ****"
 
-# Run the app
-CMD [ "pm2-runtime", "start", "ecosystem.config.json"]
+# Run entrypoint.sh script
+ENTRYPOINT ["sh", "entrypoint.sh"]

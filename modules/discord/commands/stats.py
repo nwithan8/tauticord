@@ -1,5 +1,4 @@
 import math
-import os
 from typing import Optional, Callable
 
 import discord
@@ -20,7 +19,6 @@ def play_count_tick_calculator(min_count: int, max_count: int) -> list[int]:
     """
     Calculate the y-axis ticks for play count stats based on the min and max values.
     """
-    min_count = 0  # Min value will always be 0
     # Always want 4 ticks
     max_by_4 = math.ceil(max_count / 4)
     tens = 0
@@ -34,7 +32,6 @@ def play_duration_tick_calculator(min_seconds: int, max_seconds: int) -> list[in
     """
     Calculate the y-axis ticks for play duration stats based on the min and max values.
     """
-    min_seconds = 0  # Min value will always be 0
     # Always want 4 ticks
     if max_seconds > (3600 * 4):  # More than 4 hours, use hours as ticks
         # More than 4 hours, use hours as ticks
@@ -135,13 +132,11 @@ class Stats(commands.GroupCog, name="stats"):
         if username:
             chart_title: str = f"{chart_title} for {username}"
 
-        chart_title: str = chart_title.title()
+        chart_title: str = chart_title.capitalize()
 
         chart_marker: ChartMaker = chart_builder_function(stats, chart_title)
 
-        # TODO: Remove parent directory to use "/tmp" for temporary files in Docker
-        # TODO: Add cron job to clean "/tmp" directory
-        chart_path: str = utils.get_temporary_file_path(sub_directory="charts", parent_directory=os.getcwd(),
+        chart_path: str = utils.get_temporary_file_path(sub_directory="charts", parent_directory="/tmp",
                                                         file_extension=".png")
         chart_marker.save(path=chart_path)
 
