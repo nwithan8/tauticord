@@ -22,7 +22,7 @@ def url_encode(string: str) -> str:
     return quote_plus(string)
 
 
-def minutes_to_hhmm(seconds: int) -> str:
+def seconds_to_hhmm(seconds: int) -> str:
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     return f"{hours:02d}:{minutes:02d}"

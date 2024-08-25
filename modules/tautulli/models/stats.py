@@ -11,21 +11,8 @@ class PlayStats:
         self.categories: list = data.get('categories', [])
         self._series: list[dict] = data.get('series', [])
 
-
-class PlayCountStats(PlayStats):
-    def __init__(self, data: dict):
-        super().__init__(data=data)
-
     def _get_category_data(self, category_name: str) -> PlayStatsCategoryData | None:
-        for series in self._series:
-            if series.get('name', None) == category_name:
-                return PlayStatsCategoryData(
-                    category_name=category_name,
-                    x_axis=self.categories,
-                    values=series.get('data')
-                )
-
-        return None
+        raise NotImplementedError
 
     @property
     def formatted_data(self) -> dict:
@@ -48,6 +35,33 @@ class PlayCountStats(PlayStats):
         return self._get_category_data(category_name='Music')
 
 
+class PlayCountStats(PlayStats):
+    def __init__(self, data: dict):
+        super().__init__(data=data)
+
+    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData | None:
+        for series in self._series:
+            if series.get('name', None) == category_name:
+                return PlayStatsCategoryData(
+                    category_name=category_name,
+                    x_axis=self.categories,
+                    values=series.get('data', [])
+                )
+
+        return None
+
+
 class PlayDurationStats(PlayStats):
     def __init__(self, data: dict):
         super().__init__(data=data)
+
+    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData | None:
+        for series in self._series:
+            if series.get('name', None) == category_name:
+                return PlayStatsCategoryData(
+                    category_name=category_name,
+                    x_axis=self.categories,
+                    values=series.get('data', [])
+                )
+
+        return None

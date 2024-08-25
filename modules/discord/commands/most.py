@@ -11,7 +11,7 @@ from modules.tautulli.tautulli_connector import (
     HomeStatType,
     StatMetricType,
 )
-from modules.utils import minutes_to_hhmm
+from modules.utils import seconds_to_hhmm
 
 
 def _build_response_embed(stats: list[dict[str, str]], title: str, name_key: str,
@@ -20,7 +20,7 @@ def _build_response_embed(stats: list[dict[str, str]], title: str, name_key: str
     for stat in stats:
         value = stat['total']
         if convert_time:
-            value = minutes_to_hhmm(int(value))
+            value = seconds_to_hhmm(int(value))
         embed.add_field(name=stat[name_key], value=value, inline=False)
     return embed
 

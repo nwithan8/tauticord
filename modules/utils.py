@@ -39,10 +39,81 @@ def strip_phantom_space(string: str) -> str:
     return string.replace('️', "").replace("\u200b", "").strip()
 
 
-def minutes_to_hhmm(seconds: int) -> str:
+def seconds_to_minutes(seconds: int) -> int:
+    return seconds // 60
+
+
+def seconds_to_hhmm(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HH:MM"
+    Include hours if 0
+    """
+    hours, seconds = divmod(seconds, 3600)
     minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    return f"{hours:02d}:{minutes:02d}"
+    return f"{int(hours):02d}:{int(minutes):02d}"
+
+
+def seconds_to_hhmmss(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HH:MM:SS"
+    Include hours if 0
+    Include minutes if 0
+    """
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+
+
+def seconds_to_days_hours_minutes_seconds(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "DDd HHh MMm SSs"
+    Exclude days if 0
+    Exclude hours if 0
+    Exclude minutes if 0
+    """
+    stamp = ""
+
+    days, seconds = divmod(seconds, 86400)
+    if days:
+        stamp += f"{int(days):02d}d "
+    hours, seconds = divmod(seconds, 3600)
+    if hours:
+        stamp += f"{int(hours):02d}h "
+    minutes, seconds = divmod(seconds, 60)
+    if minutes:
+        stamp += f"{int(minutes):02d}m "
+    stamp += f"{int(seconds):02d}s"
+
+    return stamp
+
+
+def seconds_to_hours_minutes_seconds(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HHh MMm SSs"
+    Exclude hours if 0
+    Exclude minutes if 0
+    """
+    stamp = ""
+
+    hours, seconds = divmod(seconds, 3600)
+    if hours:
+        stamp += f"{int(hours):02d}h "
+    minutes, seconds = divmod(seconds, 60)
+    if minutes:
+        stamp += f"{int(minutes):02d}m "
+    stamp += f"{int(seconds):02d}s"
+
+    return stamp
+
+
+def seconds_to_hours_minutes(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HHh MMm"
+    Include hours if 0
+    """
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    return f"{int(hours):02d}h {int(minutes):02d}m"
 
 
 def status_code_is_success(status_code: int) -> bool:

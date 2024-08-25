@@ -1,3 +1,4 @@
+import math
 import os
 from typing import Optional, Callable
 
@@ -7,12 +8,51 @@ from discord.ext import commands
 
 import modules.logs as logging
 from modules import utils
-from modules.charts import ChartMaker
+from modules.charts import ChartMaker, PLAY_DURATION_FORMATTER, PLAY_COUNT_FORMATTER
 from modules.tautulli.enums import StatChartType, StatMetricType, StatChartColors
 from modules.tautulli.models.stats import PlayDurationStats, PlayCountStats
 from modules.tautulli.tautulli_connector import (
     TautulliConnector,
 )
+
+
+def play_count_tick_calculator(min_count: int, max_count: int) -> list[int]:
+    """
+    Calculate the y-axis ticks for play count stats based on the min and max values.
+    """
+    min_count = 0  # Min value will always be 0
+    # Always want 4 ticks
+    max_by_4 = math.ceil(max_count / 4)
+    tens = 0
+    while max_by_4 > 10 ** tens:
+        tens += 1
+    max_by_4 = math.ceil(max_by_4 / 10 ** (tens - 1)) * 10 ** (tens - 1)
+    return [max_by_4 * i for i in range(0, 5)]
+
+
+def play_duration_tick_calculator(min_seconds: int, max_seconds: int) -> list[int]:
+    """
+    Calculate the y-axis ticks for play duration stats based on the min and max values.
+    """
+    min_seconds = 0  # Min value will always be 0
+    # Always want 4 ticks
+    if max_seconds > (3600 * 4):  # More than 4 hours, use hours as ticks
+        # More than 4 hours, use hours as ticks
+        max_hours = math.ceil(max_seconds / 3600)
+        max_hours_by_4 = math.ceil(max_hours / 4)
+        tens = 0
+        while max_hours_by_4 > 10 ** tens:
+            tens += 1
+        max_hours_by_4 = math.ceil(max_hours_by_4 / 10 ** (tens - 1)) * 10 ** (tens - 1)
+        max_by_4 = max_hours_by_4 * 3600  # Convert back to seconds
+    else:  # Less than 4 hours, use minutes
+        max_by_4 = math.ceil(max_seconds / 4)
+        tens = 0
+        while max_seconds > 60 * 10 ** tens:
+            tens += 1
+        max_by_4 = math.ceil(max_by_4 / 10 ** (tens - 1)) * 10 ** (tens - 1)
+
+    return [max_by_4 * i for i in range(0, 5)]
 
 
 class Stats(commands.GroupCog, name="stats"):
@@ -121,17 +161,33 @@ class Stats(commands.GroupCog, name="stats"):
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
-            chart_maker = ChartMaker(x_axis=tv_show_data.x_axis, x_axis_labels=tv_show_data.x_axis,
-                                     title=title, background_color=StatChartColors.BACKGROUND.value,
+            chart_maker = ChartMaker(x_axis=tv_show_data.x_axis,
+                                     x_axis_labels=tv_show_data.x_axis,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
                                      text_color=StatChartColors.TEXT.value,
-                                     grid_line_color=StatChartColors.GRIDLINES.value)
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_COUNT_FORMATTER,
+                                     y_axis_tick_calculator=play_count_tick_calculator)
             # Order - Music, Movies, TV Shows
-            chart_maker.add_line(values=music_data.values, label="Music", line_color=StatChartColors.MUSIC.value,
-                                 text_color=StatChartColors.WHITE.value, marker="s")
-            chart_maker.add_line(values=movie_data.values, label="Movies", line_color=StatChartColors.MOVIES.value,
-                                 text_color=StatChartColors.WHITE.value, marker=">")
-            chart_maker.add_line(values=tv_show_data.values, label="TV Shows", line_color=StatChartColors.TV.value,
-                                 text_color=StatChartColors.WHITE.value, marker="o")
+            chart_maker.add_line(values=music_data.values,
+                                 label="Music",
+                                 line_color=StatChartColors.MUSIC.value,
+                                 text_color=StatChartColors.WHITE.value,
+                                 marker="s",
+                                 value_text_formatter=PLAY_COUNT_FORMATTER)
+            chart_maker.add_line(values=movie_data.values,
+                                 label="Movies",
+                                 line_color=StatChartColors.MOVIES.value,
+                                 text_color=StatChartColors.WHITE.value,
+                                 marker=">",
+                                 value_text_formatter=PLAY_COUNT_FORMATTER)
+            chart_maker.add_line(values=tv_show_data.values,
+                                 label="TV Shows",
+                                 line_color=StatChartColors.TV.value,
+                                 text_color=StatChartColors.WHITE.value,
+                                 marker="o",
+                                 value_text_formatter=PLAY_COUNT_FORMATTER)
 
             return chart_maker
 
@@ -159,16 +215,22 @@ class Stats(commands.GroupCog, name="stats"):
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
-            chart_maker = ChartMaker(x_axis=stats.categories, x_axis_labels=stats.categories,
-                                     title=title, background_color=StatChartColors.BACKGROUND.value,
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
                                      text_color=StatChartColors.TEXT.value,
-                                     grid_line_color=StatChartColors.GRIDLINES.value)
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_COUNT_FORMATTER,
+                                     y_axis_tick_calculator=play_count_tick_calculator)
             # Order - Music, Movies, TV Shows
             chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
                                         labels=["Music", "Movies", "TV"],
                                         bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
-                                                    StatChartColors.TV.value], bar_width=0.8,
-                                        text_color=StatChartColors.BLACK.value)
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_COUNT_FORMATTER)
 
             return chart_maker
 
@@ -196,16 +258,22 @@ class Stats(commands.GroupCog, name="stats"):
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
-            chart_maker = ChartMaker(x_axis=stats.categories, x_axis_labels=stats.categories,
-                                     title=title, background_color=StatChartColors.BACKGROUND.value,
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
                                      text_color=StatChartColors.TEXT.value,
-                                     grid_line_color=StatChartColors.GRIDLINES.value)
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_COUNT_FORMATTER,
+                                     y_axis_tick_calculator=play_count_tick_calculator)
             # Order - Music, Movies, TV Shows
             chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
                                         labels=["Music", "Movies", "TV"],
                                         bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
-                                                    StatChartColors.TV.value], bar_width=0.8,
-                                        text_color=StatChartColors.BLACK.value)
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_COUNT_FORMATTER)
 
             return chart_maker
 
@@ -234,16 +302,22 @@ class Stats(commands.GroupCog, name="stats"):
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
-            chart_maker = ChartMaker(x_axis=stats.categories, x_axis_labels=stats.categories,
-                                     title=title, background_color=StatChartColors.BACKGROUND.value,
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
                                      text_color=StatChartColors.TEXT.value,
-                                     grid_line_color=StatChartColors.GRIDLINES.value)
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_COUNT_FORMATTER,
+                                     y_axis_tick_calculator=play_count_tick_calculator)
             # Order - Music, Movies, TV Shows
             chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
                                         labels=["Music", "Movies", "TV"],
                                         bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
-                                                    StatChartColors.TV.value], bar_width=0.8,
-                                        text_color=StatChartColors.BLACK.value)
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_COUNT_FORMATTER)
 
             return chart_maker
 
@@ -271,16 +345,22 @@ class Stats(commands.GroupCog, name="stats"):
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
-            chart_maker = ChartMaker(x_axis=stats.categories, x_axis_labels=stats.categories,
-                                     title=title, background_color=StatChartColors.BACKGROUND.value,
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
                                      text_color=StatChartColors.TEXT.value,
-                                     grid_line_color=StatChartColors.GRIDLINES.value)
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_COUNT_FORMATTER,
+                                     y_axis_tick_calculator=play_count_tick_calculator)
             # Order - Music, Movies, TV Shows
             chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
                                         labels=["Music", "Movies", "TV"],
                                         bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
-                                                    StatChartColors.TV.value], bar_width=0.8,
-                                        text_color=StatChartColors.BLACK.value)
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_COUNT_FORMATTER)
 
             return chart_maker
 
@@ -294,4 +374,233 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    # TODO: Add play duration stats commands
+    @app_commands.command(name="graph-play-duration-daily",
+                          description="Show graph of daily play duration stats.")
+    @app_commands.describe(
+        days="The number of past days to show stats for.",
+        username="The username of the user to show stats for. Leave blank for all users.",
+    )
+    async def graph_play_duration_daily(self,
+                                        interaction: discord.Interaction,
+                                        days: int,
+                                        username: Optional[str] = None,
+                                        share: Optional[bool] = False) -> None:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+            tv_show_data = stats.tv_shows
+            movie_data = stats.movies
+            music_data = stats.music
+            chart_maker = ChartMaker(x_axis=tv_show_data.x_axis,
+                                     x_axis_labels=tv_show_data.x_axis,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
+                                     text_color=StatChartColors.TEXT.value,
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_DURATION_FORMATTER,
+                                     y_axis_tick_calculator=play_duration_tick_calculator)
+            # Order - Music, Movies, TV Shows
+            chart_maker.add_line(values=music_data.values,
+                                 label="Music",
+                                 line_color=StatChartColors.MUSIC.value,
+                                 text_color=StatChartColors.WHITE.value,
+                                 marker="s",
+                                 value_text_formatter=PLAY_DURATION_FORMATTER)
+            chart_maker.add_line(values=movie_data.values,
+                                 label="Movies",
+                                 line_color=StatChartColors.MOVIES.value,
+                                 text_color=StatChartColors.WHITE.value,
+                                 marker=">",
+                                 value_text_formatter=PLAY_DURATION_FORMATTER)
+            chart_maker.add_line(values=tv_show_data.values,
+                                 label="TV Shows",
+                                 line_color=StatChartColors.TV.value,
+                                 text_color=StatChartColors.WHITE.value,
+                                 marker="o",
+                                 value_text_formatter=PLAY_DURATION_FORMATTER)
+
+            return chart_maker
+
+        await self._build_and_send_response(
+            interaction=interaction,
+            chart_type=StatChartType.DAILY_BY_MEDIA_TYPE,
+            metric=StatMetricType.DURATION,
+            days=days,
+            username=username,
+            chart_builder_function=chart_builder_function,
+            share=share
+        )
+
+    @app_commands.command(name="graph-play-duration-day-of-week",
+                          description="Show graph of play duration by day of week.")
+    @app_commands.describe(
+        days="The number of past days to show stats for.",
+        username="The username of the user to show stats for. Leave blank for all users.",
+    )
+    async def graph_play_duration_day_of_week(self,
+                                              interaction: discord.Interaction,
+                                              days: int,
+                                              username: Optional[str] = None,
+                                              share: Optional[bool] = False) -> None:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+            tv_show_data = stats.tv_shows
+            movie_data = stats.movies
+            music_data = stats.music
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
+                                     text_color=StatChartColors.TEXT.value,
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_DURATION_FORMATTER,
+                                     y_axis_tick_calculator=play_duration_tick_calculator)
+            # Order - Music, Movies, TV Shows
+            chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
+                                        labels=["Music", "Movies", "TV"],
+                                        bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_DURATION_FORMATTER)
+
+            return chart_maker
+
+        await self._build_and_send_response(
+            interaction=interaction,
+            chart_type=StatChartType.BY_DAY_OF_WEEK,
+            metric=StatMetricType.DURATION,
+            days=days,
+            username=username,
+            chart_builder_function=chart_builder_function,
+            share=share
+        )
+
+    @app_commands.command(name="graph-play-duration-hour-of-day",
+                          description="Show graph of play duration by hour of day.")
+    @app_commands.describe(
+        days="The number of past days to show stats for.",
+        username="The username of the user to show stats for. Leave blank for all users.",
+    )
+    async def graph_play_duration_hour_of_day(self,
+                                              interaction: discord.Interaction,
+                                              days: int,
+                                              username: Optional[str] = None,
+                                              share: Optional[bool] = False) -> None:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+            tv_show_data = stats.tv_shows
+            movie_data = stats.movies
+            music_data = stats.music
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
+                                     text_color=StatChartColors.TEXT.value,
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_DURATION_FORMATTER,
+                                     y_axis_tick_calculator=play_duration_tick_calculator)
+            # Order - Music, Movies, TV Shows
+            chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
+                                        labels=["Music", "Movies", "TV"],
+                                        bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_DURATION_FORMATTER)
+
+            return chart_maker
+
+        await self._build_and_send_response(
+            interaction=interaction,
+            chart_type=StatChartType.BY_HOUR_OF_DAY,
+            metric=StatMetricType.DURATION,
+            days=days,
+            username=username,
+            chart_builder_function=chart_builder_function,
+            share=share
+        )
+
+    @app_commands.command(name="graph-play-duration-platforms",
+                          description="Show graph of play duration by top 10 platforms.")
+    @app_commands.describe(
+        days="The number of past days to show stats for.",
+        username="The username of the user to show stats for. Leave blank for all users.",
+    )
+    async def graph_play_duration_platforms(self,
+                                            interaction: discord.Interaction,
+                                            days: int,
+                                            username: Optional[str] = None,
+                                            share: Optional[bool] = False) -> None:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+            tv_show_data = stats.tv_shows
+            movie_data = stats.movies
+            music_data = stats.music
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
+                                     text_color=StatChartColors.TEXT.value,
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_DURATION_FORMATTER,
+                                     y_axis_tick_calculator=play_duration_tick_calculator)
+            # Order - Music, Movies, TV Shows
+            chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
+                                        labels=["Music", "Movies", "TV"],
+                                        bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_DURATION_FORMATTER)
+
+            return chart_maker
+
+        await self._build_and_send_response(
+            interaction=interaction,
+            chart_type=StatChartType.BY_TOP_10_PLATFORMS,
+            metric=StatMetricType.DURATION,
+            days=days,
+            username=username,
+            chart_builder_function=chart_builder_function,
+            share=share
+        )
+
+    @app_commands.command(name="graph-play-duration-users",
+                          description="Show graph of play duration by top 10 users.")
+    @app_commands.describe(
+        days="The number of past days to show stats for.",
+        username="The username of the user to show stats for. Leave blank for all users.",
+    )
+    async def graph_play_duration_users(self,
+                                        interaction: discord.Interaction,
+                                        days: int,
+                                        username: Optional[str] = None,
+                                        share: Optional[bool] = False) -> None:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+            tv_show_data = stats.tv_shows
+            movie_data = stats.movies
+            music_data = stats.music
+            chart_maker = ChartMaker(x_axis=stats.categories,
+                                     x_axis_labels=stats.categories,
+                                     title=title,
+                                     background_color=StatChartColors.BACKGROUND.value,
+                                     text_color=StatChartColors.TEXT.value,
+                                     grid_line_color=StatChartColors.GRIDLINES.value,
+                                     y_axis_major_formatter=PLAY_DURATION_FORMATTER,
+                                     y_axis_tick_calculator=play_duration_tick_calculator)
+            # Order - Music, Movies, TV Shows
+            chart_maker.add_stacked_bar(values=[music_data.values, movie_data.values, tv_show_data.values],
+                                        labels=["Music", "Movies", "TV"],
+                                        bar_colors=[StatChartColors.MUSIC.value, StatChartColors.MOVIES.value,
+                                                    StatChartColors.TV.value],
+                                        bar_width=0.8,
+                                        text_color=StatChartColors.BLACK.value,
+                                        value_text_formatter=PLAY_DURATION_FORMATTER)
+
+            return chart_maker
+
+        await self._build_and_send_response(
+            interaction=interaction,
+            chart_type=StatChartType.BY_TOP_10_USERS,
+            metric=StatMetricType.DURATION,
+            days=days,
+            username=username,
+            chart_builder_function=chart_builder_function,
+            share=share
+        )
