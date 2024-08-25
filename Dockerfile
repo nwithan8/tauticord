@@ -3,7 +3,7 @@ FROM node:18.19.0-alpine3.19
 WORKDIR /app
 
 # Install Python utilities
-RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip cargo
+RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip cargo cmake
 
 # Install pm2
 RUN npm install pm2 -g
