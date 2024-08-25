@@ -3,7 +3,8 @@ FROM node:18.19.0-alpine3.19
 WORKDIR /app
 
 # Install Python utilities
-RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip cargo cmake
+RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN apk add --no-cache --update alpine-sdk wget ca-certificates musl-dev libc-dev gcc python3-dev bash linux-headers python3 py3-pip cargo make cmake py3-numpy
 
 # Install pm2
 RUN npm install pm2 -g
