@@ -148,6 +148,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_count_daily(self,
                                      interaction: discord.Interaction,
@@ -202,6 +203,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_count_day_of_week(self,
                                            interaction: discord.Interaction,
@@ -245,6 +247,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_count_hour_of_day(self,
                                            interaction: discord.Interaction,
@@ -289,6 +292,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_count_platforms(self,
                                          interaction: discord.Interaction,
@@ -332,6 +336,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_count_users(self,
                                      interaction: discord.Interaction,
@@ -376,6 +381,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_duration_daily(self,
                                         interaction: discord.Interaction,
@@ -431,6 +437,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_duration_day_of_week(self,
                                               interaction: discord.Interaction,
@@ -475,6 +482,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_duration_hour_of_day(self,
                                               interaction: discord.Interaction,
@@ -519,6 +527,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_duration_platforms(self,
                                             interaction: discord.Interaction,
@@ -563,6 +572,7 @@ class Stats(commands.GroupCog, name="stats"):
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
+        share="Whether to make the response visible to the channel."
     )
     async def graph_play_duration_users(self,
                                         interaction: discord.Interaction,

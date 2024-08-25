@@ -187,6 +187,7 @@ class Most(commands.GroupCog, name="most"):
     @app_commands.command(name="played-artists", description="Show top artists for a number of days.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
+        metric="The metric by which to calculate the stats. Default is plays.",
         share="Whether to make the response visible to the channel."
     )
     @app_commands.choices(metric=[
