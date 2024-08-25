@@ -53,14 +53,14 @@ def play_duration_tick_calculator(min_seconds: int, max_seconds: int) -> list[in
     return [max_by_4 * i for i in range(0, 5)]
 
 
-class Stats(commands.GroupCog, name="stats"):
+class Graphs(commands.GroupCog, name="graphs"):
     def __init__(self, bot: commands.Bot, tautulli: TautulliConnector,
                  admin_check: Callable[[discord.Interaction], bool] = None):
         self.bot = bot
         self._tautulli = tautulli
         self._admin_check = admin_check
         super().__init__()  # This is required for the cog to work.
-        logging.debug("Stats cog loaded.")
+        logging.debug("Graphs cog loaded.")
 
     async def check_admin(self, interaction: discord.Interaction) -> bool:
         if self._admin_check and not self._admin_check(interaction):
@@ -144,17 +144,17 @@ class Stats(commands.GroupCog, name="stats"):
 
         await interaction.response.send_message(file=discord.File(chart_path), ephemeral=not share)
 
-    @app_commands.command(name="graph-play-count-daily", description="Show graph of daily play count stats.")
+    @app_commands.command(name="play-count-daily", description="Show graph of daily play count stats.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_count_daily(self,
-                                     interaction: discord.Interaction,
-                                     days: int,
-                                     username: Optional[str] = None,
-                                     share: Optional[bool] = False) -> None:
+    async def play_count_daily(self,
+                               interaction: discord.Interaction,
+                               days: int,
+                               username: Optional[str] = None,
+                               share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -199,17 +199,17 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-count-day-of-week", description="Show graph of play count by day of week.")
+    @app_commands.command(name="play-count-day-of-week", description="Show graph of play count by day of week.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_count_day_of_week(self,
-                                           interaction: discord.Interaction,
-                                           days: int,
-                                           username: Optional[str] = None,
-                                           share: Optional[bool] = False) -> None:
+    async def play_count_day_of_week(self,
+                                     interaction: discord.Interaction,
+                                     days: int,
+                                     username: Optional[str] = None,
+                                     share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -243,17 +243,17 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-count-hour-of-day", description="Show graph of play count by hour of day.")
+    @app_commands.command(name="play-count-hour-of-day", description="Show graph of play count by hour of day.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_count_hour_of_day(self,
-                                           interaction: discord.Interaction,
-                                           days: int,
-                                           username: Optional[str] = None,
-                                           share: Optional[bool] = False) -> None:
+    async def play_count_hour_of_day(self,
+                                     interaction: discord.Interaction,
+                                     days: int,
+                                     username: Optional[str] = None,
+                                     share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -287,18 +287,18 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-count-platforms",
+    @app_commands.command(name="play-count-platforms",
                           description="Show graph of play count by top 10 platforms.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_count_platforms(self,
-                                         interaction: discord.Interaction,
-                                         days: int,
-                                         username: Optional[str] = None,
-                                         share: Optional[bool] = False) -> None:
+    async def play_count_platforms(self,
+                                   interaction: discord.Interaction,
+                                   days: int,
+                                   username: Optional[str] = None,
+                                   share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -332,17 +332,17 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-count-users", description="Show graph of play count by top 10 users.")
+    @app_commands.command(name="play-count-users", description="Show graph of play count by top 10 users.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_count_users(self,
-                                     interaction: discord.Interaction,
-                                     days: int,
-                                     username: Optional[str] = None,
-                                     share: Optional[bool] = False) -> None:
+    async def play_count_users(self,
+                               interaction: discord.Interaction,
+                               days: int,
+                               username: Optional[str] = None,
+                               share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -376,18 +376,18 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-duration-daily",
+    @app_commands.command(name="play-duration-daily",
                           description="Show graph of daily play duration stats.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_duration_daily(self,
-                                        interaction: discord.Interaction,
-                                        days: int,
-                                        username: Optional[str] = None,
-                                        share: Optional[bool] = False) -> None:
+    async def play_duration_daily(self,
+                                  interaction: discord.Interaction,
+                                  days: int,
+                                  username: Optional[str] = None,
+                                  share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -432,18 +432,18 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-duration-day-of-week",
+    @app_commands.command(name="play-duration-day-of-week",
                           description="Show graph of play duration by day of week.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_duration_day_of_week(self,
-                                              interaction: discord.Interaction,
-                                              days: int,
-                                              username: Optional[str] = None,
-                                              share: Optional[bool] = False) -> None:
+    async def play_duration_day_of_week(self,
+                                        interaction: discord.Interaction,
+                                        days: int,
+                                        username: Optional[str] = None,
+                                        share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -477,18 +477,18 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-duration-hour-of-day",
+    @app_commands.command(name="play-duration-hour-of-day",
                           description="Show graph of play duration by hour of day.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_duration_hour_of_day(self,
-                                              interaction: discord.Interaction,
-                                              days: int,
-                                              username: Optional[str] = None,
-                                              share: Optional[bool] = False) -> None:
+    async def play_duration_hour_of_day(self,
+                                        interaction: discord.Interaction,
+                                        days: int,
+                                        username: Optional[str] = None,
+                                        share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -522,18 +522,18 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-duration-platforms",
+    @app_commands.command(name="play-duration-platforms",
                           description="Show graph of play duration by top 10 platforms.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_duration_platforms(self,
-                                            interaction: discord.Interaction,
-                                            days: int,
-                                            username: Optional[str] = None,
-                                            share: Optional[bool] = False) -> None:
+    async def play_duration_platforms(self,
+                                      interaction: discord.Interaction,
+                                      days: int,
+                                      username: Optional[str] = None,
+                                      share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
@@ -567,18 +567,18 @@ class Stats(commands.GroupCog, name="stats"):
             share=share
         )
 
-    @app_commands.command(name="graph-play-duration-users",
+    @app_commands.command(name="play-duration-users",
                           description="Show graph of play duration by top 10 users.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
         username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
-    async def graph_play_duration_users(self,
-                                        interaction: discord.Interaction,
-                                        days: int,
-                                        username: Optional[str] = None,
-                                        share: Optional[bool] = False) -> None:
+    async def play_duration_users(self,
+                                  interaction: discord.Interaction,
+                                  days: int,
+                                  username: Optional[str] = None,
+                                  share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies

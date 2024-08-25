@@ -297,6 +297,28 @@ Variants:
 
 <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/most_active_libraries.png" alt="most_active_libraries">
 
+### `/graphs`
+
+**This command is locked to administrators only.**
+
+Display graphs for Tautulli play count/duration statistics. This is similar to the "Graphs" section on the Tautulli homepage.
+
+Variants:
+- `/graphs play-count-daily`
+- `/graphs play-count-day-of-week`
+- `/graphs play-count-hour-of-day`
+- `/graphs play-count-platforms`
+- `/graphs play-count-users`
+- `/graphs play-duration-daily`
+- `/graphs play-duration-day-of-week`
+- `/graphs play-duration-hour-of-day`
+- `/graphs play-duration-platforms`
+- `/graphs play-duration-users`
+
+You can optionally provide a `username` argument to the command to filter statistics to only a specific user.
+
+<img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/graphs_play_duration_day_of_week.png" alt="graphs_play_duration_day_of_week">
+
 ### `/summary`
 
 **This command is locked to administrators only.**
