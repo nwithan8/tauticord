@@ -19,6 +19,9 @@ RUN . /app/venv/bin/activate
 RUN /app/venv/bin/pip install --no-cache-dir setuptools_rust # https://github.com/docker/compose/issues/8105#issuecomment-775931324
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
+# Set up environment variables
+ENV AM_I_IN_A_DOCKER_CONTAINER Yes
+
 # Make Docker /config volume for optional config file
 VOLUME /config
 
@@ -31,5 +34,5 @@ COPY . .
 # Delete unnecessary files in WORKDIR (/app) folder (not caught by .dockerignore)
 RUN echo "**** removing unneeded files ****"
 
-# Run the app
-CMD [ "pm2-runtime", "start", "ecosystem.config.json"]
+# Run entrypoint.sh script
+ENTRYPOINT ["sh", "entrypoint.sh"]

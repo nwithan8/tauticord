@@ -79,7 +79,8 @@ class Recently(commands.GroupCog, name="recently"):
             discord.app_commands.Choice(name="Shows", value="show"),
         ]
     )
-    async def added(self, interaction: discord.Interaction,
+    async def added(self,
+                    interaction: discord.Interaction,
                     media_type: Optional[discord.app_commands.Choice[str]] = None,
                     share: Optional[bool] = False) -> None:
         # This command is public, no admin restrictions

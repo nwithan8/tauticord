@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timedelta
 from typing import Optional, Any
 from urllib.parse import quote_plus
@@ -38,10 +39,81 @@ def strip_phantom_space(string: str) -> str:
     return string.replace('️', "").replace("\u200b", "").strip()
 
 
-def minutes_to_hhmm(seconds: int) -> str:
+def seconds_to_minutes(seconds: int) -> int:
+    return seconds // 60
+
+
+def seconds_to_hhmm(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HH:MM"
+    Include hours if 0
+    """
+    hours, seconds = divmod(seconds, 3600)
     minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    return f"{hours:02d}:{minutes:02d}"
+    return f"{int(hours):02d}:{int(minutes):02d}"
+
+
+def seconds_to_hhmmss(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HH:MM:SS"
+    Include hours if 0
+    Include minutes if 0
+    """
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+
+
+def seconds_to_days_hours_minutes_seconds(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "DDd HHh MMm SSs"
+    Exclude days if 0
+    Exclude hours if 0
+    Exclude minutes if 0
+    """
+    stamp = ""
+
+    days, seconds = divmod(seconds, 86400)
+    if days:
+        stamp += f"{int(days):02d}d "
+    hours, seconds = divmod(seconds, 3600)
+    if hours:
+        stamp += f"{int(hours):02d}h "
+    minutes, seconds = divmod(seconds, 60)
+    if minutes:
+        stamp += f"{int(minutes):02d}m "
+    stamp += f"{int(seconds):02d}s"
+
+    return stamp
+
+
+def seconds_to_hours_minutes_seconds(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HHh MMm SSs"
+    Exclude hours if 0
+    Exclude minutes if 0
+    """
+    stamp = ""
+
+    hours, seconds = divmod(seconds, 3600)
+    if hours:
+        stamp += f"{int(hours):02d}h "
+    minutes, seconds = divmod(seconds, 60)
+    if minutes:
+        stamp += f"{int(minutes):02d}m "
+    stamp += f"{int(seconds):02d}s"
+
+    return stamp
+
+
+def seconds_to_hours_minutes(seconds: int) -> str:
+    """
+    Returns a string representation of the given seconds in the format "HHh MMm"
+    Include hours if 0
+    """
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    return f"{int(hours):02d}h {int(minutes):02d}m"
 
 
 def status_code_is_success(status_code: int) -> bool:
@@ -478,3 +550,34 @@ def discord_text_channel_name_format(string: str) -> str:
     # lowercase and replace spaces with dashes
     string = string.lower().replace(" ", "-")
     return string
+
+
+def get_temporary_file_path(sub_directory: str = None, parent_directory: str = None, file_extension: str = None) -> str:
+    """
+    Return a temporary file path
+
+    :param sub_directory: (Optional) subdirectory to use
+    :type sub_directory: str, optional
+    :param parent_directory: (Optional) parent directory to use
+    :type parent_directory: str, optional
+    :param file_extension: (Optional) file extension to use
+    :type file_extension: str, optional
+    :return: temporary file path
+    :rtype: str
+    """
+    base = parent_directory or "/tmp"
+
+    if sub_directory:
+        base = os.path.join(base, sub_directory)
+
+    os.makedirs(base, exist_ok=True)
+
+    return os.path.join(base, f"{os.urandom(24).hex()}{file_extension or '.tmp'}")
+
+
+def get_current_directory() -> str:
+    return os.getcwd()
+
+
+def is_docker():
+    return os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False)
