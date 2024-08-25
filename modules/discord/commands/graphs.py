@@ -130,10 +130,10 @@ class Graphs(commands.GroupCog, name="graphs"):
                 chart_title: str = f"{chart_title_metric} by top 10 users"
 
         chart_title: str = f"{chart_title} for past {days} {'day' if days == 1 else 'days'}"
+        chart_title: str = chart_title.capitalize()
+
         if username:
             chart_title: str = f"{chart_title} for {username}"
-
-        chart_title: str = chart_title.capitalize()
 
         chart_marker: ChartMaker = chart_builder_function(stats, chart_title)
 
@@ -335,13 +335,11 @@ class Graphs(commands.GroupCog, name="graphs"):
     @app_commands.command(name="play-count-users", description="Show graph of play count by top 10 users.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
-        username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
     async def play_count_users(self,
                                interaction: discord.Interaction,
                                days: int,
-                               username: Optional[str] = None,
                                share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
@@ -371,7 +369,6 @@ class Graphs(commands.GroupCog, name="graphs"):
             chart_type=StatChartType.BY_TOP_10_USERS,
             metric=StatMetricType.PLAYS,
             days=days,
-            username=username,
             chart_builder_function=chart_builder_function,
             share=share
         )
@@ -571,13 +568,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                           description="Show graph of play duration by top 10 users.")
     @app_commands.describe(
         days="The number of past days to show stats for.",
-        username="The username of the user to show stats for. Leave blank for all users.",
         share="Whether to make the response visible to the channel."
     )
     async def play_duration_users(self,
                                   interaction: discord.Interaction,
                                   days: int,
-                                  username: Optional[str] = None,
                                   share: Optional[bool] = False) -> None:
         def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
             tv_show_data = stats.tv_shows
@@ -607,7 +602,6 @@ class Graphs(commands.GroupCog, name="graphs"):
             chart_type=StatChartType.BY_TOP_10_USERS,
             metric=StatMetricType.DURATION,
             days=days,
-            username=username,
             chart_builder_function=chart_builder_function,
             share=share
         )
