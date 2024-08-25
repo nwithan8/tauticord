@@ -573,3 +573,11 @@ def get_temporary_file_path(sub_directory: str = None, parent_directory: str = N
     os.makedirs(base, exist_ok=True)
 
     return os.path.join(base, f"{os.urandom(24).hex()}{file_extension or '.tmp'}")
+
+
+def get_current_directory() -> str:
+    return os.getcwd()
+
+
+def is_docker():
+    return os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False)

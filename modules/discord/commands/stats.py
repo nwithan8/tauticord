@@ -13,6 +13,7 @@ from modules.tautulli.models.stats import PlayDurationStats, PlayCountStats
 from modules.tautulli.tautulli_connector import (
     TautulliConnector,
 )
+from modules.utils import is_docker, get_current_directory
 
 
 def play_count_tick_calculator(min_count: int, max_count: int) -> list[int]:
@@ -136,7 +137,8 @@ class Stats(commands.GroupCog, name="stats"):
 
         chart_marker: ChartMaker = chart_builder_function(stats, chart_title)
 
-        chart_path: str = utils.get_temporary_file_path(sub_directory="charts", parent_directory="/tmp",
+        parent_chart_path = get_current_directory() if not is_docker() else None
+        chart_path: str = utils.get_temporary_file_path(sub_directory="charts", parent_directory=parent_chart_path,
                                                         file_extension=".png")
         chart_marker.save(path=chart_path)
 

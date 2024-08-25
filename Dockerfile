@@ -19,6 +19,9 @@ RUN . /app/venv/bin/activate
 RUN /app/venv/bin/pip install --no-cache-dir setuptools_rust # https://github.com/docker/compose/issues/8105#issuecomment-775931324
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
+# Set up environment variables
+ENV AM_I_IN_A_DOCKER_CONTAINER Yes
+
 # Make Docker /config volume for optional config file
 VOLUME /config
 
