@@ -11,20 +11,24 @@ class VoiceChannel(BaseConfig):
     @property
     def prefix(self) -> str:
         emoji = strip_phantom_space(string=self.emoji)
-        return f"{emoji} {self.name}"
+        prefix = f"{emoji} {self.name}"
+        return prefix.strip()  # Remove any spaces provided to override default name/emoji
 
     @property
     def channel_id_set(self) -> bool:
         return self.channel_id != 0
 
     def build_channel_name(self, value) -> str:
+        prefix = self.prefix
+        if not prefix:
+            return value
         return f"{self.prefix}: {value}"
 
     def as_dict(self) -> dict:
         return {
             "name": self.name,
             "enable": self.enable,
-            "emoji": self.emoji.strip(),
+            "emoji": self.emoji,
             "channel_id": self.channel_id
         }
 
