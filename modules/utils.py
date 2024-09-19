@@ -39,6 +39,16 @@ def strip_phantom_space(string: str) -> str:
     return string.replace('️', "").replace("\u200b", "").strip()
 
 
+def is_none_or_empty(value) -> bool:
+    return value is None or value == ""
+
+
+def set_default_if_none_or_empty(value, default) -> Any:
+    if is_none_or_empty(value):
+        return default
+    return value
+
+
 def seconds_to_minutes(seconds: int) -> int:
     return seconds // 60
 

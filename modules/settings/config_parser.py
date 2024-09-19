@@ -18,10 +18,7 @@ class ConfigSection:
     def get_value(self, key: str, default: Any = None) -> Any:
         value = self.data.get(key, default)
 
-        if value is None or value == "":
-            return default
-
-        return value
+        return utils.set_default_if_none_or_empty(value=value, default=default)
 
     def get_subsection_data(self, key: str, optional: bool = False) -> dict:
         try:
@@ -42,14 +39,10 @@ class VoiceChannelConfig(ConfigSection):
 
     def to_model(self) -> settings_models.VoiceChannel:
         enable: bool = utils.extract_boolean(self.get_value(key="Enable", default=False))
-        name: str = self.get_value(key="CustomName", default="")
-        if not name:
-            # Fall back to the default channel name if a custom name is not provided
-            name: str = self.channel_name
-        emoji: str = self.get_value(key="CustomEmoji", default="")
-        if not emoji:
-            # Fall back to the default emoji if a custom emoji is not provided
-            emoji: str = self.emoji.value  # type: ignore
+        # Fall back to the default channel name if a custom name is not provided
+        name: str = self.get_value(key="CustomName", default=self.channel_name)
+        # Fall back to the default emoji if a custom emoji is not provided
+        emoji: str = self.get_value(key="CustomEmoji", default=self.emoji.value)
         channel_id: int = self.get_value(key="VoiceChannelID", default="0")
 
         return settings_models.VoiceChannel(
