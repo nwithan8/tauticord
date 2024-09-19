@@ -42,6 +42,5 @@ def disk_usage_display(path: str) -> str:
 
     space_used = utils.human_size(used, decimal_places=1, no_zeros=True)
     total_space = utils.human_size(total, decimal_places=1, no_zeros=True)
-    percentage_used = utils.format_decimal(used / total * 100, decimal_places=2, no_zeros=True)
 
-    return f"{space_used}/{total_space} ({percentage_used}%)"
+    return f"{space_used}/{total_space}"
