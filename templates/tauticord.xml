@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-    <Name>tauticord</Name>
+    <Name>Tauticord</Name>
     <Repository>nwithan8/tauticord:latest</Repository>
     <Registry>https://hub.docker.com/r/nwithan8/tauticord</Registry>
     <Branch>
