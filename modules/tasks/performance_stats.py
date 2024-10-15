@@ -90,14 +90,16 @@ class PerformanceMonitor(VoiceCategoryStatsMonitor):
             await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                stat=stat)
 
-        if self.stats_settings.cpu.enable:
+        if self.tautulli.plex_pass_feature_is_allowed(feature=self.stats_settings.cpu.enable,
+                                                      warning="CPU usage stats require Plex Pass, ignoring setting..."):
             settings = self.stats_settings.cpu
             cpu_percent = self.calculate_cpu_percent()
             logging.debug(f"Updating CPU voice channel with new CPU percent: {cpu_percent}")
             await self.edit_stat_voice_channel(voice_channel_settings=settings,
                                                stat=cpu_percent)
 
-        if self.stats_settings.memory.enable:
+        if self.tautulli.plex_pass_feature_is_allowed(feature=self.stats_settings.memory.enable,
+                                                      warning="Memory usage stats require Plex Pass, ignoring setting..."):
             settings = self.stats_settings.memory
             memory_percent = self.calculate_memory_percent()
             logging.debug(f"Updating Memory voice channel with new Memory percent: {memory_percent}")

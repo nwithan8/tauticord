@@ -62,8 +62,10 @@ class TautulliConnector:
         logging.error(error_message)
         self.analytics.event(event_category="Error", event_action=function_name, random_uuid_if_needed=True)
 
-    def plex_pass_feature_is_allowed(self, feature: bool) -> bool:
+    def plex_pass_feature_is_allowed(self, feature: bool, warning: Optional[str] = None) -> bool:
         if not self.has_plex_pass:
+            if feature and warning:  # Only log warning if feature was attempted to be used
+                logging.warning(warning)
             return False
 
         return feature
@@ -345,7 +347,8 @@ class TautulliConnector:
 
         match chart_type:
             case StatChartType.DAILY_BY_MEDIA_TYPE:
-                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetricType.DURATION.value, user_ids=user_ids)
+                data = self.api.get_plays_by_date(time_range=days, y_axis=StatMetricType.DURATION.value,
+                                                  user_ids=user_ids)
             case StatChartType.BY_HOUR_OF_DAY:
                 data = self.api.get_plays_by_hour_of_day(time_range=days, y_axis=StatMetricType.DURATION.value,
                                                          user_ids=user_ids)

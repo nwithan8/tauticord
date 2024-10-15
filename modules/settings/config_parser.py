@@ -84,7 +84,7 @@ class DiscordConfig(ConfigSection):
         channel_name = self.get_value(key="ChannelName", default="tauticord")
         channel_name = utils.discord_text_channel_name_format(string=channel_name)
         use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
-        enable_termination = utils.extract_boolean(self.get_value(key="EnableTermination", default=True))
+        enable_termination = utils.extract_boolean(self.get_value(key="EnableTermination", default=False))
         enable_slash_commands = utils.extract_boolean(self.get_value(key="EnableSlashCommands", default=False))
 
         status_message_settings_data = self.get_subsection_data(key="StatusMessage", optional=True)
