@@ -160,7 +160,8 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
         # update the message regardless of whether the content has changed
         self.message = await discord_utils.send_embed_message(embed=summary.embed, message=self.message)
 
-        if self.tautulli.plex_pass_feature_is_allowed(feature=self.enable_stream_termination_if_possible):
+        if self.tautulli.plex_pass_feature_is_allowed(feature=self.enable_stream_termination_if_possible,
+                                                      warning="Stream termination control requires Plex Pass, ignoring setting..."):
             await self.add_stream_number_emoji_reactions(count=len(summary.streams),
                                                          emoji_manager=self.emoji_manager)
             # on_raw_reaction_add will handle the rest

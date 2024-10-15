@@ -227,8 +227,8 @@ updates).
 
 Performance monitoring will report metrics such as:
 
-- CPU usage
-- RAM usage
+- CPU usage (requires Plex Pass)
+- RAM usage (requires Plex Pass)
 - Disk space usage
 - Plex user count
 
@@ -254,6 +254,17 @@ report "N/A".
 Please be aware of the potential risks of allowing raw SQL queries to be run directly on your Tautulli database via the
 API. If you do not intend on using the performance monitoring feature, it is recommended to keep SQL queries
 disabled (`api_sql = 0` in Tautulli's `config.ini` file).
+
+#### CPU and RAM Monitoring
+
+Tauticord's CPU and RAM monitoring features will [directly communicate with the Plex Media Server](#system-access) to
+retrieve statistics. CPU and RAM usage statistics is
+a [Plex Pass feature](https://support.plex.tv/articles/200871837-status-and-dashboard/); as a result, this requires a
+Plex Pass subscription to work.
+
+Tauticord will automatically determine if the Plex Media Server has a Plex Pass subscription. If this feature is enabled
+in the configuration file, but the Plex Media Server does not have a Plex Pass subscription, Tauticord will ignore the
+configuration settings and log a warning.
 
 #### Disk Space Monitoring
 
@@ -301,9 +312,11 @@ Variants:
 
 **This command is locked to administrators only.**
 
-Display graphs for Tautulli play count/duration statistics. This is similar to the "Graphs" section on the Tautulli homepage.
+Display graphs for Tautulli play count/duration statistics. This is similar to the "Graphs" section on the Tautulli
+homepage.
 
 Variants:
+
 - `/graphs play-count-daily`
 - `/graphs play-count-day-of-week`
 - `/graphs play-count-hour-of-day`
