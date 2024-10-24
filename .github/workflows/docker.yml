@@ -27,7 +27,9 @@ jobs:
       - name: Establish variables
         id: vars
         run: |
+          echo "app_name=tauticord" >> "$GITHUB_OUTPUT"
           echo "version=${{ github.event.inputs.version || github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          echo "major_version=$(echo ${{ github.event.inputs.version || github.event.release.tag_name }} | cut -d '.' -f 1)" >> "$GITHUB_OUTPUT"
           echo "today=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
           echo "year=$(date +'%Y')" >> "$GITHUB_OUTPUT"
 
@@ -94,13 +96,16 @@ jobs:
           push: true
           platforms: linux/amd64,linux/armhf,linux/arm64
           tags: |
-            nwithan8/tauticord:latest
-            nwithan8/tauticord:${{ steps.vars.outputs.version }}
-            ghcr.io/nwithan8/tauticord:latest
-            ghcr.io/nwithan8/tauticord:${{ steps.vars.outputs.version }}
-            ${{ secrets.GITEA_REGISTRY }}/nwithan8/tauticord:latest
-            ${{ secrets.GITEA_REGISTRY }}/nwithan8/tauticord:${{ steps.vars.outputs.version }}
+            nwithan8/${{ steps.vars.outputs.app_name }}:latest
+            nwithan8/${{ steps.vars.outputs.app_name }}:${{ steps.vars.outputs.version }}
+            nwithan8/${{ steps.vars.outputs.app_name }}:${{ steps.vars.outputs.major_version }}
+            ghcr.io/nwithan8/${{ steps.vars.outputs.app_name }}:latest
+            ghcr.io/nwithan8/${{ steps.vars.outputs.app_name }}:${{ steps.vars.outputs.version }}
+            ghcr.io/nwithan8/${{ steps.vars.outputs.app_name }}:${{ steps.vars.outputs.major_version }}
+            ${{ secrets.GITEA_REGISTRY }}/nwithan8/${{ steps.vars.outputs.app_name }}:latest
+            ${{ secrets.GITEA_REGISTRY }}/nwithan8/${{ steps.vars.outputs.app_name }}:${{ steps.vars.outputs.version }}
+            ${{ secrets.GITEA_REGISTRY }}/nwithan8/${{ steps.vars.outputs.app_name }}:${{ steps.vars.outputs.major_version }}
           labels: |
-            org.opencontainers.image.title=tauticord
+            org.opencontainers.image.title=${{ steps.vars.outputs.app_name }}
             org.opencontainers.image.version=${{ steps.vars.outputs.version }}
             org.opencontainers.image.created=${{ steps.vars.outputs.today }}
