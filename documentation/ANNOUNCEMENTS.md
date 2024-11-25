@@ -1,3 +1,27 @@
+## Dropping Support for v2.14.0 and v2.14.1 of Tautulli
+
+**Date Posted**: 2024-11-24
+
+**Latest Release**: *v5.7.3*
+
+**Affected Release**: *v5.8.0+*
+
+**Affected Users**: Those using Tauticord with Tautulli versions v2.14.0 and v2.14.1
+
+An upcoming minor release of Tauticord will drop support for Tautulli versions v2.14.0 and v2.14.1. This is due to the
+minimum required API version of the `tautulli` API library, which has been updated.
+
+Tautulli v2.14.0 and v2.14.1 were technically beta releases of Tautulli v2.14.X, and did not play nicely with the 
+minimum API version enforcement capabilities of the `tautulli` API library (which are enforced by Tauticord).
+
+Any users still running Tautulli v2.14.0 or v2.14.1 should upgrade to a newer version of Tautulli to continue using
+Tauticord.
+
+If you need to continue using Tauticord with Tautulli versions v2.14.0 or v2.14.1, you will need to pin your Tauticord
+version to an earlier version using Docker tags: https://hub.docker.com/r/nwithan8/tauticord/tags
+
+---
+
 ## Dropping Support for v2.12.x and v2.13.x of Tautulli
 
 **Date Posted**: 2024-04-19
