@@ -4,7 +4,7 @@
 
 Tauticord is compatible with the following versions of Tautulli:
 
-- v2.14.x
+- v2.14.2 and above
 
 ## Requirements
 
