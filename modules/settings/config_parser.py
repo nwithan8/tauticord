@@ -8,7 +8,12 @@ import modules.logs as logging
 import modules.settings.models as settings_models
 from modules import utils
 from modules.emojis import Emoji
-from modules.statics import KEY_RUN_ARGS_MONITOR_PATH, KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH
+from modules.statics import (
+    KEY_RUN_ARGS_MONITOR_PATH,
+    KEY_RUN_ARGS_CONFIG_PATH,
+    KEY_RUN_ARGS_LOG_PATH,
+    KEY_RUN_ARGS_DATABASE_PATH,
+)
 
 
 class ConfigSection:
@@ -427,11 +432,13 @@ class RunArgsConfig(ConfigSection):
         performance_disk_space_mapping = self.get_value(key=KEY_RUN_ARGS_MONITOR_PATH, default=None)
         config_path = self.get_value(key=KEY_RUN_ARGS_CONFIG_PATH, default=None)
         log_path = self.get_value(key=KEY_RUN_ARGS_LOG_PATH, default=None)
+        database_path = self.get_value(key=KEY_RUN_ARGS_DATABASE_PATH, default=None)
 
         return settings_models.RunArgs(
             performance_disk_space_mapping=performance_disk_space_mapping,
             config_path=config_path,
-            log_path=log_path
+            log_path=log_path,
+            database_path=database_path
         )
 
 

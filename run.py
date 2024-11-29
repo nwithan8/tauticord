@@ -15,6 +15,7 @@ from consts import (
     APP_NAME,
     DEFAULT_CONFIG_PATH,
     DEFAULT_LOG_DIR,
+    DEFAULT_DATABASE_PATH,
     CONSOLE_LOG_LEVEL,
     FILE_LOG_LEVEL,
     FLASK_ADDRESS,
@@ -35,7 +36,10 @@ from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
     MONITORED_DISK_SPACE_FOLDER,
-    KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH, KEY_RUN_ARGS_MONITOR_PATH,
+    KEY_RUN_ARGS_CONFIG_PATH,
+    KEY_RUN_ARGS_LOG_PATH,
+    KEY_RUN_ARGS_MONITOR_PATH,
+    KEY_RUN_ARGS_DATABASE_PATH,
 )
 from modules.webhook_processor import WebhookProcessor
 
@@ -50,6 +54,7 @@ Bot will use config, in order:
 """
 parser.add_argument("-c", "--config", help="Path to config file", default=DEFAULT_CONFIG_PATH)
 parser.add_argument("-l", "--log", help="Log file directory", default=DEFAULT_LOG_DIR)
+parser.add_argument("-d", "--database", help="Path to database file", default=DEFAULT_DATABASE_PATH)
 parser.add_argument("-u", "--usage", help="Path to directory to monitor for disk usage",
                     default=MONITORED_DISK_SPACE_FOLDER)
 args = parser.parse_args()
@@ -97,6 +102,7 @@ def set_up_configuration() -> Config:
         KEY_RUN_ARGS_MONITOR_PATH: args.usage,
         KEY_RUN_ARGS_CONFIG_PATH: config_directory,
         KEY_RUN_ARGS_LOG_PATH: args.log,
+        KEY_RUN_ARGS_DATABASE_PATH: args.database,
     }
     try:
         return Config(config_path=f"{args.config}", **kwargs)
@@ -185,7 +191,7 @@ def set_up_discord_bot(config: Config,
 
 
 @run_with_potential_exit_on_error
-def start_api(config: Config, discord_bot: Bot) -> [Flask, threading.Thread]:
+def start_api(config: Config, discord_bot: Bot, database_path: str) -> [Flask, threading.Thread]:
     api = Flask(APP_NAME)
 
     @api.route('/ping', methods=['GET'])
@@ -200,9 +206,11 @@ def start_api(config: Config, discord_bot: Bot) -> [Flask, threading.Thread]:
     def health_check():
         return 'OK', 200
 
-    @api.route('/webhook', methods=['POST'])
-    def webhook():
-        return WebhookProcessor.process_tautulli_webhook(request=flask_request, bot=discord_bot)
+    @api.route('/webhooks/tautulli', methods=['POST'])
+    def tautulli_webhook():
+        return WebhookProcessor.process_tautulli_webhook(request=flask_request,
+                                                         bot=discord_bot,
+                                                         database_path=database_path)
 
     flask_thread = threading.Thread(
         target=lambda: api.run(host=FLASK_ADDRESS, port=FLASK_PORT, debug=True, use_reloader=False))
@@ -229,5 +237,5 @@ if __name__ == "__main__":
                                            tautulli_connector=_tautulli_connector,
                                            emoji_manager=_emoji_manager,
                                            analytics=_analytics)
-    _api, _flask_thread = start_api(config=_config, discord_bot=_discord_bot)
+    _api, _flask_thread = start_api(config=_config, discord_bot=_discord_bot, database_path=args.database)
     start(discord_bot=_discord_bot)
