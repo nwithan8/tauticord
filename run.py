@@ -42,6 +42,7 @@ from modules.statics import (
     KEY_RUN_ARGS_DATABASE_PATH,
 )
 from modules.webhook_processor import WebhookProcessor
+from modules.database.migrations import run_migrations as run_database_migrations_steps
 
 # Parse CLI arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
@@ -85,14 +86,21 @@ def set_up_logging():
 
 
 @run_with_potential_exit_on_error
-def run_migrations() -> None:
-    # Run migrations
+def run_config_migrations() -> None:
+    # Run configuration migrations
     migration_manager = MigrationManager(
         migration_data_directory=os.path.join(config_directory, "migration_data"),
         config_directory=config_directory,
         logs_directory=args.log)
     if not migration_manager.run_migrations():
         raise TauticordMigrationFailure("Migrations failed.")
+
+
+@run_with_potential_exit_on_error
+def run_database_migrations(database_path: str) -> None:
+    # Run database migrations
+    if not run_database_migrations_steps(database_path=database_path):
+        raise TauticordMigrationFailure("Database migrations failed.")
 
 
 @run_with_potential_exit_on_error
@@ -119,12 +127,15 @@ def set_up_analytics(config: Config) -> GoogleAnalytics:
 
 
 @run_with_potential_exit_on_error
-def set_up_tautulli_connection(config: Config, analytics: GoogleAnalytics) -> tautulli.TautulliConnector:
+def set_up_tautulli_connection(config: Config,
+                               analytics: GoogleAnalytics,
+                               database_path: str) -> tautulli.TautulliConnector:
     # Set up Tautulli connection
     return tautulli.TautulliConnector(
         tautulli_settings=config.tautulli,
         display_settings=config.display,
         stats_settings=config.stats,
+        database_path=database_path,
         analytics=analytics,
     )
 
@@ -228,11 +239,14 @@ def start(discord_bot: Bot) -> None:
 
 if __name__ == "__main__":
     set_up_logging()
-    run_migrations()
+    run_config_migrations()
+    run_database_migrations(database_path=args.database)
     _config: Config = set_up_configuration()
     _analytics: GoogleAnalytics = set_up_analytics(config=_config)
     _emoji_manager: EmojiManager = set_up_emoji_manager()
-    _tautulli_connector: tautulli.TautulliConnector = set_up_tautulli_connection(config=_config, analytics=_analytics)
+    _tautulli_connector: tautulli.TautulliConnector = set_up_tautulli_connection(config=_config,
+                                                                                 analytics=_analytics,
+                                                                                 database_path=args.database)
     _discord_bot: Bot = set_up_discord_bot(config=_config,
                                            tautulli_connector=_tautulli_connector,
                                            emoji_manager=_emoji_manager,

@@ -6,8 +6,8 @@ from flask import (
 )
 from tautulli.tools.webhooks import DiscordWebhook
 
-from modules.discord.bot import Bot
 import modules.database.repository as db
+from modules.discord.bot import Bot
 
 
 class WebhookProcessor:
@@ -23,6 +23,6 @@ class WebhookProcessor:
         webhook: DiscordWebhook = DiscordWebhook.from_flask_request(request=request)
 
         database = db.DatabaseRepository(database_path=database_path)
-        database.add_received_webhook_to_database(webhook=webhook)
+        _ = database.add_received_webhook_to_database(webhook=webhook)
 
         return jsonify({}), 200

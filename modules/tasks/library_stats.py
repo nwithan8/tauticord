@@ -75,6 +75,17 @@ class LibraryStats(VoiceCategoryStatsMonitor):
 
             await self.update_library_stats_for_library(library_settings=library_settings, item_counts=item_counts)
 
+            if library_settings.voice_channels.recently_added.enable:
+                minutes = library_settings.voice_channels.recently_added.hours * 60
+                recently_added_count: int = (
+                    self.tautulli.get_recently_added_count_for_library(
+                        library_name=library_settings.name,
+                        minutes=minutes))
+
+                await self.edit_stat_voice_channel(
+                    voice_channel_settings=library_settings.voice_channels.recently_added,
+                    stat=recently_added_count)
+
         # Combined libraries
         for library_settings in self.stats_settings.combined_libraries:
             item_counts: modules.tautulli.tautulli_connector.LibraryItemCounts = (
@@ -83,3 +94,14 @@ class LibraryStats(VoiceCategoryStatsMonitor):
                     sub_libraries=library_settings.libraries))
 
             await self.update_library_stats_for_library(library_settings=library_settings, item_counts=item_counts)
+
+            if library_settings.voice_channels.recently_added.enable:
+                minutes = library_settings.voice_channels.recently_added.hours * 60
+                recently_added_count: int = (
+                    self.tautulli.get_recently_added_count_for_combined_libraries(
+                        sub_libraries=library_settings.libraries,
+                        minutes=minutes))
+
+                await self.edit_stat_voice_channel(
+                    voice_channel_settings=library_settings.voice_channels.recently_added,
+                    stat=recently_added_count)

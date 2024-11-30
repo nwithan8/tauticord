@@ -129,9 +129,58 @@
         }
       },
       "required": [
+        "CustomName",
         "CustomEmoji",
         "Enable",
         "VoiceChannelID"
+      ]
+    },
+    "recentlyAddedVoiceChannel": {
+      "id": "#/definitions/voiceChannel",
+      "type": "object",
+      "properties": {
+        "CustomName": {
+          "description": "The custom name to use for the voice channel (overrides the default name)",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/discordVoiceChannelName"
+            },
+            {
+              "$ref": "#/definitions/emptyString"
+            }
+          ]
+        },
+        "CustomEmoji": {
+          "description": "The custom emoji to use for the voice channel (overrides the default emoji)",
+          "type": "string"
+        },
+        "Enable": {
+          "description": "Whether to enable the voice channel",
+          "type": "boolean"
+        },
+        "VoiceChannelID": {
+          "description": "The ID of the voice channel",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/discordChannelId"
+            },
+            {
+              "$ref": "#/definitions/numberZero"
+            }
+          ]
+        },
+        "Hours": {
+          "description": "The number of hours to look back for recently added items",
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "CustomName",
+        "CustomEmoji",
+        "Enable",
+        "VoiceChannelID",
+        "Hours"
       ]
     },
     "library": {
@@ -187,6 +236,10 @@
         "Tracks": {
           "description": "Settings for the voice channel about track information (used if the library is a music library)",
           "$ref": "#/definitions/voiceChannel"
+        },
+        "RecentlyAdded": {
+          "description": "Settings for the voice channel about recently added items",
+          "$ref": "#/definitions/recentlyAddedVoiceChannel"
         }
       },
       "required": [
@@ -197,7 +250,8 @@
         "Episodes",
         "Movies",
         "Series",
-        "Tracks"
+        "Tracks",
+        "RecentlyAdded"
       ]
     },
     "combinedLibrarySubLibrary": {
@@ -269,6 +323,10 @@
         "Tracks": {
           "description": "Settings for the voice channel about track information (used if the library is a music library)",
           "$ref": "#/definitions/voiceChannel"
+        },
+        "RecentlyAdded": {
+          "description": "Settings for the voice channel about recently added items",
+          "$ref": "#/definitions/recentlyAddedVoiceChannel"
         }
       },
       "required": [
@@ -279,7 +337,8 @@
         "Episodes",
         "Movies",
         "Series",
-        "Tracks"
+        "Tracks",
+        "RecentlyAdded"
       ]
     }
   },

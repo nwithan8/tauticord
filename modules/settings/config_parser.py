@@ -58,6 +58,28 @@ class VoiceChannelConfig(ConfigSection):
         )
 
 
+class RecentlyAddedVoiceChannelConfig(VoiceChannelConfig):
+    def __init__(self, channel_name: str, emoji: Emoji, data: dict):
+        super().__init__(channel_name=channel_name, emoji=emoji, data=data)
+
+    def to_model(self) -> settings_models.RecentlyAddedVoiceChannel:
+        enable: bool = utils.extract_boolean(self.get_value(key="Enable", default=False))
+        # Fall back to the default channel name if a custom name is not provided
+        name: str = self.get_value(key="CustomName", default=self.channel_name)
+        # Fall back to the default emoji if a custom emoji is not provided
+        emoji: str = self.get_value(key="CustomEmoji", default=self.emoji.value)
+        channel_id: int = self.get_value(key="VoiceChannelID", default="0")
+        hours: int = self.get_value(key="Hours", default=24)
+
+        return settings_models.RecentlyAddedVoiceChannel(
+            name=utils.strip_phantom_space(string=name),
+            enable=enable,
+            emoji=utils.strip_phantom_space(string=emoji),
+            channel_id=channel_id,
+            hours=hours
+        )
+
+
 class DiscordStatusMessageConfig(ConfigSection):
     def __init__(self, data: dict):
         super().__init__(data=data)
@@ -271,6 +293,10 @@ class StatsLibrariesConfig(ConfigSection):
             track = VoiceChannelConfig(channel_name=voice_channel_name,
                                        emoji=Emoji.Track,
                                        data=details_config.get_subsection_data("Tracks")).to_model()
+            recently_added = RecentlyAddedVoiceChannelConfig(channel_name=voice_channel_name,
+                                                             emoji=Emoji.RecentlyAdded,
+                                                             data=details_config.get_subsection_data(
+                                                                 "RecentlyAdded")).to_model()
 
             libraries.append(
                 settings_models.Library(
@@ -283,7 +309,8 @@ class StatsLibrariesConfig(ConfigSection):
                         artist=artist,
                         episode=episode,
                         series=series,
-                        track=track
+                        track=track,
+                        recently_added=recently_added
                     )
                 )
             )
@@ -328,6 +355,10 @@ class StatsLibrariesConfig(ConfigSection):
             track = VoiceChannelConfig(channel_name=combined_library_name,
                                        emoji=Emoji.Track,
                                        data=details_config.get_subsection_data("Tracks")).to_model()
+            recently_added = RecentlyAddedVoiceChannelConfig(channel_name=combined_library_name,
+                                                             emoji=Emoji.RecentlyAdded,
+                                                             data=details_config.get_subsection_data(
+                                                                 "RecentlyAdded")).to_model()
 
             combined_libraries.append(
                 settings_models.CombinedLibrary(
@@ -340,7 +371,8 @@ class StatsLibrariesConfig(ConfigSection):
                         artist=artist,
                         episode=episode,
                         series=series,
-                        track=track
+                        track=track,
+                        recently_added=recently_added
                     )
                 )
             )

@@ -221,6 +221,17 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
+        RecentlyAdded:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+          # The number of hours to consider items "recently added"
+          Hours: 24
         # The name of the library in Plex
       - Name: "Movies (4K)"
         # A friendlier name for the library to use in Discord
@@ -283,6 +294,17 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
+        RecentlyAdded:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+          # The number of hours to consider items "recently added"
+          Hours: 24
         # The name of the library in Plex
       - Name: "TV Shows (Non-English)"
         # A friendlier name for the library to use in Discord
@@ -345,6 +367,17 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
+        RecentlyAdded:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+          # The number of hours to consider items "recently added"
+          Hours: 24
     # Libraries to combine into an aggregate library
     CombinedLibraries:
       # The name of the aggregate library
@@ -417,6 +450,17 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
+        RecentlyAdded:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+          # The number of hours to consider items "recently added"
+          Hours: 24
   # Stats about the Tauticord host's performance
   Performance:
     # The name of the category
