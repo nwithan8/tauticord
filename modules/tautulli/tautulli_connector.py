@@ -50,6 +50,8 @@ class TautulliConnector:
         self.database_path = database_path
 
         self.has_plex_pass = self.api.shortcuts.has_plex_pass
+        self.plex_url = self.api.server_info.get('pms_url', None)
+
         self.plex_api = None
         try:
             self.plex_api = self.api.shortcuts.plex_api
@@ -132,16 +134,12 @@ class TautulliConnector:
         :return: True if successfully reached, False otherwise
         :rtype: bool
         """
-        # TODO: Fix this!
-        if not self.plex_details:
+        if not self.plex_url:
             logging.error("Could not ping Plex Media Server directly: Plex details not found")
             return False
 
         try:
-            pms_url = self.plex_details.get('pms_url')
-            if not pms_url:
-                return False
-            status_code = objectrest.get(url=pms_url, verify=False).status_code
+            status_code = objectrest.get(url=self.plex_url, verify=False).status_code
             return status_code_is_success(
                 status_code=status_code) or status_code == 401  # 401 is a success because it means we got a response
         except Exception as e:
