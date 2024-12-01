@@ -115,7 +115,7 @@ def set_up_configuration() -> Config:
     try:
         return Config(config_path=f"{args.config}", **kwargs)
     except PydanticValidationError as e:  # Redirect Pydantic validation errors during config parsing
-        raise TauticordSetupFailure(f"Configuration error: {e}")
+        raise TauticordSetupFailure(f"Configuration error: {e}") from e
 
 
 @run_with_potential_exit_on_error

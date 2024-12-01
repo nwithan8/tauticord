@@ -25,7 +25,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
         try:
             return self._get_first_entry(Version) # type: ignore
         except Exception as e:
-            raise Exception("Failed to get version from database")
+            raise Exception("Failed to get version from database") from e
 
     def set_version(self, semver: str) -> bool:
         """
@@ -41,7 +41,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
             else:
                 return self._update_entry_single_field(entry=entry, field_name="semver", field_value=semver)  # type: ignore
         except Exception as e:
-            raise Exception("Failed to set version in database")
+            raise Exception("Failed to set version in database") from e
 
     # Webhooks table
 
@@ -55,7 +55,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
         try:
             return self._create_entry(table_schema=Webhook, webhook_type=webhook_type) # type: ignore
         except Exception as e:
-            raise Exception("Failed to add webhook to database")
+            raise Exception("Failed to add webhook to database") from e
 
     def get_all_webhooks_by_type(self, webhook_type: TautulliWebhookTrigger) -> list[Webhook]:
         """
@@ -67,7 +67,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
         try:
             return self._get_all_entries(Webhook,(Webhook.webhook_type == webhook_type))  # type: ignore
         except Exception as e:
-            raise Exception("Failed to get webhooks from database")
+            raise Exception("Failed to get webhooks from database") from e
 
     def get_all_webhooks_by_time(self, minutes: int) -> list[Webhook]:
         """
@@ -80,7 +80,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
         try:
             return self._get_all_entries(Webhook, (Webhook.created_at >= timestamp))  # type: ignore
         except Exception as e:
-            raise Exception("Failed to get webhooks from database")
+            raise Exception("Failed to get webhooks from database") from e
 
     def get_all_webhooks_by_type_and_time(self, webhook_type: TautulliWebhookTrigger, minutes: int) -> list[Webhook]:
         """
@@ -97,7 +97,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
                                          (Webhook.webhook_type == webhook_type),
                                          (Webhook.created_at >= timestamp))  # type: ignore
         except Exception as e:
-            raise Exception("Failed to get webhooks from database")
+            raise Exception("Failed to get webhooks from database") from e
 
     # RecentlyAddedItem table
 
@@ -118,7 +118,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
                                       library_name=library_name,
                                       webhook_id=webhook_id) # type: ignore
         except Exception as e:
-            raise Exception("Failed to add recently added item to database")
+            raise Exception("Failed to add recently added item to database") from e
 
     def get_all_recently_added_items_in_past_x_minutes(self, minutes: int) -> list[RecentlyAddedItem]:
         """
@@ -131,7 +131,7 @@ class RootDatabase(db.SQLAlchemyDatabase):
         try:
             return self._get_all_entries(RecentlyAddedItem, (RecentlyAddedItem.created_at >= timestamp))  # type: ignore
         except Exception as e:
-            raise Exception("Failed to get recently added items from database")
+            raise Exception("Failed to get recently added items from database") from e
 
     def get_all_recently_added_items_in_past_x_minutes_for_libraries(self, minutes: int, library_names: list[str]) -> list[RecentlyAddedItem]:
         """
@@ -148,4 +148,4 @@ class RootDatabase(db.SQLAlchemyDatabase):
                                          (RecentlyAddedItem.created_at >= timestamp),
                                          (RecentlyAddedItem.library_name.in_(library_names)))  # type: ignore
         except Exception as e:
-            raise Exception("Failed to get recently added items from database")
+            raise Exception("Failed to get recently added items from database") from e

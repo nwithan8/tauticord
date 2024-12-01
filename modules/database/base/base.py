@@ -79,13 +79,13 @@ class SQLAlchemyDatabase:
             self.session.commit()
         except Exception as e:
             self.session.rollback()
-            raise Exception(f"Failed to commit session: {e}")
+            raise Exception(f"Failed to commit session: {e}") from e
 
     def _rollback(self):
         try:
             self.session.rollback()
         except Exception as e:
-            raise Exception(f"Failed to rollback session: {e}")
+            raise Exception(f"Failed to rollback session: {e}") from e
 
     def _close(self):
         self.session.close()

@@ -39,7 +39,7 @@ class TautulliConnector:
             # causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
             raise Exception(
                 f"Could not begin a Tautulli connection. Please check that your configuration is complete and "
-                f"reachable. Exception: {e}")
+                f"reachable. Exception: {e}") from e
 
         self.server_name = display_settings.plex_server_name or self.api.server_friendly_name
         self.terminate_message = tautulli_settings.termination_message
