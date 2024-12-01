@@ -63,7 +63,7 @@ class DatabaseRepository:
 
             return WebhookModel.from_database_record(record=database_entry)
         except Exception as e:
-            raise Exception(f'Error adding webhook to database: {e}')
+            raise Exception(f'Error adding webhook to database: {e}') from e
 
     def add_recently_added_item_to_database(self, webhook: WebhookDatabaseModel, library_name: str,
                                             item_name: str) -> RecentlyAddedItemModel | None:
