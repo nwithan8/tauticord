@@ -4,6 +4,7 @@ from flask import (
     jsonify,
     request as flask_request,
 )
+from sqlalchemy.testing.plugin.plugin_base import logging
 
 import modules.database.repository as db
 from modules.discord.bot import Bot
@@ -22,7 +23,10 @@ class WebhookProcessor:
         """
         webhook: RecentlyAddedWebhook = RecentlyAddedWebhook.from_flask_request(request=request)
 
-        database = db.DatabaseRepository(database_path=database_path)
-        _ = database.add_received_recently_added_webhook_to_database(webhook=webhook)
+        if webhook:
+            database = db.DatabaseRepository(database_path=database_path)
+            _ = database.add_received_recently_added_webhook_to_database(webhook=webhook)
+        else:
+            logging.debug("Received invalid recently-added webhook from Tautulli")
 
         return jsonify({}), 200

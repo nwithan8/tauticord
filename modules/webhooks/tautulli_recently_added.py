@@ -72,12 +72,12 @@ class RecentlyAddedWebhook(TautulliWebhook):
     data: RecentlyAddedWebhookData
 
     @classmethod
-    def from_flask_request(cls, request) -> "RecentlyAddedWebhook":
+    def from_flask_request(cls, request) -> Union["RecentlyAddedWebhook", None]:
         """
         Ingest a configured recently-added webhook from a Flask request
 
         :param request: The incoming Flask request
-        :return: The processed recently-added webhook
+        :return: The processed recently-added webhook, or None if the request could not be processed
         """
         try:
             body = request.get_json()
@@ -86,7 +86,12 @@ class RecentlyAddedWebhook(TautulliWebhook):
             # ref: https://github.com/Tautulli/Tautulli/blob/d019efcf911b4806618761c2da48bab7d04031ec/plexpy/notifiers.py#L1225
             body = json.loads(request.form.get('payload_json', '{}'))
 
+        if not body:
+            return None
+
         data = RecentlyAddedWebhookData(**body)
+        if not data or not data.title:
+            return None
 
         return cls(data=data)
 

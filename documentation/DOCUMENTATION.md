@@ -416,43 +416,6 @@ posts.
 All slash command responses are ephemeral (only visible to the user who triggered it) by default. Most slash commands,
 however, have a `share` option that can be used to make the response visible to everyone in the channel.
 
-# Webhooks
-
-Tauticord can ingest webhooks from Tautulli and act on them.
-
-## Setup
-
-Under `Settings -> Notification Agents`, add a new notification agent with the following settings:
-
-### Configuration
-
-- Type: `Discord` (**do not use `Webhook`**)
-- Discord Webhook URL: `http://ip:8283/webhook`
-- Include Subject Line: **Enabled**
-- Include Rich Metadata Info: **Enabled**
-- Include Summary: **Enabled**
-- Include Link to Plex Web: **Enabled**
-
-### Triggers
-
-Enable the events you want Tauticord to act on.
-
-### Conditions
-
-Set any conditions you want to filter the events by.
-
-### Text
-
-:warning: **IMPORTANT** :warning:
-
-Add the following to the end of the `Subject Line` field for each event (separated by a space from the rest of the text):
-
-```text
-action={action}
-```
-
-This will allow Tauticord to determine what caused the webhook to be sent, and therefore how to act on it. Any webhook that does not have this text **will be ignored** by Tauticord.
-
 # Common Issues
 
 - On startup, Tauticord attempts to upload a set of custom emojis that it will use when displaying stream information (

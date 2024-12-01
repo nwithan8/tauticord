@@ -605,7 +605,7 @@ def convert_string_to_bool(bool_string: str) -> bool:
     """
     Careful: True or False is valid. Check if is None to see if this conversion failed
     """
-    bool_string = bool_string.strip()
+    bool_string = bool_string.strip().lower()
     if bool_string in ['true', 'yes', 'on', 'enable']:
         return True
     elif bool_string in ['false', 'no', 'off', 'disable']:
