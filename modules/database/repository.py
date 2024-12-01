@@ -29,7 +29,7 @@ class DatabaseRepository:
             version: VersionDatabaseModel = self._database.get_version()
             return version.semver
         except Exception as e:
-            raise Exception(f'Error getting database version: {e}')
+            raise Exception(f'Error getting database version: {e}') from e
 
     def set_database_version(self, version: str) -> bool:
         """
