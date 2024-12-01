@@ -224,7 +224,7 @@ def start_api(config: Config, discord_bot: Bot, database_path: str) -> [Flask, t
                                                                         database_path=database_path)
 
     flask_thread = threading.Thread(
-        target=lambda: api.run(host=FLASK_ADDRESS, port=FLASK_PORT, debug=True, use_reloader=False))
+        target=lambda: api.run(host=FLASK_ADDRESS, port=FLASK_PORT, debug=False, use_reloader=False))
     logging.info("Starting Flask server")
     flask_thread.start()
 
