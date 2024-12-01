@@ -108,4 +108,4 @@ class DatabaseRepository:
             )
             return [RecentlyAddedItemModel.from_database_record(record=entry) for entry in database_entries]
         except Exception as e:
-            raise Exception(f'Error getting webhooks from database: {e}')
+            raise Exception(f'Error getting webhooks from database: {e}') from e
