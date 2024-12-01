@@ -1,10 +1,11 @@
-from tautulli.tools.webhooks import DiscordWebhook, TautulliWebhookTrigger, RecentlyAddedDiscordWebhookData
+from tautulli.tools.webhooks import TautulliWebhook
 
 from modules.database.database import RootDatabase
 from modules.database.models.recently_added_item import RecentlyAddedItem as RecentlyAddedItemDatabaseModel
-from modules.database.models.webhooks import Webhook as WebhookDatabaseModel
 from modules.database.models.version import Version as VersionDatabaseModel
+from modules.database.models.webhooks import Webhook as WebhookDatabaseModel
 from modules.models import RecentlyAddedItem as RecentlyAddedItemModel, Webhook as WebhookModel
+from modules.webhooks import RecentlyAddedWebhook, RecentlyAddedWebhookData
 
 """
 NOTES:
@@ -43,25 +44,22 @@ class DatabaseRepository:
         except Exception as e:
             raise Exception(f'Error setting database version: {e}')
 
-    def add_received_webhook_to_database(self, webhook: DiscordWebhook) -> WebhookModel | None:
+    def add_received_recently_added_webhook_to_database(self, webhook: RecentlyAddedWebhook) -> WebhookModel | None:
         """
-        Add a received webhook to the database
+        Add a received recently-added webhook to the database
 
         :param webhook: The webhook to add
-        :type webhook: DiscordWebhook
+        :type webhook: TautulliWebhook
         :return: The webhook that was added, or None if the webhook could not be added
         """
         try:
             database_entry: WebhookDatabaseModel = self._database.add_webhook(webhook_type=webhook.trigger)
-
-            # Also add to recently added items if the webhook is a "recently added" webhook
-            if webhook.trigger == TautulliWebhookTrigger.RECENTLY_ADDED:
-                data: RecentlyAddedDiscordWebhookData = webhook.data  # type: ignore
-                library_name = data.library_name
-                item_name = data.title
-                _ = self.add_recently_added_item_to_database(webhook=database_entry,
-                                                             library_name=library_name,
-                                                             item_name=item_name)
+            data: RecentlyAddedWebhookData = webhook.data  # type: ignore
+            library_name = data.library_name
+            item_name = data.title
+            _ = self.add_recently_added_item_to_database(webhook=database_entry,
+                                                         library_name=library_name,
+                                                         item_name=item_name)
 
             return WebhookModel.from_database_record(record=database_entry)
         except Exception as e:

@@ -2,6 +2,8 @@ version: "3.9"
 services:
   tauticord:
     image: nwithan8/tauticord:latest
+    ports:
+      - "8283:8283"
     volumes:
       - /path/to/config:/config
       - /path/to/logs:/logs

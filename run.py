@@ -24,6 +24,7 @@ from consts import (
 from migrations.migration_manager import MigrationManager
 from modules import versioning
 from modules.analytics import GoogleAnalytics
+from modules.database.migrations import run_migrations as run_database_migrations_steps
 from modules.discord.bot import Bot
 from modules.discord.services.library_stats import LibraryStatsMonitor
 from modules.discord.services.live_activity import LiveActivityMonitor
@@ -42,7 +43,6 @@ from modules.statics import (
     KEY_RUN_ARGS_DATABASE_PATH,
 )
 from modules.webhook_processor import WebhookProcessor
-from modules.database.migrations import run_migrations as run_database_migrations_steps
 
 # Parse CLI arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
@@ -217,11 +217,11 @@ def start_api(config: Config, discord_bot: Bot, database_path: str) -> [Flask, t
     def health_check():
         return 'OK', 200
 
-    @api.route('/webhooks/tautulli', methods=['POST'])
+    @api.route('/webhooks/tautulli/recently_added', methods=['POST'])
     def tautulli_webhook():
-        return WebhookProcessor.process_tautulli_webhook(request=flask_request,
-                                                         bot=discord_bot,
-                                                         database_path=database_path)
+        return WebhookProcessor.process_tautulli_recently_added_webhook(request=flask_request,
+                                                                        bot=discord_bot,
+                                                                        database_path=database_path)
 
     flask_thread = threading.Thread(
         target=lambda: api.run(host=FLASK_ADDRESS, port=FLASK_PORT, debug=True, use_reloader=False))

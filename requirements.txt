@@ -1,6 +1,6 @@
 discord.py==2.3.*
 asyncio~=3.4
-tautulli==4.5.*,>=4.5.0.2142
+tautulli==4.6.*,>=4.6.0.2142
 confuse==2.0.1
 PyYAML==6.0.*
 objectrest~=2.0.0
