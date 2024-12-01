@@ -87,7 +87,7 @@ class DatabaseRepository:
             )
             return RecentlyAddedItemModel.from_database_record(record=database_entry)
         except Exception as e:
-            raise Exception(f'Error adding recently added item to database: {e}')
+            raise Exception(f'Error adding recently added item to database: {e}') from e
 
     def get_all_recently_added_items_in_past_x_minutes_for_libraries(self, minutes: int, library_names: list[str]) -> \
             list[RecentlyAddedItemModel]:
