@@ -42,7 +42,7 @@ class DatabaseRepository:
         try:
             return self._database.set_version(semver=version)
         except Exception as e:
-            raise Exception(f'Error setting database version: {e}')
+            raise Exception(f'Error setting database version: {e}') from e
 
     def add_received_recently_added_webhook_to_database(self, webhook: RecentlyAddedWebhook) -> WebhookModel | None:
         """
