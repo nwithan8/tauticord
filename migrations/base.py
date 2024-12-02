@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from datetime import datetime
 
 import modules.logs as logging
@@ -24,36 +25,42 @@ class BaseMigration:
     def error(self, message: str):
         logging.error(f"Migration {self.number}: {message}")
 
+    @abstractmethod
     def pre_forward_check(self) -> bool:
         """
         Check if the forward migration needs to run
         """
         return True
 
+    @abstractmethod
     def forward(self):
         """
         Run the forward migration
         """
         pass
 
+    @abstractmethod
     def post_forward_check(self) -> bool:
         """
         Check if the forward migration was successful
         """
         return True
 
+    @abstractmethod
     def pre_backwards_check(self) -> bool:
         """
         Check if the backwards migration needs to run
         """
         return True
 
+    @abstractmethod
     def backwards(self):
         """
         Run the backwards migration
         """
         pass
 
+    @abstractmethod
     def post_backwards_check(self) -> bool:
         """
         Check if the backwards migration was successful

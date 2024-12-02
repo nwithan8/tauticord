@@ -4,6 +4,11 @@ import modules.logs as logging
 
 from migrations.m001_env_var_to_config_yaml import Migration as Migration001
 from migrations.m002_old_config_to_new_config import Migration as Migration002
+from migrations.m003_add_recently_added_webhook import Migration as Migration003
+
+# NOTE:
+# MigrationManager assumes you are using the default tauticord.yaml config file name.
+# Does not support custom config file names.
 
 
 class MigrationManager:
@@ -25,6 +30,11 @@ class MigrationManager:
                          logs_folder=self.logs_directory),
             # Convert old config.yaml (or migration file above) to new config.yaml schema
             Migration002(number="002",
+                         migration_data_directory=self.migration_data_directory,
+                         config_folder=self.config_directory,
+                         logs_folder=self.logs_directory),
+            # Add "Recently Added" webhook support
+            Migration003(number="003",
                          migration_data_directory=self.migration_data_directory,
                          config_folder=self.config_directory,
                          logs_folder=self.logs_directory),

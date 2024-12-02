@@ -1,4 +1,5 @@
 import os
+from abc import ABC
 
 import yaml
 
@@ -491,7 +492,7 @@ class ConfigWriter:
         self.add(key_path=["Extras", "Performance", "Memory"], value=value)
 
 
-class Migration(BaseMigration):
+class Migration(BaseMigration, ABC):
     def __init__(self, number: str, migration_data_directory: str, config_folder: str, logs_folder: str):
         super().__init__(number=number, migration_data_directory=migration_data_directory)
         self.config_folder = config_folder
@@ -582,5 +583,11 @@ class Migration(BaseMigration):
         # Make sure the new config file was created
         return os.path.exists(self._new_config_file_path)
 
+    def pre_backwards_check(self) -> bool:
+        return True
+
     def backwards(self):
         self.mark_undone()
+
+    def post_backwards_check(self) -> bool:
+        return True
