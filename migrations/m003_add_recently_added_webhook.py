@@ -64,7 +64,7 @@ def path_ends_in_empty(yaml_data, path: list[str]) -> bool:
     if value_at_path is None:
         return False
 
-    return value_at_path is [] or value_at_path == {}
+    return value_at_path == [] or value_at_path == {}
 
 
 class ConfigWriter:
@@ -118,35 +118,39 @@ class Migration(BaseMigration, ABC):
         with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
 
+            path = ["Stats", "Libraries", "Libraries"]
+
+            # If the Libraries section doesn't exist, that's an error that should be raised
+            if not path_exists_in_yaml(yaml_data=data, path=path):
+                path_string = " -> ".join(path)
+                raise Exception(f"Missing {path_string} section in config file")
+
             # If the Libraries section is empty, that's fine
-            paths = [
-                ["Stats", "Libraries", "Libraries"],
-            ]
-            if all([path_ends_in_empty(yaml_data=data, path=path) for path in paths]):
+            if path_ends_in_empty(yaml_data=data, path=path):
                 return True
 
             # Otherwise, confirm that the RecentlyAdded section is already in the config
-            paths = [
-                ["Stats", "Libraries", "Libraries", [], "RecentlyAdded", "Enable"],
-            ]
-            return all([path_exists_in_yaml(yaml_data=data, path=path) for path in paths])
+            path = ["Stats", "Libraries", "Libraries", [], "RecentlyAdded", "Enable"]
+            return path_exists_in_yaml(yaml_data=data, path=path)
 
     def recently_added_combined_libraries_config_section_exists(self, file_path: str) -> bool:
         with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
 
+            path = ["Stats", "Libraries", "CombinedLibraries"]
+
+            # If the CombinedLibraries section doesn't exist, that's an error that should be raised
+            if not path_exists_in_yaml(yaml_data=data, path=path):
+                path_string = " -> ".join(path)
+                raise Exception(f"Missing {path_string} section in config file")
+
             # If the CombinedLibraries section is empty, that's fine
-            paths = [
-                ["Stats", "Libraries", "CombinedLibraries"],
-            ]
-            if all([path_ends_in_empty(yaml_data=data, path=path) for path in paths]):
+            if path_ends_in_empty(yaml_data=data, path=path):
                 return True
 
             # Otherwise, confirm that the RecentlyAdded section is already in the config
-            paths = [
-                ["Stats", "Libraries", "CombinedLibraries", [], "RecentlyAdded", "Enable"],
-            ]
-            return all([path_exists_in_yaml(yaml_data=data, path=path) for path in paths])
+            path = ["Stats", "Libraries", "CombinedLibraries", [], "RecentlyAdded", "Enable"]
+            return path_exists_in_yaml(yaml_data=data, path=path)
 
     def pre_forward_check(self) -> bool:
         # Check if the old config file exists
@@ -177,10 +181,8 @@ class Migration(BaseMigration, ABC):
                                                                          path=["Stats", "Libraries",
                                                                                "CombinedLibraries"])
 
-            # By this point, we know thanks to pre-checks that stat_libraries and stat_combined_libraries exist
-            # and have some or all elements that don't have the "RecentlyAdded" section
-
-            for i, _ in enumerate(stat_libraries):
+            # Need to add the RecentlyAdded section to each library in the Libraries section
+            for i, _ in enumerate(stat_libraries or []):  # Will iterate 0 times if stat_libraries is None
                 new_config.add(value={
                     "CustomName": "",
                     "CustomEmoji": "",
@@ -189,8 +191,9 @@ class Migration(BaseMigration, ABC):
                     "Hours": 24,
                 },
                     key_path=["Stats", "Libraries", "Libraries", i, "RecentlyAdded"])
-
-            for i, _ in enumerate(stat_combined_libraries):
+            # Need to add the RecentlyAdded section to each library in the CombinedLibraries section
+            for i, _ in enumerate(
+                    stat_combined_libraries or []):  # Will iterate 0 times if stat_combined_libraries is None
                 new_config.add(value={
                     "CustomName": "",
                     "CustomEmoji": "",
