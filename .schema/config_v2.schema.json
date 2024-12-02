@@ -250,8 +250,7 @@
         "Episodes",
         "Movies",
         "Series",
-        "Tracks",
-        "RecentlyAdded"
+        "Tracks"
       ]
     },
     "combinedLibrarySubLibrary": {
@@ -337,8 +336,7 @@
         "Episodes",
         "Movies",
         "Series",
-        "Tracks",
-        "RecentlyAdded"
+        "Tracks"
       ]
     }
   },

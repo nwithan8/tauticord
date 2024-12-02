@@ -1,5 +1,6 @@
 import os
 import shutil
+from abc import ABC
 
 import yaml
 
@@ -65,7 +66,7 @@ class ConfigWriter:
             f.write(yaml_data)
 
 
-class Migration(BaseMigration):
+class Migration(BaseMigration, ABC):
     def __init__(self, number: str, migration_data_directory: str, config_folder: str, logs_folder: str):
         super().__init__(number=number, migration_data_directory=migration_data_directory)
         self.config_folder = config_folder
@@ -306,5 +307,11 @@ class Migration(BaseMigration):
         # Make sure the new config file was created
         return os.path.isfile(self.new_config_file) and os.path.isfile(f"{self.config_folder}/{V2_CONFIG_FILE}")
 
+    def pre_backwards_check(self) -> bool:
+        return True
+
     def backwards(self):
         self.mark_undone()
+
+    def post_backwards_check(self) -> bool:
+        return True

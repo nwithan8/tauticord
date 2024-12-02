@@ -296,7 +296,7 @@ class StatsLibrariesConfig(ConfigSection):
             recently_added = RecentlyAddedVoiceChannelConfig(channel_name=voice_channel_name,
                                                              emoji=Emoji.RecentlyAdded,
                                                              data=details_config.get_subsection_data(
-                                                                 "RecentlyAdded")).to_model()
+                                                                 key="RecentlyAdded", optional=True)).to_model()
 
             libraries.append(
                 settings_models.Library(
@@ -358,7 +358,7 @@ class StatsLibrariesConfig(ConfigSection):
             recently_added = RecentlyAddedVoiceChannelConfig(channel_name=combined_library_name,
                                                              emoji=Emoji.RecentlyAdded,
                                                              data=details_config.get_subsection_data(
-                                                                 "RecentlyAdded")).to_model()
+                                                                 key="RecentlyAdded", optional=True)).to_model()
 
             combined_libraries.append(
                 settings_models.CombinedLibrary(
