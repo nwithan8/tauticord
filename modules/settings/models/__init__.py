@@ -8,5 +8,4 @@ from modules.settings.models.stats import Stats, LibraryStats, ActivityStats, Pe
 from modules.settings.models.tautulli import Tautulli
 from modules.settings.models.time import Time
 from modules.settings.models.voice_category import VoiceCategory
-from modules.settings.models.voice_channel import LibraryVoiceChannels
-from modules.settings.models.voice_channel import VoiceChannel
+from modules.settings.models.voice_channel import VoiceChannel, LibraryVoiceChannels, RecentlyAddedVoiceChannel

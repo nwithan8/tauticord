@@ -33,6 +33,19 @@ class VoiceChannel(BaseConfig):
         }
 
 
+class RecentlyAddedVoiceChannel(VoiceChannel):
+    hours: int = 24
+
+    def as_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "enable": self.enable,
+            "emoji": self.emoji,
+            "channel_id": self.channel_id,
+            "hours": self.hours
+        }
+
+
 class LibraryVoiceChannels(BaseConfig):
     movie: VoiceChannel
     album: VoiceChannel
@@ -40,10 +53,11 @@ class LibraryVoiceChannels(BaseConfig):
     episode: VoiceChannel
     series: VoiceChannel
     track: VoiceChannel
+    recently_added: RecentlyAddedVoiceChannel
 
     @property
     def _channels(self) -> list[VoiceChannel]:
-        return [self.movie, self.album, self.artist, self.episode, self.series, self.track]
+        return [self.movie, self.album, self.artist, self.episode, self.series, self.track, self.recently_added]
 
     @property
     def enabled_channels(self) -> list[VoiceChannel]:
@@ -56,5 +70,6 @@ class LibraryVoiceChannels(BaseConfig):
             "artist": self.artist.as_dict(),
             "episode": self.episode.as_dict(),
             "series": self.series.as_dict(),
-            "track": self.track.as_dict()
+            "track": self.track.as_dict(),
+            "recently_added": self.recently_added.as_dict()
         }

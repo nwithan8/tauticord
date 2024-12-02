@@ -1,5 +1,9 @@
+import hashlib
+import hmac
 import json
 import os
+import secrets
+import time
 from datetime import datetime, timedelta
 from typing import Optional, Any
 from urllib.parse import quote_plus
@@ -591,3 +595,155 @@ def get_current_directory() -> str:
 
 def is_docker():
     return os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False)
+
+
+def is_positive_int(n):
+    return n.isdigit()
+
+
+def convert_string_to_bool(bool_string: str) -> bool:
+    """
+    Careful: True or False is valid. Check if is None to see if this conversion failed
+    """
+    bool_string = bool_string.strip().lower()
+    if bool_string in ['true', 'yes', 'on', 'enable']:
+        return True
+    elif bool_string in ['false', 'no', 'off', 'disable']:
+        return False
+
+    raise ValueError(f"Invalid bool string: {bool_string}")
+
+
+def convert_bool_to_string(bool_value: bool) -> str:
+    if bool_value:
+        return "True"
+    else:
+        return "False"
+
+
+def convert_bool_to_int(bool_value: bool) -> int:
+    if bool_value:
+        return 1
+    else:
+        return 0
+
+
+def convert_int_to_bool(int_value: int) -> bool:
+    if int_value == 1:
+        return True
+    elif int_value == 0:
+        return False
+
+    raise ValueError(f"Invalid int value for bool: {int_value}")
+
+
+def convert_string_list_to_string(string_list: list[str]) -> str:
+    return ",".join(string_list)
+
+
+def convert_string_to_string_list(string: str) -> list[str]:
+    return string.split(",")
+
+
+def object_to_string_representation(obj: object) -> str:
+    """
+    Convert an object to a string
+
+    :param obj:
+    :return: String representation of the object
+    """
+    if isinstance(obj, str):
+        return obj
+    elif isinstance(obj, int):
+        return str(obj)
+    elif isinstance(obj, float):
+        return str(obj)
+    elif isinstance(obj, bool):
+        return convert_bool_to_string(bool_value=obj)
+    elif isinstance(obj, list):
+        string_list = [object_to_string_representation(obj=o) for o in obj]
+        return convert_string_list_to_string(string_list=string_list)
+
+    raise ValueError(f'Cannot convert type {type(object)} to string representation')
+
+
+def get_now_timestamp():
+    return int(time.time())
+
+
+def get_days_ago_timestamp(days: int):
+    return int(time.mktime((datetime.today() - timedelta(days=days)).timetuple()))
+
+
+def get_hours_ago_timestamp(hours: int):
+    return int(time.mktime((datetime.today() - timedelta(hours=hours)).timetuple()))
+
+
+def get_minutes_ago_timestamp(minutes: int):
+    return int(time.mktime((datetime.today() - timedelta(minutes=minutes)).timetuple()))
+
+
+def get_seconds_ago_timestamp(seconds: int):
+    return int(time.mktime((datetime.today() - timedelta(seconds=seconds)).timetuple()))
+
+
+def get_days_from_now_timestamp(days: int):
+    return int(time.mktime((datetime.today() + timedelta(days=days)).timetuple()))
+
+
+def get_hours_from_now_timestamp(hours: int):
+    return int(time.mktime((datetime.today() + timedelta(hours=hours)).timetuple()))
+
+
+def get_minutes_from_now_timestamp(minutes: int):
+    return int(time.mktime((datetime.today() + timedelta(minutes=minutes)).timetuple()))
+
+
+def get_seconds_from_now_timestamp(seconds: int):
+    return int(time.mktime((datetime.today() + timedelta(seconds=seconds)).timetuple()))
+
+
+def _bytes_to_hash(_input: bytes) -> str:
+    """
+    Hash a string with SHA256.
+    :param _input: string to hash.
+    :return: hashed string.
+    """
+    return hashlib.sha256(_input).hexdigest()
+
+
+def _string_to_hash(_input: str) -> str:
+    """
+    Hash a string with SHA256.
+    :param _input: string to hash.
+    :return: hashed string.
+    """
+    return _bytes_to_hash(_input.encode('utf-8'))
+
+
+def generate_hash(secret: str) -> str:
+    """
+    Generate a hash from a string.
+    :param secret: string to hash.
+    :return: hashed string.
+    """
+    return _string_to_hash(secret)
+
+
+def hash_matches(_input: str, hashed: str) -> bool:
+    """
+    Check if a string, when hashed, matches another string.
+    :param _input: String to hash and compare to the hashed string.
+    :param hashed: Hashed string to compare against.
+    :return: True if the string, when hashed, matches the hashed string, False otherwise.
+    """
+    to_match = _string_to_hash(_input)
+    return hmac.compare_digest(to_match, hashed)
+
+
+def generate_random_alphanumeric_string() -> str:
+    """
+    Generate a random alphanumeric string.
+    :return: random alphanumeric string.
+    """
+    return secrets.token_urlsafe(24)

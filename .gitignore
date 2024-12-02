@@ -145,3 +145,4 @@ tauticord.yaml
 /on_host/
 00*.yaml
 .migration_*
+/reference/

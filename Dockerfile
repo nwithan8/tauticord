@@ -21,6 +21,9 @@ VOLUME /logs
 # Copy source code from build machine to WORKDIR (/app) folder
 COPY . .
 
+# Expose port 8283 for API
+EXPOSE 8283
+
 # Delete unnecessary files in WORKDIR (/app) folder (not caught by .dockerignore)
 RUN echo "**** removing unneeded files ****"
 

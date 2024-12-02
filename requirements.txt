@@ -1,9 +1,13 @@
 discord.py==2.3.*
 asyncio~=3.4
-tautulli==4.4.*,>=4.4.0.2142
+tautulli==4.6.*,>=4.6.0.2142
 confuse==2.0.1
 PyYAML==6.0.*
 objectrest~=2.0.0
 psutil==5.9.8
 emoji==2.11.1
+Flask~=3.0.2
 matplotlib==3.9.2
+SQLAlchemy~=2.0.25
+sqlalchemy-utils==0.41.1
+pydantic>=2.6.0

@@ -20,6 +20,7 @@ MAX_EMBED_FIELD_NAME_LENGTH = 200  # 256 - estimated emojis + flairs + safety ma
 KEY_RUN_ARGS_MONITOR_PATH = "run_args_monitor_path"
 KEY_RUN_ARGS_CONFIG_PATH = "run_args_config_path"
 KEY_RUN_ARGS_LOG_PATH = "run_args_log_path"
+KEY_RUN_ARGS_DATABASE_PATH = "run_args_database_path"
 
 MAX_STREAM_COUNT = 20  # max number of emojis one user can post on a single message
 

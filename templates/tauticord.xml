@@ -10,18 +10,27 @@
     <Network>bridge</Network>
     <Shell>bash</Shell>
     <Privileged>false</Privileged>
-    <Support>https://forums.unraid.net/topic/133764-support-grtgbln-docker-templates</Support>
+    <Support>https://github.com/nwithan8/tauticord/issues</Support>
     <Project>https://github.com/nwithan8/tauticord</Project>
     <Overview>Tauticord is a Discord bot that displays live data from Tautulli, including stream summaries, bandwidth and library statistics.</Overview>
-    <Category>Tools: MediaServer Status:Stable</Category>
+    <Category>MediaApp:Other Productivity: Tools: MediaServer Status:Stable</Category>
     <Icon>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/icon.png</Icon>
     <Banner>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/banner.png</Banner>
+    <Screenshot>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/embed.png</Screenshot>
+    <Screenshot>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/libraries.png</Screenshot>
+    <Screenshot>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/recently_added.png</Screenshot>
+    <Screenshot>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/most_active_libraries.png</Screenshot>
+    <Screenshot>https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/graphs_play_duration_day_of_week.png</Screenshot>
     <TemplateURL>https://raw.githubusercontent.com/nwithan8/unraid_templates/main/templates/tauticord.xml</TemplateURL>
     <Maintainer>
         <WebPage>https://github.com/nwithan8</WebPage>
     </Maintainer>
     <Requires>Please see announcements for potential breaking changes: https://github.com/nwithan8/tauticord/blob/master/documentation/ANNOUNCEMENTS.md</Requires>
     <Changes>
+        ### 2024-11-30
+
+        Add port configuration for API server
+
         ### 2024-03-30 - BREAKING CHANGE
 
         Configuration via environment variables has been removed. Please see the [GitHub page](https://github.com/nwithan8/tauticord) for more information.
@@ -30,6 +39,7 @@
 
         Template now uses dropdowns for boolean values. Please see the [GitHub page](https://github.com/nwithan8/tauticord/blob/master/documentation/ANNOUNCEMENTS.md#adding-dropdown-options-in-unraid-community-applications-template) for more information.
     </Changes>
+    <Config Name="API Port" Target="8283" Default="8283" Description="Port for the API server" Type="Port" Display="always-hide" Required="true" Mask="false">8283</Config>
     <Config Name="Config Path" Target="/config" Default="/mnt/user/appdata/tauticord/config" Mode="rw" Description="Where config file will be stored" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/config</Config>
     <Config Name="Log Path" Target="/logs" Default="/mnt/user/appdata/tauticord/logs" Mode="rw" Description="Where debug logs will be stored" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/logs</Config>
     <Config Name="Monitor Path" Target="/monitor" Default="/mnt/user/appdata/tauticord/monitor" Mode="ro" Description="Directory to monitor usage percentage of (e.g. your Plex library)" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/tauticord/monitor</Config>

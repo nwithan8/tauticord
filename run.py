@@ -1,6 +1,11 @@
 import argparse
 import os
+import threading
 
+from flask import (
+    Flask,
+    request as flask_request,
+)
 from pydantic import ValidationError as PydanticValidationError
 
 import modules.logs as logging
@@ -10,12 +15,16 @@ from consts import (
     APP_NAME,
     DEFAULT_CONFIG_PATH,
     DEFAULT_LOG_DIR,
+    DEFAULT_DATABASE_PATH,
     CONSOLE_LOG_LEVEL,
     FILE_LOG_LEVEL,
+    FLASK_ADDRESS,
+    FLASK_PORT,
 )
 from migrations.migration_manager import MigrationManager
 from modules import versioning
 from modules.analytics import GoogleAnalytics
+from modules.database.migrations import run_migrations as run_database_migrations_steps
 from modules.discord.bot import Bot
 from modules.discord.services.library_stats import LibraryStatsMonitor
 from modules.discord.services.live_activity import LiveActivityMonitor
@@ -28,8 +37,12 @@ from modules.settings.config_parser import Config
 from modules.statics import (
     splash_logo,
     MONITORED_DISK_SPACE_FOLDER,
-    KEY_RUN_ARGS_CONFIG_PATH, KEY_RUN_ARGS_LOG_PATH, KEY_RUN_ARGS_MONITOR_PATH,
+    KEY_RUN_ARGS_CONFIG_PATH,
+    KEY_RUN_ARGS_LOG_PATH,
+    KEY_RUN_ARGS_MONITOR_PATH,
+    KEY_RUN_ARGS_DATABASE_PATH,
 )
+from modules.webhook_processor import WebhookProcessor
 
 # Parse CLI arguments
 parser = argparse.ArgumentParser(description="Tauticord - Discord bot for Tautulli")
@@ -42,6 +55,7 @@ Bot will use config, in order:
 """
 parser.add_argument("-c", "--config", help="Path to config file", default=DEFAULT_CONFIG_PATH)
 parser.add_argument("-l", "--log", help="Log file directory", default=DEFAULT_LOG_DIR)
+parser.add_argument("-d", "--database", help="Path to database file", default=DEFAULT_DATABASE_PATH)
 parser.add_argument("-u", "--usage", help="Path to directory to monitor for disk usage",
                     default=MONITORED_DISK_SPACE_FOLDER)
 args = parser.parse_args()
@@ -72,8 +86,8 @@ def set_up_logging():
 
 
 @run_with_potential_exit_on_error
-def run_migrations() -> None:
-    # Run migrations
+def run_config_migrations() -> None:
+    # Run configuration migrations
     migration_manager = MigrationManager(
         migration_data_directory=os.path.join(config_directory, "migration_data"),
         config_directory=config_directory,
@@ -83,17 +97,25 @@ def run_migrations() -> None:
 
 
 @run_with_potential_exit_on_error
+def run_database_migrations(database_path: str) -> None:
+    # Run database migrations
+    if not run_database_migrations_steps(database_path=database_path):
+        raise TauticordMigrationFailure("Database migrations failed.")
+
+
+@run_with_potential_exit_on_error
 def set_up_configuration() -> Config:
     # Set up configuration
     kwargs = {
         KEY_RUN_ARGS_MONITOR_PATH: args.usage,
         KEY_RUN_ARGS_CONFIG_PATH: config_directory,
         KEY_RUN_ARGS_LOG_PATH: args.log,
+        KEY_RUN_ARGS_DATABASE_PATH: args.database,
     }
     try:
         return Config(config_path=f"{args.config}", **kwargs)
     except PydanticValidationError as e:  # Redirect Pydantic validation errors during config parsing
-        raise TauticordSetupFailure(f"Configuration error: {e}")
+        raise TauticordSetupFailure(f"Configuration error: {e}") from e
 
 
 @run_with_potential_exit_on_error
@@ -105,12 +127,15 @@ def set_up_analytics(config: Config) -> GoogleAnalytics:
 
 
 @run_with_potential_exit_on_error
-def set_up_tautulli_connection(config: Config, analytics: GoogleAnalytics) -> tautulli.TautulliConnector:
+def set_up_tautulli_connection(config: Config,
+                               analytics: GoogleAnalytics,
+                               database_path: str) -> tautulli.TautulliConnector:
     # Set up Tautulli connection
     return tautulli.TautulliConnector(
         tautulli_settings=config.tautulli,
         display_settings=config.display,
         stats_settings=config.stats,
+        database_path=database_path,
         analytics=analytics,
     )
 
@@ -177,26 +202,54 @@ def set_up_discord_bot(config: Config,
 
 
 @run_with_potential_exit_on_error
-def start(discord_bot: Bot) -> None:
-    # Start Flask first (in separate thread)
-    # logging.info("Starting Flask server")
-    # flask_thread = threading.Thread(
-    #    target=lambda: flask_app.run(host=host_name, port=port, debug=True, use_reloader=False))
-    # flask_thread.start()
+def start_api(config: Config, discord_bot: Bot, database_path: str) -> [Flask, threading.Thread]:
+    api = Flask(APP_NAME)
 
+    @api.route('/ping', methods=['GET'])
+    def ping():
+        return 'Pong!', 200
+
+    @api.route('/hello', methods=['GET'])
+    def hello_world():
+        return 'Hello, World!', 200
+
+    @api.route('/health', methods=['GET'])
+    def health_check():
+        return 'OK', 200
+
+    @api.route('/webhooks/tautulli/recently_added', methods=['POST'])
+    def tautulli_webhook():
+        return WebhookProcessor.process_tautulli_recently_added_webhook(request=flask_request,
+                                                                        bot=discord_bot,
+                                                                        database_path=database_path)
+
+    flask_thread = threading.Thread(
+        target=lambda: api.run(host=FLASK_ADDRESS, port=FLASK_PORT, debug=False, use_reloader=False))
+    logging.info("Starting Flask server")
+    flask_thread.start()
+
+    return api, flask_thread
+
+
+@run_with_potential_exit_on_error
+def start(discord_bot: Bot) -> None:
     # Connect the bot to Discord (last step, since it will block and trigger all the sub-services)
     discord_bot.connect()
 
 
 if __name__ == "__main__":
     set_up_logging()
-    run_migrations()
+    run_config_migrations()
+    run_database_migrations(database_path=args.database)
     _config: Config = set_up_configuration()
     _analytics: GoogleAnalytics = set_up_analytics(config=_config)
     _emoji_manager: EmojiManager = set_up_emoji_manager()
-    _tautulli_connector: tautulli.TautulliConnector = set_up_tautulli_connection(config=_config, analytics=_analytics)
+    _tautulli_connector: tautulli.TautulliConnector = set_up_tautulli_connection(config=_config,
+                                                                                 analytics=_analytics,
+                                                                                 database_path=args.database)
     _discord_bot: Bot = set_up_discord_bot(config=_config,
                                            tautulli_connector=_tautulli_connector,
                                            emoji_manager=_emoji_manager,
                                            analytics=_analytics)
+    _api, _flask_thread = start_api(config=_config, discord_bot=_discord_bot, database_path=args.database)
     start(discord_bot=_discord_bot)

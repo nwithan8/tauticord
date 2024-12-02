@@ -93,6 +93,7 @@ class Emoji(enum.Enum):
     Artist = "🎤"
     Album = "📀"
     Track = "🎵"
+    RecentlyAdded = "➕"
     Unknown = "❓"
     Status = "🔔"
     Online = "✅"

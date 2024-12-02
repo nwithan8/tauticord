@@ -3,6 +3,7 @@ from typing import List, Union, Optional
 import objectrest
 import tautulli
 
+import modules.database.repository as db
 import modules.logs as logging
 import modules.settings.models as settings_models
 from modules import utils
@@ -23,6 +24,7 @@ class TautulliConnector:
                  tautulli_settings: settings_models.Tautulli,
                  display_settings: settings_models.Display,
                  stats_settings: settings_models.Stats,
+                 database_path: str,
                  analytics: GoogleAnalytics):
         self.base_url = tautulli_settings.url
         self.api_key = tautulli_settings.api_key
@@ -37,7 +39,7 @@ class TautulliConnector:
             # causes "'NoneType' object has no attribute 'endswith'" error inside Tautulli API library
             raise Exception(
                 f"Could not begin a Tautulli connection. Please check that your configuration is complete and "
-                f"reachable. Exception: {e}")
+                f"reachable. Exception: {e}") from e
 
         self.server_name = display_settings.plex_server_name or self.api.server_friendly_name
         self.terminate_message = tautulli_settings.termination_message
@@ -45,8 +47,11 @@ class TautulliConnector:
         self.text_manager = display_settings.text_manager
         self.time_manager = display_settings.time.time_manager
         self.stats_settings = stats_settings
+        self.database = db.DatabaseRepository(database_path=database_path)
 
         self.has_plex_pass = self.api.shortcuts.has_plex_pass
+        self.plex_url = self.api.server_info.get('pms_url', None)
+
         self.plex_api = None
         try:
             self.plex_api = self.api.shortcuts.plex_api
@@ -129,15 +134,12 @@ class TautulliConnector:
         :return: True if successfully reached, False otherwise
         :rtype: bool
         """
-        if not self.plex_details:
+        if not self.plex_url:
             logging.error("Could not ping Plex Media Server directly: Plex details not found")
             return False
 
         try:
-            pms_url = self.plex_details.get('pms_url')
-            if not pms_url:
-                return False
-            status_code = objectrest.get(url=pms_url, verify=False).status_code
+            status_code = objectrest.get(url=self.plex_url, verify=False).status_code
             return status_code_is_success(
                 status_code=status_code) or status_code == 401  # 401 is a success because it means we got a response
         except Exception as e:
@@ -285,6 +287,21 @@ class TautulliConnector:
             albums=albums,
             tracks=tracks
         )
+
+    def get_recently_added_count_for_library(self, library_name: str, minutes: int) -> int | None:
+        results = self.database.get_all_recently_added_items_in_past_x_minutes_for_libraries(minutes=minutes,
+                                                                                        library_names=[library_name])
+        return len(results)
+
+    def get_recently_added_count_for_combined_libraries(self,
+                                                        sub_libraries: List[
+                                                            settings_models.CombinedLibrarySubLibrary],
+                                                        minutes: int) -> int | None:
+        library_names = [library.name for library in sub_libraries]
+        results = self.database.get_all_recently_added_items_in_past_x_minutes_for_libraries(minutes=minutes,
+                                                                                        library_names=library_names)
+
+        return len(results)
 
     def is_plex_server_online(self) -> bool:
         return self.api.server_status.get("connected", False)
