@@ -144,7 +144,7 @@ Library statistics are about the media stored on the Plex server. This includes 
 - Total music artist count
 - Total album count
 - Total song/track count
-- Recently added media (movie, episode, or track) count
+- [Recently added media (movie, episode, or track) count](#webhooks)
 
 Only metrics relevant to the library type will be displayed. For example, a music library will not display a movie
 count, and a movie library will not display an album count.
@@ -199,14 +199,15 @@ Libraries:
 
 Library data updates at a configurable interval (with a minimum of 5 minutes between updates).
 
+If you do not wish to use library statistics, you can simply set `Libraries: []` in the configuration file.
+
 ### Combined Libraries
 
 You can optionally combine multiple Plex libraries into one for display in the voice channel. This is useful if you have
 multiple "movies" libraries, for example, and you want to display them all as one in terms of statistics.
 
-To do this, you must specify the libraries you want to combine in the `CombinedLibraries` section of
-the `tauticord.yaml`
-file.
+To do this, you must specify the libraries you want to combine in the `CombinedLibraries` section of the
+`tauticord.yaml` file.
 
 ```yaml
 CombinedLibraries:
@@ -235,6 +236,9 @@ CombinedLibraries:
 
 Combined library data updates at the same interval as regular library data (with a minimum of 5 minutes between
 updates).
+
+If you do not wish to use combined library statistics, you can simply set `CombinedLibraries: []` in the configuration
+file.
 
 ## Performance Monitoring
 
@@ -292,32 +296,38 @@ Tauticord can ingest webhooks from Tautulli, acting upon them in various ways.
 
 Currently, Tauticord can do the following:
 
-- Ingest "Recently Added" webhooks. These webhooks and details about the associated recently-added media are stored in Tauticord's database. This data is used for the "Recently Added" [Library Statistics](#library-statistics).
-- Ingest playback state change-related webhooks (e.g. "Playback Start", "Playback Stop", etc.). These webhooks are stored in Tauticord's database, but not currently used for anything.
+- Ingest "Recently Added" webhooks. These webhooks and details about the associated recently-added media are stored in
+  Tauticord's database. This data is used for the "Recently Added" [Library Statistics](#library-statistics).
+- Ingest playback state change-related webhooks (e.g. "Playback Start", "Playback Stop", etc.). These webhooks are
+  stored in Tauticord's database, but not currently used for anything.
 
 ## Setup
 
-Tauticord expects to receive webhooks from Tautulli as at its `/webhooks/tautulli/recently_added` webhook endpoint, available at POST `http://<TAUTICORD_IP_ADDRESS>:8283/webhooks/tautulli/recently_added`.
+Tauticord expects to receive webhooks from Tautulli as at its `/webhooks/tautulli/recently_added` webhook endpoint,
+available at POST `http://<TAUTICORD_IP_ADDRESS>:8283/webhooks/tautulli/recently_added`.
 
 To set up Tautulli to send webhooks to Tauticord, follow these steps:
+
 1. Expose port 8283 from Tauticord to the network so Tautulli can reach it.
-   1. To do this in Docker, add `-p 8283:8283` to the `docker run` command.
-   1. If you are using Docker Compose, add the following to your `docker-compose.yml` file:
-      ```yaml
-      ports:
-        - 8283:8283
-      ```
-   1. If you are using the Unraid Docker template, a "Port" field is available in the template settings, preset to map port 8283 externally to 8283 internally.
-1. In Tautulli, navigate to `Settings -> Notification Agents`. Click the `Add a new notification agent` button and select "Webhook".
+    1. To do this in Docker, add `-p 8283:8283` to the `docker run` command.
+    1. If you are using Docker Compose, add the following to your `docker-compose.yml` file:
+       ```yaml
+       ports:
+         - 8283:8283
+       ```
+    1. If you are using the Unraid Docker template, a "Port" field is available in the template settings, preset to map
+       port 8283 externally to 8283 internally.
+1. In Tautulli, navigate to `Settings -> Notification Agents`. Click the `Add a new notification agent` button and
+   select "Webhook".
 1. On the "Configuration" tab, fill in the following fields:
-   - **Webhook URL**: `http://<TAUTICORD_IP_ADDRESS>:8283/webhooks/tautulli/recently_added`
-   - **Webhook Method**: `POST`
-   - **Description**: A description of the webhook (e.g. "Tauticord - Recently Added")
-   
+    - **Webhook URL**: `http://<TAUTICORD_IP_ADDRESS>:8283/webhooks/tautulli/recently_added`
+    - **Webhook Method**: `POST`
+    - **Description**: A description of the webhook (e.g. "Tauticord - Recently Added")
+
    <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/tauticord_webhook_config_1.png">
 
-1. On the "Triggers" tab, check the box next to "Recently Added". Do not check any other boxes. 
-    
+1. On the "Triggers" tab, check the box next to "Recently Added". Do not check any other boxes.
+
     <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/tauticord_webhook_config_2.png">
 
 1. Do not make any changes on the "Conditions" tab.
@@ -341,8 +351,8 @@ To set up Tautulli to send webhooks to Tauticord, follow these steps:
      "poster_url": "{{poster_url}}"
    }
    ```
-   1. Leave "JSON Headers" blank.
-    
+    1. Leave "JSON Headers" blank.
+
    <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/tauticord_webhook_config_3.png">
 
 1. Click the "Save" button to save the webhook.
