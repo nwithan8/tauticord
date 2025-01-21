@@ -39,6 +39,15 @@ class TauticordDiscordCollectionFailure(TauticordException):
         super().__init__(code=303, message=message)
 
 
+class TauticordAPIFailure(TauticordException):
+    """
+    Raised when an error occurs during an API call
+    """
+
+    def __init__(self, message: str):
+        super().__init__(code=304, message=message)
+
+
 def determine_exit_code(exception: Exception) -> int:
     """
     Determine the exit code based on the exception that was thrown

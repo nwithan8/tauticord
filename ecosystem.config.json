@@ -9,6 +9,15 @@
       "instances": 1
     },
     {
+      "name": "api",
+      "interpreter": "/app/venv/bin/python",
+      "script": "api.py",
+      "autorestart": true,
+      "exec_mode": "fork",
+      "instances": 1,
+      "stop_exit_codes": [302]
+    },
+    {
       "name": "tauticord",
       "interpreter": "/app/venv/bin/python",
       "script": "run.py",
@@ -22,7 +31,7 @@
       // 101 - Discord login failed
       // 102 - Missing privileged intents
       // 301 - Migrations failed
-      "stop_exit_codes": [101, 102, 301]
+      "stop_exit_codes": [101, 102, 301, 302]
     }
   ]
 }

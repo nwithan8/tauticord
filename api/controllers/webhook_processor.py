@@ -4,10 +4,9 @@ from flask import (
     jsonify,
     request as flask_request,
 )
-from sqlalchemy.testing.plugin.plugin_base import logging
+import modules.logs as logging
 
 import modules.database.repository as db
-from modules.discord.bot import Bot
 from modules.webhooks import RecentlyAddedWebhook
 
 
@@ -16,7 +15,7 @@ class WebhookProcessor:
         pass
 
     @staticmethod
-    def process_tautulli_recently_added_webhook(request: flask_request, bot: Bot, database_path: str) -> [Union[str, None], int]:
+    def process_tautulli_recently_added_webhook(request: flask_request, database_path: str) -> [Union[str, None], int]:
         """
         Process a configured recently-added webhook from Tautulli.
         Return an empty response and a 200 status code back to Tautulli as confirmation.
