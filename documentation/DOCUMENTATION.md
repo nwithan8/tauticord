@@ -38,7 +38,7 @@ You will need to map the following volumes:
 | Host Path                 | Container Path | Reason                                                                                   |
 |---------------------------|----------------|------------------------------------------------------------------------------------------|
 | /path/to/logs/folder      | /logs          | Required, debug log file for bot will be generated here                                  |
-| /path/to/config/folder    | /config        | Optional, path to the folder containing the configuration file                           |
+| /path/to/config/folder    | /config        | Required, path to the folder containing the configuration file                           |
 | /path/to/monitored/folder | /monitor       | Optional, path to a folder to monitor for disk usage statistics (e.g. your Plex library) |
 
 ## Configuration
