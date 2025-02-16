@@ -1,30 +1,22 @@
 from datetime import datetime
 
+import discord.utils
 from pydantic import BaseModel
 
 from modules import utils
 
 
 class TimeManager(BaseModel):
-    timezone: str
-    use_24_hour_time: bool
-
-    @property
-    def time_format(self) -> str:
-        return "%H:%M" if self.use_24_hour_time else "%I:%M %p"
-
     def now(self) -> datetime:
-        return utils.now(self.timezone)
+        return discord.utils.utcnow()
 
-    def now_string(self) -> str:
-        _datetime = self.now()
-        return utils.datetime_to_string(datetime_object=_datetime,
-                                        template=self.time_format)
+    def now_unix_timestamp(self) -> str:
+        _timestamp = int(self.now().timestamp())
+        return utils.timestamp(ts=_timestamp)
 
     def now_plus_milliseconds(self, milliseconds: int) -> datetime:
-        return utils.now_plus_milliseconds(milliseconds, self.timezone)
+        return utils.now_plus_milliseconds(milliseconds)
 
-    def now_plus_milliseconds_string(self, milliseconds: int) -> str:
-        _datetime = self.now_plus_milliseconds(milliseconds)
-        return utils.datetime_to_string(datetime_object=_datetime,
-                                        template=self.time_format)
+    def now_plus_milliseconds_unix_timestamp(self, milliseconds: int) -> str:
+        _timestamp = int(self.now_plus_milliseconds(milliseconds).timestamp())
+        return utils.timestamp(ts=_timestamp)

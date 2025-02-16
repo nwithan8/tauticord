@@ -44,7 +44,7 @@ class Session:
         if not self.duration_milliseconds or not self.location_milliseconds:
             return "Unknown"
         milliseconds_remaining = self.duration_milliseconds - self.location_milliseconds
-        return self._time_manager.now_plus_milliseconds_string(milliseconds=milliseconds_remaining)
+        return self._time_manager.now_plus_milliseconds_unix_timestamp(milliseconds=milliseconds_remaining)
 
     @property
     def title(self) -> str:

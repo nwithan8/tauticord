@@ -64,11 +64,7 @@ Display:
   # The thousands separator
   ThousandsSeparator: ''
   # Time settings
-  Time:
-    # The time zone of the server
-    ServerTimeZone: America/Denver
-    # Whether to use 24 hour time
-    Use24HourTime: false
+  Time: {}
   # Whether to use Plex users' names instead of usernames
   UseFriendlyNames: true
 

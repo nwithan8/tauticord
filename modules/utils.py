@@ -224,18 +224,12 @@ def milliseconds_to_minutes_seconds(milliseconds: int) -> str:
     return f"{minutes}:{seconds}"
 
 
-def now(timezone_code: str = None) -> datetime:
-    if timezone_code:
-        return datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
+def now() -> datetime:
     return datetime.now()
 
 
-def now_plus_milliseconds(milliseconds: int, timezone_code: str = None) -> datetime:
-    if timezone_code:
-        now = datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
-    else:
-        now = datetime.now()
-    return now + timedelta(milliseconds=milliseconds)
+def now_plus_milliseconds(milliseconds: int) -> datetime:
+    return datetime.now() + timedelta(milliseconds=milliseconds)
 
 
 def limit_text_length(text: str, limit: int, suffix: str = "...") -> str:
@@ -452,6 +446,18 @@ def role_mention(string: str, role_id: str) -> str:
     :rtype: str
     """
     return f"<@&{role_id}>"
+
+
+def timestamp(ts: float) -> str:
+    """
+    Return a string wrapped in timestamp markdown
+
+    :param ts: timestamp to wrap in timestamp markdown
+    :type ts: int
+    :return: string wrapped in timestamp markdown
+    :rtype: str
+    """
+    return f"<t:{ts}>"
 
 
 def emoji(string: str, emoji_id: str) -> str:

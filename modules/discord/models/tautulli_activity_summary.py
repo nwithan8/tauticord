@@ -54,4 +54,6 @@ class TautulliActivitySummary:
 
         embed.set_footer(text=footer_text)
 
+        embed.timestamp = discord.utils.utcnow()
+
         return embed

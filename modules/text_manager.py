@@ -102,13 +102,11 @@ class TextManager(BaseModel):
         return "\n".join(stubs)
 
     def overview_footer(self, no_connection: bool, activity, emoji_manager: EmojiManager) -> str:
-        timestamp = f"\n\nUpdated {self.time_manager.now_string()}"
-
         if no_connection or activity is None:
-            return f"{utils.bold('Connection lost.')}\n\n{timestamp}"
+            return f"{utils.bold('Connection lost.')}"
 
         if activity.stream_count == 0:
-            return timestamp
+            return ""
 
         stream_count = activity.stream_count
         stream_count_word = utils.make_plural(word='stream', count=stream_count)
@@ -127,7 +125,5 @@ class TextManager(BaseModel):
                 lan_bandwidth_emoji = emoji_manager.get_emoji(key='home')
                 lan_bandwidth = activity.lan_bandwidth
                 overview_message += f""" {lan_bandwidth_emoji} {lan_bandwidth}"""
-
-        overview_message += f"{timestamp}\n"
 
         return overview_message
