@@ -8,14 +8,10 @@ from datetime import datetime, timedelta
 from typing import Optional, Any
 from urllib.parse import quote_plus
 
-from pytz import timezone
-
 
 def pretty_print_json(json_data: dict, sort: bool = False) -> str:
     """
-    Return a pretty printed JSON string
-
-    :param json_data: JSON data to pretty print
+    Return a pretty printed JSON m json_data: JSON data to pretty print
     :type json_data: dict
     :param sort: (Optional) sort the keys in the JSON data
     :type sort: bool, optional
@@ -448,7 +444,7 @@ def role_mention(string: str, role_id: str) -> str:
     return f"<@&{role_id}>"
 
 
-def timestamp(ts: float) -> str:
+def timestamp(ts: int) -> str:
     """
     Return a string wrapped in timestamp markdown
 

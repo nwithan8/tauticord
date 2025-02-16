@@ -36,8 +36,7 @@ def init(app_name: str,
     logger.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('%(asctime)s - [%(levelname)s]: %(message)s')
-    timezone_abbr = os.getenv('TZ',
-                              'UTC')  # Due to chicken-egg issue, we can't parse the timezone from config, only from env
+    timezone_abbr = os.getenv('TZ', 'UTC')
     formatter.converter = lambda *args: datetime.now(tz=timezone(timezone_abbr)).timetuple()
 
     # Console logging

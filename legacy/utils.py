@@ -2,8 +2,6 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Any
 from urllib.parse import quote_plus
 
-from pytz import timezone
-
 import modules.logs as logging
 from legacy.statics import ENCODING_SEPARATOR_1, ENCODING_SEPARATOR_2
 
@@ -120,20 +118,6 @@ def milliseconds_to_minutes_seconds(milliseconds: int) -> str:
     if seconds < 10:
         seconds = f"0{seconds}"
     return f"{minutes}:{seconds}"
-
-
-def now(timezone_code: str = None) -> datetime:
-    if timezone_code:
-        return datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
-    return datetime.now()
-
-
-def now_plus_milliseconds(milliseconds: int, timezone_code: str = None) -> datetime:
-    if timezone_code:
-        now = datetime.now(timezone(timezone_code))  # will raise exception if invalid timezone_code
-    else:
-        now = datetime.now()
-    return now + timedelta(milliseconds=milliseconds)
 
 
 def limit_text_length(text: str, limit: int, suffix: str = "...") -> str:

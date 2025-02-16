@@ -62,11 +62,13 @@ in `tauticord.yaml`:
 - Tautulli -> Customization -> ServerTimeZone
 + Display -> Time -> ServerTimeZone
 ```
+(**DEPRECATED in v5.12.0**)
 
 ```diff
 - Tautulli -> Customization -> Use24HourTime
 + Display -> Time -> Use24HourTime
 ```
+(**DEPRECATED in v5.12.0**)
 
 ```diff
 - Tautulli -> Customization -> VoiceChannels -> Stats -> CategoryName
