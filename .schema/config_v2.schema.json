@@ -534,21 +534,8 @@
           "description": "Settings for how the bot handles time",
           "type": "object",
           "properties": {
-            "ServerTimeZone": {
-              "title": "Server time zone",
-              "description": "The time zone of the Plex server",
-              "type": "string",
-              "format": "date-time"
-            },
-            "Use24HourTime": {
-              "title": "Use 24-hour (military) time",
-              "description": "Whether to use 24-hour (military) time",
-              "type": "boolean"
-            }
           },
           "required": [
-            "ServerTimeZone",
-            "Use24HourTime"
           ]
         },
         "UseFriendlyNames": {

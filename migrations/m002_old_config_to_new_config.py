@@ -170,12 +170,7 @@ class Migration(BaseMigration, ABC):
                                  to_path=["Display", "Anonymize", "HideProgress"], default=False)
         new_config.migrate_value(value=old_config.tautulli._anonymize_hide_eta,
                                  to_path=["Display", "Anonymize", "HideETA"], default=False)
-        new_config.migrate_value(
-            value=old_config.tautulli._customization._get_value(key='Use24HourTime', default=False),
-            to_path=["Display", "Time", "Use24HourTime"], default=False)
-        new_config.migrate_value(
-            value=old_config.tautulli._customization._get_value(key='ServerTimeZone', default="UTC"),
-            to_path=["Display", "Time", "ServerTimeZone"], default="UTC")
+        new_config.add(value={}, key_path=["Display", "Time"])
 
         # Stats
         new_config.add(value=any([

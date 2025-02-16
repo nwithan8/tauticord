@@ -160,13 +160,7 @@ class TimeConfig(ConfigSection):
         super().__init__(data=data)
 
     def to_model(self) -> settings_models.Time:
-        tautulli_server_time_zone = self.get_value(key="ServerTimeZone", default="UTC")
-        use_24_hour_time = utils.extract_boolean(self.get_value(key="Use24HourTime", default=False))
-
-        return settings_models.Time(
-            tautulli_server_time_zone=tautulli_server_time_zone,
-            use_24_hour_time=use_24_hour_time
-        )
+        return settings_models.Time()
 
 
 class DisplayConfig(ConfigSection):

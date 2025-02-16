@@ -96,22 +96,6 @@ class ConfigWriter:
         self.add(key_path=["Tautulli", "Customization", "PlexPass"], value=value)
 
     @property
-    def tautulli_customization_server_time_zone(self) -> str:
-        return self.read(key_path=["Tautulli", "Customization", "ServerTimeZone"])
-
-    @tautulli_customization_server_time_zone.setter
-    def tautulli_customization_server_time_zone(self, value: str):
-        self.add(key_path=["Tautulli", "Customization", "ServerTimeZone"], value=value)
-
-    @property
-    def tautulli_customization_use_24_hour_time(self) -> bool:
-        return self.read(key_path=["Tautulli", "Customization", "Use24HourTime"])
-
-    @tautulli_customization_use_24_hour_time.setter
-    def tautulli_customization_use_24_hour_time(self, value: bool):
-        self.add(key_path=["Tautulli", "Customization", "Use24HourTime"], value=value)
-
-    @property
     def tautulli_customization_voice_channels_stats_category_name(self) -> str:
         return self.read(key_path=["Tautulli", "Customization", "VoiceChannels", "Stats", "CategoryName"])
 
@@ -519,11 +503,6 @@ class Migration(BaseMigration, ABC):
         new_config.tautulli_customization_refresh_seconds = old_config.tautulli.refresh_interval
         new_config.tautulli_customization_server_name = old_config.tautulli.server_name
         new_config.tautulli_customization_terminate_message = old_config.tautulli.terminate_message
-        new_config.tautulli_customization_server_time_zone = old_config.tautulli._customization._get_value(
-            key='ServerTimeZone', default=None, env_name_override="TZ")
-        use_24_hour_time = old_config.tautulli._customization._get_value(key='Use24HourTime', default=False,
-                                                                         env_name_override="TC_USE_24_HOUR_TIME")
-        new_config.tautulli_customization_use_24_hour_time = config_parser._extract_bool(value=use_24_hour_time)
         new_config.tautulli_customization_voice_channels_stats_category_name = old_config.tautulli.stats_voice_channel_category_name
         new_config.tautulli_customization_voice_channels_stats_stream_count = old_config.tautulli.display_stream_count
         new_config.tautulli_customization_voice_channels_stats_stream_count_channel_id = old_config.tautulli.stream_count_channel_id

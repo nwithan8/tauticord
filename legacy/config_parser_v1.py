@@ -8,7 +8,7 @@ import yaml
 import modules.logs as logging
 from legacy import statics, utils
 from legacy.text_manager import TextManager
-from legacy.time_manager import TimeManager
+from modules.time_manager import TimeManager
 
 
 def _extract_bool(value):
@@ -100,10 +100,7 @@ class TautulliConfig(ConfigSection):
 
     @property
     def time_manager(self) -> TimeManager:
-        timezone = self._customization._get_value(key='ServerTimeZone', default=None, env_name_override="TZ")
-        mil_time = self._customization._get_value(key='Use24HourTime', default=False,
-                                                  env_name_override="TC_USE_24_HOUR_TIME")
-        return TimeManager(timezone=timezone, military_time=mil_time)
+        return TimeManager()
 
     @property
     def _voice_channels(self) -> ConfigSection:
