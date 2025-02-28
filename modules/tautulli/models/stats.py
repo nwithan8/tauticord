@@ -11,7 +11,7 @@ class PlayStats:
         self.categories: list = data.get('categories', [])
         self._series: list[dict] = data.get('series', [])
 
-    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData | None:
+    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData:
         raise NotImplementedError
 
     @property
@@ -23,15 +23,15 @@ class PlayStats:
         }
 
     @property
-    def tv_shows(self) -> PlayStatsCategoryData | None:
+    def tv_shows(self) -> PlayStatsCategoryData:
         return self._get_category_data(category_name='TV')
 
     @property
-    def movies(self) -> PlayStatsCategoryData | None:
+    def movies(self) -> PlayStatsCategoryData:
         return self._get_category_data(category_name='Movies')
 
     @property
-    def music(self) -> PlayStatsCategoryData | None:
+    def music(self) -> PlayStatsCategoryData:
         return self._get_category_data(category_name='Music')
 
 
@@ -39,7 +39,7 @@ class PlayCountStats(PlayStats):
     def __init__(self, data: dict):
         super().__init__(data=data)
 
-    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData | None:
+    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData:
         for series in self._series:
             if series.get('name', None) == category_name:
                 return PlayStatsCategoryData(
@@ -48,14 +48,18 @@ class PlayCountStats(PlayStats):
                     values=series.get('data', [])
                 )
 
-        return None
+        return PlayStatsCategoryData(
+            category_name=category_name,
+            x_axis=self.categories,
+            values=[]
+        )
 
 
 class PlayDurationStats(PlayStats):
     def __init__(self, data: dict):
         super().__init__(data=data)
 
-    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData | None:
+    def _get_category_data(self, category_name: str) -> PlayStatsCategoryData:
         for series in self._series:
             if series.get('name', None) == category_name:
                 return PlayStatsCategoryData(
@@ -64,4 +68,8 @@ class PlayDurationStats(PlayStats):
                     values=series.get('data', [])
                 )
 
-        return None
+        return PlayStatsCategoryData(
+            category_name=category_name,
+            x_axis=self.categories,
+            values=[]
+        )

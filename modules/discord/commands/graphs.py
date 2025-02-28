@@ -75,7 +75,7 @@ class Graphs(commands.GroupCog, name="graphs"):
                                        metric: StatMetricType,
                                        days: int,
                                        chart_builder_function: Callable[
-                                           [PlayCountStats | PlayDurationStats, str], ChartMaker],
+                                           [PlayCountStats | PlayDurationStats, str], ChartMaker | None],
                                        username: str = None,
                                        share: Optional[bool] = False) -> None:
         passed_admin_check: bool = await self.check_admin(interaction)
@@ -135,7 +135,10 @@ class Graphs(commands.GroupCog, name="graphs"):
         if username:
             chart_title: str = f"{chart_title} for {username}"
 
-        chart_marker: ChartMaker = chart_builder_function(stats, chart_title)
+        chart_marker: ChartMaker | None = chart_builder_function(stats, chart_title)
+        if not chart_marker:
+            await interaction.response.send_message("Error occurred when generating chart.", ephemeral=True)
+            return
 
         parent_chart_path = get_current_directory() if not is_docker() else None
         chart_path: str = utils.get_temporary_file_path(sub_directory="charts", parent_directory=parent_chart_path,
@@ -155,12 +158,19 @@ class Graphs(commands.GroupCog, name="graphs"):
                                days: int,
                                username: Optional[str] = None,
                                share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
-            tv_show_data = stats.tv_shows
+        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker | None:
+            tv_show_data = stats.tv_shows  # Will always be a PlayStatsCategoryData object, but potentially [] values
             movie_data = stats.movies
             music_data = stats.music
-            chart_maker = ChartMaker(x_axis=tv_show_data.x_axis,
-                                     x_axis_labels=tv_show_data.x_axis,
+
+            x_axis = tv_show_data.x_axis or movie_data.x_axis or music_data.x_axis  # Potentially []
+            x_axis_labels = tv_show_data.x_axis or movie_data.x_axis or music_data.x_axis  # Potentially []
+
+            if not x_axis or not x_axis_labels:
+                return None
+
+            chart_maker = ChartMaker(x_axis=x_axis,
+                                     x_axis_labels=x_axis_labels,
                                      title=title,
                                      background_color=StatChartColors.BACKGROUND.value,
                                      text_color=StatChartColors.TEXT.value,
@@ -210,10 +220,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                      days: int,
                                      username: Optional[str] = None,
                                      share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
@@ -254,10 +265,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                      days: int,
                                      username: Optional[str] = None,
                                      share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
@@ -299,10 +311,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                    days: int,
                                    username: Optional[str] = None,
                                    share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
@@ -341,10 +354,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                interaction: discord.Interaction,
                                days: int,
                                share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayCountStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
@@ -385,12 +399,19 @@ class Graphs(commands.GroupCog, name="graphs"):
                                   days: int,
                                   username: Optional[str] = None,
                                   share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
-            chart_maker = ChartMaker(x_axis=tv_show_data.x_axis,
-                                     x_axis_labels=tv_show_data.x_axis,
+
+            x_axis = tv_show_data.x_axis or movie_data.x_axis or music_data.x_axis
+            x_axis_labels = tv_show_data.x_axis or movie_data.x_axis or music_data.x_axis
+
+            if not x_axis or not x_axis_labels:
+                return None
+
+            chart_maker = ChartMaker(x_axis=x_axis,
+                                     x_axis_labels=x_axis_labels,
                                      title=title,
                                      background_color=StatChartColors.BACKGROUND.value,
                                      text_color=StatChartColors.TEXT.value,
@@ -441,10 +462,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                         days: int,
                                         username: Optional[str] = None,
                                         share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
@@ -486,10 +508,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                         days: int,
                                         username: Optional[str] = None,
                                         share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
@@ -531,10 +554,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                       days: int,
                                       username: Optional[str] = None,
                                       share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
@@ -574,10 +598,11 @@ class Graphs(commands.GroupCog, name="graphs"):
                                   interaction: discord.Interaction,
                                   days: int,
                                   share: Optional[bool] = False) -> None:
-        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker:
+        def chart_builder_function(stats: PlayDurationStats, title: str) -> ChartMaker | None:
             tv_show_data = stats.tv_shows
             movie_data = stats.movies
             music_data = stats.music
+
             chart_maker = ChartMaker(x_axis=stats.categories,
                                      x_axis_labels=stats.categories,
                                      title=title,
