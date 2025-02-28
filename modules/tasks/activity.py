@@ -158,7 +158,7 @@ class ActivityStatsAndSummaryMessage(VoiceCategoryStatsMonitor):
             logging.debug('Editing old message...')
 
         # update the message regardless of whether the content has changed
-        self.message = await discord_utils.send_embed_message(embed=summary.embed, message=self.message)
+        self.message = await summary.send_to_channel(message=self.message)
 
         if self.tautulli.plex_pass_feature_is_allowed(feature=self.enable_stream_termination_if_possible,
                                                       warning="Stream termination control requires Plex Pass, ignoring setting..."):

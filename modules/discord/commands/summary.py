@@ -5,6 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 
 import modules.logs as logging
+from modules.discord import discord_utils
 from modules.emojis import EmojiManager
 from modules.tautulli.tautulli_connector import (
     TautulliConnector,
@@ -22,7 +23,9 @@ class Summary(commands.Cog):
 
     async def check_admin(self, interaction: discord.Interaction) -> bool:
         if self._admin_check and not self._admin_check(interaction):
-            await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+            await discord_utils.respond_to_slash_command_with_text(interaction=interaction,
+                                                                    text="You do not have permission to use this command.",
+                                                                    ephemeral=True)
             return False
 
         return True
@@ -37,4 +40,4 @@ class Summary(commands.Cog):
 
         # Does NOT include new version reminder or stream termination.
         summary = self._tautulli.refresh_data(enable_stream_termination_if_possible=False, emoji_manager=self._emoji_manager)
-        await interaction.response.send_message(embed=summary.embed, ephemeral=not share)
+        await summary.reply_to_slash_command(interaction=interaction, ephemeral=not share)

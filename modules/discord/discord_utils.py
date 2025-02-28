@@ -157,7 +157,7 @@ async def get_or_create_discord_category_by_name(client: discord.Client,
 async def send_embed_message(embed: discord.Embed = None, message: discord.Message = None,
                              channel: discord.TextChannel = None):
     """
-    Send or edit a message.
+    Send or edit a message with an embed.
     :param embed: Embed to send
     :param message: Message to edit
     :param channel: Channel to send the message to
@@ -177,6 +177,107 @@ async def send_embed_message(embed: discord.Embed = None, message: discord.Messa
             return await channel.send(content="Something went wrong.")
         else:
             return await channel.send(content=None, embed=embed)
+
+
+async def send_view_message(view: discord.ui.View = None, message: discord.Message = None,
+                            channel: discord.TextChannel = None):
+    """
+    Send or edit a message with a View.
+    :param view: View to send
+    :param message: Message to edit
+    :param channel: Channel to send the message to
+    :return: Message sent
+    """
+    # if neither channel nor message is specified, throw an error
+    if not channel and not message:
+        raise ValueError("Must specify either a channel or a message")
+    if message:  # if message exists, use it to edit the message
+        if not view:  # oops, no view to send
+            await message.edit(content="Something went wrong.", view=None)  # erase any existing content and views
+        else:
+            await message.edit(content=None, view=view)  # erase any existing content and views
+        return message
+    else:  # otherwise, send a new message in the channel
+        if not view:  # oops, no view to send
+            return await channel.send(content="Something went wrong.")
+        else:
+            return await channel.send(content=None, view=view)
+
+
+async def respond_to_slash_command_with_text(interaction: discord.Interaction, text: str, ephemeral: bool = False):
+    """
+    Respond to a slash command with text.
+    :param interaction: Interaction to respond to
+    :param text: Text to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    return await interaction.response.send_message(text, ephemeral=ephemeral)
+
+
+async def respond_to_slash_command_with_view(interaction: discord.Interaction, view: discord.ui.View,
+                                             ephemeral: bool = False):
+    """
+    Respond to a slash command with a View.
+    :param interaction: Interaction to respond to
+    :param view: View to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    try:
+        # Try to respond to the interaction
+        return await interaction.response.send_message(view=view, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then get the original response message
+        return await interaction.edit_original_response(view=view)
+
+
+async def respond_to_slash_command_with_embed(interaction: discord.Interaction, embed: discord.Embed,
+                                              ephemeral: bool = False):
+    """
+    Respond to a slash command with an embed.
+    :param interaction: Interaction to respond to
+    :param embed: Embed to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    try:
+        # Try to respond to the interaction
+        return await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then get the original response message
+        return await interaction.edit_original_response(embed=embed)
+
+
+async def respond_to_slash_command_with_file(interaction: discord.Interaction, file: discord.File,
+                                             ephemeral: bool = False):
+    """
+    Respond to a slash command with a file.
+    :param interaction: Interaction to respond to
+    :param file: File to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    return await interaction.response.send_message(file=file, ephemeral=ephemeral)
+
+
+async def respond_to_slash_command_with_thinking(interaction: discord.Interaction, ephemeral: bool = True) -> None:
+    """
+    Send a "thinking" placeholder response to a slash command.
+    :param interaction: Interaction to respond to
+    :param ephemeral: Whether the response should be ephemeral
+    :return: None
+    """
+    await interaction.response.defer(thinking=True, ephemeral=ephemeral)
+
+
+async def defer_slash_command_response(interaction: discord.Interaction) -> None:
+    """
+    Defer a slash command response. Use to process a command for longer than 3 seconds.
+    :param interaction: Interaction to defer the response for
+    :return: None
+    """
+    await interaction.response.defer()
 
 
 async def update_presence(client: discord.Client,
