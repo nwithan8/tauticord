@@ -5,6 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 
 import modules.logs as logging
+from modules.discord import discord_utils
 from modules.discord.views import EmbedColor
 from modules.tautulli.tautulli_connector import (
     TautulliConnector,
@@ -36,7 +37,9 @@ class Most(commands.GroupCog, name="most"):
 
     async def check_admin(self, interaction: discord.Interaction) -> bool:
         if self._admin_check and not self._admin_check(interaction):
-            await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+            await discord_utils.respond_to_slash_command_with_text(interaction=interaction,
+                                                                   text="You do not have permission to use this command.",
+                                                                   ephemeral=True)
             return False
 
         return True
@@ -56,7 +59,9 @@ class Most(commands.GroupCog, name="most"):
         stats = self._tautulli.get_stats_for_x_days(stat_type=stat_type, metric=metric, days=days, limit=limit)
 
         if not stats:
-            await interaction.response.send_message("No stats found.", ephemeral=True)
+            await discord_utils.respond_to_slash_command_with_text(interaction=interaction,
+                                                                   text="No stats found.",
+                                                                   ephemeral=True)
             return
 
         # Switch case setting the title_prefix based on the stat_type
@@ -85,7 +90,9 @@ class Most(commands.GroupCog, name="most"):
                                       title=f"Most {title_prefix} for past {days} day(s), by {metric}",
                                       name_key=name_key,
                                       convert_time=metric == StatMetricType.DURATION.value)
-        await interaction.response.send_message(embed=embed, ephemeral=not share)
+        await discord_utils.respond_to_slash_command_with_embed(interaction=interaction,
+                                                                embed=embed,
+                                                                ephemeral=not share)
 
     @app_commands.command(name="watched-movies", description="Show most watched movies for a number of days.")
     @app_commands.describe(

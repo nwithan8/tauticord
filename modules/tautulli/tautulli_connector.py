@@ -9,6 +9,7 @@ import modules.settings.models as settings_models
 from modules import utils
 from modules.analytics import GoogleAnalytics
 from modules.discord.models.tautulli_activity_summary import TautulliActivitySummary
+from modules.discord.models.tautulli_recently_added_summary import TautulliRecentlyAddedSummary
 from modules.discord.models.tautulli_stream_info import TautulliStreamInfo
 from modules.emojis import EmojiManager
 from modules.tautulli.enums import LibraryType, HomeStatType, StatMetricType, StatChartType
@@ -415,3 +416,9 @@ class TautulliConnector:
             items.append(item)
 
         return items
+
+    def get_recently_added_media_summary(self, count: int, media_type: Optional[str] = None) \
+            -> TautulliRecentlyAddedSummary:
+        items: list[RecentlyAddedMediaItem] = self.get_recently_added_media(count=count, media_type=media_type)
+
+        return TautulliRecentlyAddedSummary(items=items)

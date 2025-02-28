@@ -8,6 +8,7 @@ from discord.ext import commands
 import modules.logs as logging
 from modules import utils
 from modules.charts import ChartMaker, PLAY_DURATION_FORMATTER, PLAY_COUNT_FORMATTER
+from modules.discord import discord_utils
 from modules.tautulli.enums import StatChartType, StatMetricType, StatChartColors
 from modules.tautulli.models.stats import PlayDurationStats, PlayCountStats
 from modules.tautulli.tautulli_connector import (
@@ -64,7 +65,9 @@ class Graphs(commands.GroupCog, name="graphs"):
 
     async def check_admin(self, interaction: discord.Interaction) -> bool:
         if self._admin_check and not self._admin_check(interaction):
-            await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+            await discord_utils.respond_to_slash_command_with_text(interaction=interaction,
+                                                                   text="You do not have permission to use this command.",
+                                                                   ephemeral=True)
             return False
 
         return True
@@ -86,7 +89,9 @@ class Graphs(commands.GroupCog, name="graphs"):
         if username:
             user_id = self._tautulli.get_user_id_by_username(username=username)
             if not user_id:
-                await interaction.response.send_message("User not found.", ephemeral=True)
+                await discord_utils.respond_to_slash_command_with_text(interaction=interaction,
+                                                                       text="User not found.",
+                                                                       ephemeral=True)
                 return
 
         stats = None
@@ -103,7 +108,9 @@ class Graphs(commands.GroupCog, name="graphs"):
                                                                                                   str(user_id)] if user_id else None)
 
         if not stats:
-            await interaction.response.send_message("No stats found.", ephemeral=True)
+            await discord_utils.respond_to_slash_command_with_text(interaction=interaction,
+                                                                   text="No stats found.",
+                                                                   ephemeral=True)
             return
 
         chart_title_metric: str = ""
@@ -137,7 +144,9 @@ class Graphs(commands.GroupCog, name="graphs"):
 
         chart_marker: ChartMaker | None = chart_builder_function(stats, chart_title)
         if not chart_marker:
-            await interaction.response.send_message("Error occurred when generating chart.", ephemeral=True)
+            await discord_utils.respond_to_slash_command_with_text(interaction=interaction,
+                                                                   text="An error occurred while generating the chart.",
+                                                                   ephemeral=True)
             return
 
         parent_chart_path = get_current_directory() if not is_docker() else None
@@ -145,7 +154,8 @@ class Graphs(commands.GroupCog, name="graphs"):
                                                         file_extension=".png")
         chart_marker.save(path=chart_path)
 
-        await interaction.response.send_message(file=discord.File(chart_path), ephemeral=not share)
+        await discord_utils.respond_to_slash_command_with_file(interaction=interaction, file=discord.File(chart_path),
+                                                               ephemeral=not share)
 
     @app_commands.command(name="play-count-daily", description="Show graph of daily play count stats.")
     @app_commands.describe(
