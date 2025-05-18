@@ -244,13 +244,7 @@
       },
       "required": [
         "Name",
-        "AlternateName",
-        "Albums",
-        "Artists",
-        "Episodes",
-        "Movies",
-        "Series",
-        "Tracks"
+        "AlternateName"
       ]
     },
     "combinedLibrarySubLibrary": {
@@ -330,13 +324,7 @@
       },
       "required": [
         "Name",
-        "Libraries",
-        "Albums",
-        "Artists",
-        "Episodes",
-        "Movies",
-        "Series",
-        "Tracks"
+        "Libraries"
       ]
     }
   },

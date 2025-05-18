@@ -271,22 +271,22 @@ class StatsLibrariesConfig(ConfigSection):
             voice_channel_name = alternate_name if alternate_name else library_name
             movie = VoiceChannelConfig(channel_name=voice_channel_name,
                                        emoji=Emoji.Movie,
-                                       data=details_config.get_subsection_data("Movies")).to_model()
+                                       data=details_config.get_subsection_data("Movies", optional=True)).to_model()
             album = VoiceChannelConfig(channel_name=voice_channel_name,
                                        emoji=Emoji.Album,
-                                       data=details_config.get_subsection_data("Albums")).to_model()
+                                       data=details_config.get_subsection_data("Albums", optional=True)).to_model()
             artist = VoiceChannelConfig(channel_name=voice_channel_name,
                                         emoji=Emoji.Artist,
-                                        data=details_config.get_subsection_data("Artists")).to_model()
+                                        data=details_config.get_subsection_data("Artists", optional=True)).to_model()
             episode = VoiceChannelConfig(channel_name=voice_channel_name,
                                          emoji=Emoji.Episode,
-                                         data=details_config.get_subsection_data("Episodes")).to_model()
+                                         data=details_config.get_subsection_data("Episodes", optional=True)).to_model()
             series = VoiceChannelConfig(channel_name=voice_channel_name,
                                         emoji=Emoji.Series,
-                                        data=details_config.get_subsection_data("Series")).to_model()
+                                        data=details_config.get_subsection_data("Series", optional=True)).to_model()
             track = VoiceChannelConfig(channel_name=voice_channel_name,
                                        emoji=Emoji.Track,
-                                       data=details_config.get_subsection_data("Tracks")).to_model()
+                                       data=details_config.get_subsection_data("Tracks", optional=True)).to_model()
             recently_added = RecentlyAddedVoiceChannelConfig(channel_name=voice_channel_name,
                                                              emoji=Emoji.RecentlyAdded,
                                                              data=details_config.get_subsection_data(
@@ -333,22 +333,22 @@ class StatsLibrariesConfig(ConfigSection):
 
             movie = VoiceChannelConfig(channel_name=combined_library_name,
                                        emoji=Emoji.Movie,
-                                       data=details_config.get_subsection_data("Movies")).to_model()
+                                       data=details_config.get_subsection_data("Movies", optional=True)).to_model()
             album = VoiceChannelConfig(channel_name=combined_library_name,
                                        emoji=Emoji.Album,
-                                       data=details_config.get_subsection_data("Albums")).to_model()
+                                       data=details_config.get_subsection_data("Albums", optional=True)).to_model()
             artist = VoiceChannelConfig(channel_name=combined_library_name,
                                         emoji=Emoji.Artist,
-                                        data=details_config.get_subsection_data("Artists")).to_model()
+                                        data=details_config.get_subsection_data("Artists", optional=True)).to_model()
             episode = VoiceChannelConfig(channel_name=combined_library_name,
                                          emoji=Emoji.Episode,
-                                         data=details_config.get_subsection_data("Episodes")).to_model()
+                                         data=details_config.get_subsection_data("Episodes", optional=True)).to_model()
             series = VoiceChannelConfig(channel_name=combined_library_name,
                                         emoji=Emoji.Series,
-                                        data=details_config.get_subsection_data("Series")).to_model()
+                                        data=details_config.get_subsection_data("Series", optional=True)).to_model()
             track = VoiceChannelConfig(channel_name=combined_library_name,
                                        emoji=Emoji.Track,
-                                       data=details_config.get_subsection_data("Tracks")).to_model()
+                                       data=details_config.get_subsection_data("Tracks", optional=True)).to_model()
             recently_added = RecentlyAddedVoiceChannelConfig(channel_name=combined_library_name,
                                                              emoji=Emoji.RecentlyAdded,
                                                              data=details_config.get_subsection_data(
