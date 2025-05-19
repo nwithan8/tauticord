@@ -10,7 +10,7 @@ from migrations.migration_names import V2_CONFIG_FILE, MIGRATION_003_CONFIG_FILE
 
 
 def json_to_yaml(json_data) -> str:
-    return yaml.dump(json_data)
+    return yaml.dump(json_data, default_flow_style=False, sort_keys=False)
 
 
 def path_exists_in_yaml(yaml_data, path: list[str]) -> bool:

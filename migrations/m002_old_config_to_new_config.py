@@ -12,7 +12,7 @@ from migrations.migration_names import V1_CONFIG_FILE, V2_CONFIG_FILE, MIGRATION
 
 
 def json_to_yaml(json_data) -> str:
-    return yaml.dump(json_data)
+    return yaml.dump(json_data, default_flow_style=False, sort_keys=False)
 
 
 def value_exists(value):

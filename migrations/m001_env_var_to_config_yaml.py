@@ -10,7 +10,7 @@ from legacy.utils import decode_combined_tautulli_libraries
 
 
 def json_to_yaml(json_data) -> str:
-    return yaml.dump(json_data)
+    return yaml.dump(json_data, default_flow_style=False, sort_keys=False)
 
 
 class ConfigWriter:
