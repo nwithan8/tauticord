@@ -97,9 +97,10 @@ async def get_or_create_discord_channel_by_name(client: discord.Client,
                                                 channel_type: discord.ChannelType,
                                                 category: discord.CategoryChannel = None) -> \
         Union[discord.VoiceChannel, discord.TextChannel, discord.CategoryChannel, None]:
+    channel_name_normalized = normalize_channel_name(channel_name=channel_name)
     channels = await get_all_discord_channels(client=client, guild_id=guild_id, channel_type=channel_type)
     for channel in channels:
-        if channel.name == channel_name:
+        if normalize_channel_name(channel_name=channel.name) == channel_name_normalized:
             if category and channel.category != category:
                 continue
             return channel
@@ -140,10 +141,11 @@ async def get_or_create_discord_category_by_name(client: discord.Client,
                                                  guild_id: int,
                                                  category_name: str) -> discord.CategoryChannel:
     logging.debug(f"Getting {quote(category_name)} category")
+    category_name_normalized = normalize_channel_name(channel_name=category_name)
     categories = await get_all_discord_channels(client=client, guild_id=guild_id,
                                                 channel_type=discord.ChannelType.category)
     for category in categories:
-        if category.name == category_name:
+        if normalize_channel_name(channel_name=category.name) == category_name_normalized:
             return category
 
     logging.error(f"Could not load {category_name} category. Attempting to create...")
@@ -248,3 +250,16 @@ def normalize_channel_name(channel_name: str) -> str:
     channel_name = channel_name.replace(" ", "")  # Remove any weird space characters in the name
     channel_name = channel_name.lower()
     return channel_name
+
+
+def normalize_category_name(category_name: str) -> str:
+    """
+    Normalize a Discord category name.
+    :param category_name: The original category name
+    :return: Normalized category name
+    """
+    category_name = category_name.strip()  # Remove leading and trailing spaces
+    category_name = strip_phantom_space(string=category_name)  # Remove phantom spaces
+    category_name = category_name.replace(" ", "")  # Remove any weird space characters in the name
+    category_name = category_name.lower()
+    return category_name
