@@ -1,4 +1,4 @@
-discord.py==2.3.*
+discord.py==2.5.*
 asyncio~=3.4
 tautulli==4.6.*,>=4.6.0.2142
 confuse==2.0.1

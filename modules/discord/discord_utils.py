@@ -3,7 +3,7 @@ from typing import Union, List, Optional
 import discord
 
 import modules.logs as logging
-from modules.utils import quote
+from modules.utils import quote, strip_phantom_space
 
 
 async def get_guild(client: discord.Client, guild_id: int) -> discord.Guild:
@@ -118,11 +118,12 @@ async def get_or_create_discord_channel_by_starting_name(client: discord.Client,
                                                          channel_type: discord.ChannelType,
                                                          category: discord.CategoryChannel = None) -> \
         Union[discord.VoiceChannel, discord.TextChannel, None]:
+    starting_channel_name_normalized = normalize_channel_name(channel_name=starting_channel_name)
     channels = await get_all_discord_channels(client=client, guild_id=guild_id, channel_type=channel_type)
     for channel in channels:
-        name = channel.name.strip()  # Phantom spaces are the worst
+        name_normalized = normalize_channel_name(channel_name=channel.name)
 
-        if name.startswith(starting_channel_name):
+        if name_normalized.startswith(starting_channel_name_normalized):
             if category and channel.category != category:
                 continue
             return channel
@@ -234,3 +235,16 @@ def is_valid_reaction(reaction_emoji: discord.PartialEmoji,
     if valid_user_ids and reaction_user_id not in valid_user_ids:
         return False
     return True
+
+
+def normalize_channel_name(channel_name: str) -> str:
+    """
+    Normalize a Discord channel name.
+    :param channel_name: The original channel name
+    :return: Normalized channel name
+    """
+    channel_name = channel_name.strip()  # Remove leading and trailing spaces
+    channel_name = strip_phantom_space(string=channel_name)  # Remove phantom spaces
+    channel_name = channel_name.replace(" ", "")  # Remove any weird space characters in the name
+    channel_name = channel_name.lower()
+    return channel_name
