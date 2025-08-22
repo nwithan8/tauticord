@@ -40,7 +40,7 @@ class LiveActivityMonitor(BaseService):
         self.version_checker: versioning.VersionChecker = version_checker
         self.analytics: GoogleAnalytics = analytics
         self.discord_status_settings: settings_models.DiscordStatusMessage = discord_settings.status_message_settings
-        self.tautulli_summary_channel_name: str = discord_settings.channel_name
+        self.tautulli_summary_channel_name: str = discord_settings.summary_channel_name
 
         self.tautulli_summary_channel: discord.TextChannel = None
         self.activity_monitor: ActivityStatsAndSummaryMessage = None
