@@ -140,6 +140,14 @@ class Migration(BaseMigration, ABC):
 
             return path_exists_in_yaml(yaml_data=data, path=path)
 
+    def post_recently_added_message_key_exists(self, file_path: str) -> bool:
+        with open(file_path, 'r') as f:
+            data = yaml.safe_load(f)
+
+            path = ["Discord", "PostRecentlyAddedMessage"]
+
+            return path_exists_in_yaml(yaml_data=data, path=path)
+
     def summary_channel_name_key_exists(self, file_path: str) -> bool:
         with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
@@ -164,6 +172,7 @@ class Migration(BaseMigration, ABC):
         # If the file is already in the new schema, we don't need to do anything
         return not all([
             self.announcements_channel_name_key_exists(file_path=self.old_config_file),
+            self.post_recently_added_message_key_exists(file_path=self.old_config_file),
             self.summary_channel_name_key_exists(file_path=self.old_config_file),
             not self.legacy_channel_name_key_exists(file_path=self.old_config_file),
         ])
@@ -185,6 +194,9 @@ class Migration(BaseMigration, ABC):
             # Add AnnouncementsChannelName with an empty string value
             new_config.add(value="",
                            key_path=["Discord", "AnnouncementsChannelName"])
+            # Add PostRecentlyAddedMessage with a default value
+            new_config.add(value=False,
+                           key_path=["Discord", "PostRecentlyAddedMessage"])
 
         # Write config file to disk
         new_config.save()
@@ -196,6 +208,7 @@ class Migration(BaseMigration, ABC):
         # Make sure the "old" config file has the new keys now
         return all([
             self.announcements_channel_name_key_exists(file_path=self.old_config_file),
+            self.post_recently_added_message_key_exists(file_path=self.old_config_file),
             self.summary_channel_name_key_exists(file_path=self.old_config_file),
             not self.legacy_channel_name_key_exists(file_path=self.old_config_file)
         ])

@@ -110,6 +110,7 @@ class DiscordConfig(ConfigSection):
         admin_ids = self.get_value(key="AdminIDs", default=[])
         announcements_channel_name = self.get_value(key="AnnouncementsChannelName", default=None)
         announcements_channel_name = utils.discord_text_channel_name_format(string=announcements_channel_name) if announcements_channel_name else None
+        use_recently_added_carousel_message = utils.extract_boolean(self.get_value(key="PostRecentlyAddedMessage", default=False))
         summary_channel_name = self.get_value(key="SummaryChannelName", default="tauticord")
         summary_channel_name = utils.discord_text_channel_name_format(string=summary_channel_name)
         use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
@@ -124,6 +125,7 @@ class DiscordConfig(ConfigSection):
             server_id=server_id,
             admin_ids=admin_ids,
             announcements_channel_name=announcements_channel_name,
+            use_recently_added_carousel_message=use_recently_added_carousel_message,
             summary_channel_name=summary_channel_name,
             use_summary_message=use_summary_message,
             enable_termination=enable_termination,
