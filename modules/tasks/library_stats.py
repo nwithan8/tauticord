@@ -2,7 +2,7 @@ import discord
 
 import modules.logs as logging
 import modules.settings.models
-from modules.tasks.voice_category_stats import VoiceCategoryStatsMonitor
+from modules.tasks.base import VoiceCategoryStatsMonitor
 from modules.tautulli.models.library_item_counts import LibraryItemCounts
 from modules.tautulli.tautulli_connector import TautulliConnector
 

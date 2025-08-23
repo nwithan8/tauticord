@@ -7,7 +7,7 @@ from modules import emojis
 from modules.discord import discord_utils
 from modules.discord.models.tautulli_activity_summary import TautulliActivitySummary
 from modules.emojis import EmojiManager
-from modules.tasks.voice_category_stats import VoiceCategoryStatsMonitor
+from modules.tasks.base import VoiceCategoryStatsMonitor
 from modules.tautulli.tautulli_connector import TautulliConnector
 from modules.versioning import VersionChecker
 
