@@ -58,6 +58,13 @@ def init(app_name: str,
         file_logger.setLevel(level_name_to_level(file_log_level or console_log_level))
         logger.addHandler(file_logger)
 
+    # Disable discord.py double-logging
+    discord_logger = logging.getLogger("discord")
+    discord_logger.propagate = False
+
+    # Disable self double-logging
+    logger.propagate = False
+
 
 def level_name_to_level(level_name: str):
     return _nameToLevel.get(level_name, _nameToLevel['NOTSET'])
