@@ -22,10 +22,14 @@ Discord:
   # List of admin IDs
   AdminIDs:
     - '00000000000000000001' # Right-click on your profile picture -> "Copy ID"
-  # Whether to post a live stats summary message
+  # Whether to post a live stats summary message in the SummaryChannelName channel
   PostSummaryMessage: true
   # The name of the channel where the live stats summary message will be posted
-  ChannelName: "tautulli"
+  SummaryChannelName: "tautulli"
+  # The name of the channel where public announcements will be posted
+  AnnouncementsChannelName: "announcements"
+  # Whether to post a recently-added posters carousel in the AnnouncementsChannelName channel
+  PostRecentlyAddedMessage: true
   # Whether to enable termination capabilities (requires Plex Pass)
   EnableTermination: true
   # Whether to enable slash commands
