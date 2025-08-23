@@ -417,8 +417,8 @@ class TautulliConnector:
 
         return items
 
-    def get_recently_added_media_summary(self, count: int, media_type: Optional[str] = None) \
+    def get_recently_added_media_summary(self, count: int, media_type: Optional[str] = None, footer: str = None) \
             -> TautulliRecentlyAddedSummary:
         items: list[RecentlyAddedMediaItem] = self.get_recently_added_media(count=count, media_type=media_type)
 
-        return TautulliRecentlyAddedSummary(items=items)
+        return TautulliRecentlyAddedSummary(items=items, footer=footer)

@@ -5,13 +5,16 @@ from modules.tautulli.models.recently_added_media_item import RecentlyAddedMedia
 
 
 class RecentlyAddedMediaItemCard(PaginatedCardViewItem):
-    def __init__(self, item: RecentlyAddedMediaItem):
+    def __init__(self, item: RecentlyAddedMediaItem, footer: str = None):
         self._item = item
+        self._footer = footer
 
     def render(self) -> discord.Embed:
         embed = discord.Embed(
             title=self._item.title,
             color=EmbedColor.DARK_ORANGE.value)
+        if self._footer:
+            embed.set_footer(text=self._footer)
 
         summary = self._item.summary
         if not summary:
@@ -29,8 +32,8 @@ class RecentlyAddedMediaItemCard(PaginatedCardViewItem):
 
 
 class RecentlyAddedSummaryView(PaginatedCardView):
-    def __init__(self, items: list[RecentlyAddedMediaItem]):
-        cards = [RecentlyAddedMediaItemCard(item=item) for item in items]
+    def __init__(self, items: list[RecentlyAddedMediaItem], footer: str = None):
+        cards = [RecentlyAddedMediaItemCard(item=item, footer=footer) for item in items]
 
         style = PaginatedViewStyle()
         style.to_beginning_button_color = ButtonColor.GREEN

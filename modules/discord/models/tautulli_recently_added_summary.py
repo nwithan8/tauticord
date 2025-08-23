@@ -12,8 +12,10 @@ from modules.tautulli.models.recently_added_media_item import RecentlyAddedMedia
 
 class TautulliRecentlyAddedSummary:
     def __init__(self,
-                 items: List[RecentlyAddedMediaItem]):
+                 items: List[RecentlyAddedMediaItem],
+                 footer: str = None):
         self.items = items or []
+        self.footer = footer
 
     # This is for replying to a slash command with the summary view
     async def reply_to_slash_command(self, interaction: discord.Interaction, ephemeral: bool = False) -> None:
@@ -23,7 +25,7 @@ class TautulliRecentlyAddedSummary:
                                                                    ephemeral=True)  # Always ephemeral if error
             return
 
-        view = RecentlyAddedSummaryView(items=self.items)
+        view = RecentlyAddedSummaryView(items=self.items, footer=self.footer)
 
         # Handles sending the message and updating the embed when interacted with
         await view.respond_to_slash_command(interaction=interaction, ephemeral=ephemeral)
@@ -33,7 +35,7 @@ class TautulliRecentlyAddedSummary:
         if not self.items:
             return await message.channel.send("No recently added items found.")
 
-        view = RecentlyAddedSummaryView(items=self.items)
+        view = RecentlyAddedSummaryView(items=self.items, footer=self.footer)
 
         # Handles sending the message and updating the embed when interacted with
         return await view.send_to_channel(message=message)

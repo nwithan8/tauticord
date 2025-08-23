@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Union, List, Optional
 
 import discord
@@ -154,7 +155,68 @@ async def get_or_create_discord_category_by_name(client: discord.Client,
                                          channel_name=category_name)
 
 
-async def send_embed_message(embed: discord.Embed = None, message: discord.Message = None,
+async def delete_all_channel_messages(channel: discord.TextChannel) -> None:
+    """
+    Delete all messages in a text channel.
+    :param channel: Channel to delete messages from
+    :return: None
+    """
+    await channel.purge()
+
+
+async def get_very_last_message_in_channel(channel: discord.TextChannel, validators: list[Callable[[discord.Message], bool]] = None) -> Optional[discord.Message]:
+    """
+    Get the very last message in a text channel.
+    :param channel: Channel to get the message from
+    :param validators: List of validation functions to check the message against. Each function should take a discord.Message as input and return a boolean.
+    :return: The very last message in the channel if all validators passed, else None
+    """
+    return await get_most_recent_message_in_channel_matching_validators(channel=channel, validators=validators or [], max_depth=1)
+
+
+async def get_most_recent_message_in_channel_matching_validators(channel: discord.TextChannel, validators: list[Callable[[discord.Message], bool]], max_depth: int = 50) -> Optional[discord.Message]:
+    """
+    Get the most recent message in a text channel that matches all validators.
+    :param channel: Channel to get the message from
+    :param validators: List of validation functions to check the message against. Each function should take a discord.Message as input and return a boolean.
+    :param max_depth: Maximum number of messages to search through
+    :return: The most recent message in the channel that matches all validators, else None
+    """
+    async for msg in channel.history(limit=max_depth):
+        msg.embeds[0].footer.text
+        if all(validator(msg) for validator in validators):
+            return msg
+
+    return None
+
+async def send_text_message(text: str = None,
+                            message: discord.Message = None,
+                            channel: discord.TextChannel = None):
+    """
+    Send or edit a message with text.
+    :param text: Text to send
+    :param message: Message to edit
+    :param channel: Channel to send the message to
+    :return: Message sent
+    """
+    # if neither channel nor message is specified, throw an error
+    if not channel and not message:
+        raise ValueError("Must specify either a channel or a message")
+    if message:  # if message exists, use it to edit the message
+        if not text:  # oops, no text to send
+            await message.edit(content="Something went wrong.", embed=None)
+        else:
+            await message.edit(content=text, embed=None)
+        return message
+    else:  # otherwise, send a new message in the channel
+        if not text:  # oops, no text to send
+            return await channel.send(content="Something went wrong.")
+        else:
+            return await channel.send(content=text)
+
+
+async def send_embed_message(embed: discord.Embed = None,
+                             message: discord.Message = None,
                              channel: discord.TextChannel = None):
     """
     Send or edit a message with an embed.
@@ -179,7 +241,8 @@ async def send_embed_message(embed: discord.Embed = None, message: discord.Messa
             return await channel.send(content=None, embed=embed)
 
 
-async def send_view_message(view: discord.ui.View = None, message: discord.Message = None,
+async def send_view_message(view: discord.ui.View = None,
+                            message: discord.Message = None,
                             channel: discord.TextChannel = None):
     """
     Send or edit a message with a View.
