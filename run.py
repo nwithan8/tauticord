@@ -22,6 +22,7 @@ from modules.discord.bot import Bot
 from modules.discord.services.library_stats import LibraryStatsMonitor
 from modules.discord.services.live_activity import LiveActivityMonitor
 from modules.discord.services.performance_stats import PerformanceStatsMonitor
+from modules.discord.services.recently_added import RecentlyAddedMonitor
 from modules.discord.services.slash_commands import SlashCommandManager
 from modules.discord.services.tagged_message import TaggedMessagesManager
 from modules.emojis import EmojiManager
@@ -181,6 +182,13 @@ def set_up_discord_bot(config: Config,
             run_args_settings=config.run_args,
             emoji_manager=emoji_manager,
             analytics=analytics,
+        ),
+        RecentlyAddedMonitor(
+            tautulli_connector=tautulli_connector,
+            discord_settings=config.discord,
+            tautulli_settings=config.tautulli,
+            emoji_manager=emoji_manager,
+            analytics=analytics
         ),
     ]
     logging.info("Setting up Discord connection")
