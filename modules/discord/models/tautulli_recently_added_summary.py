@@ -35,6 +35,13 @@ class TautulliRecentlyAddedSummary:
         if not self.items:
             return await message.channel.send("No recently added items found.")
 
+        if not self.items:
+            embed = discord.Embed(title="Recently Added",
+                                  description="No recently added items found.")
+            if self.footer:
+                embed.set_footer(text=self.footer)
+            return await discord_utils.send_embed_message(embed=embed, message=message)
+
         view = RecentlyAddedSummaryView(items=self.items, footer=self.footer)
 
         # Handles sending the message and updating the embed when interacted with

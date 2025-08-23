@@ -83,7 +83,8 @@ class PaginatedView(discord.ui.View):
         return discord.Embed(title=self._title)
 
     async def respond_to_slash_command(self, interaction: discord.Interaction, ephemeral: bool = False):
-        self._message = await discord_utils.respond_to_slash_command_with_view(interaction=interaction, view=self,
+        self._message = await discord_utils.respond_to_slash_command_with_view(interaction=interaction,
+                                                                               view=self,
                                                                                ephemeral=ephemeral)
 
         # Need to immediately update the message to set the initial embed

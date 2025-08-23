@@ -186,7 +186,7 @@ class Migration(BaseMigration, ABC):
             new_config = ConfigWriter(initial_data=old_config_data, config_file_path=self.new_config_file)
 
             # Rename ChannelName to SummaryChannelName
-            legacy_channel_name = get_value_at_yaml_path(yaml_data=old_config_data, path=["Discord", "ChannelName"])
+            legacy_channel_name = get_value_at_yaml_path(yaml_data=old_config_data, path=["Discord", "ChannelName"]) or "tauticord"
             new_config.add(value=legacy_channel_name,
                            key_path=["Discord", "SummaryChannelName"])
             new_config.remove_key_value_pair(key_path=["Discord", "ChannelName"])

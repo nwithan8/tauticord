@@ -55,7 +55,21 @@ class ServiceRunner:
                 await self.service_entrypoint()
                 await asyncio.sleep(interval_seconds)
             except Exception:
-                exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)"""
+                exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
+
+        while True:
+            try:
+                await self.service_entrypoint()
+                await asyncio.sleep(interval_seconds)
+            except asyncio.CancelledError:
+                logging.info(f"{self.__class__.__name__}: Service loop cancelled; shutting down gracefully.")
+                break
+            except Exception as e:
+                # Log and back off instead of killing the whole process
+                logging.error(f"{self.__class__.__name__}: Unhandled exception in service loop: {e}. Backing off.")
+                interval_seconds *= 2  # Exponential backoff
+                interval_seconds = min(interval_seconds, 3600)  # Cap backoff at 1 hour
+                await asyncio.sleep(interval_seconds)
 
 
 class TextChannelMessageMonitor(ServiceRunner):
@@ -140,6 +154,7 @@ class VoiceCategoryStatsMonitor(ServiceRunner):
             channel = await self.discord_client.fetch_channel(channel_id)
             if not channel:
                 logging.error(f"Could not load channel with ID {channel_id}")
+                return
         else:
             partial_channel_name = voice_channel_settings.prefix
             try:
@@ -149,7 +164,11 @@ class VoiceCategoryStatsMonitor(ServiceRunner):
                                                                                              channel_type=discord.ChannelType.voice,
                                                                                              category=self.voice_category)
             except Exception as e:
-                logging.error(f"Error editing {partial_channel_name} voice channel: {e}")
+                logging.error(f"Error retrieving {partial_channel_name} voice channel: {e}")
+                return
+
+            if not channel:
+                logging.error(f"Could not load or create channel with name starting with {partial_channel_name}")
                 return
 
         try:

@@ -450,8 +450,8 @@
         "BotToken",
         "ServerID",
         "AdminIDs",
+        "SummaryChannelName",
         "PostSummaryMessage",
-        "ChannelName",
         "EnableSlashCommands"
       ]
     },

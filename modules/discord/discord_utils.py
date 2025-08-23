@@ -183,7 +183,6 @@ async def get_most_recent_message_in_channel_matching_validators(channel: discor
     :return: The most recent message in the channel that matches all validators, else None
     """
     async for msg in channel.history(limit=max_depth):
-        msg.embeds[0].footer.text
         if all(validator(msg) for validator in validators):
             return msg
 
@@ -275,7 +274,14 @@ async def respond_to_slash_command_with_text(interaction: discord.Interaction, t
     :param ephemeral: Whether the response should be ephemeral
     :return: Message sent
     """
-    return await interaction.response.send_message(text, ephemeral=ephemeral)
+    try:
+        # Try to respond to the interaction
+        await interaction.response.send_message(text, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then edit the original response message
+        await interaction.edit_original_response(content=text)
+
+    return await interaction.original_response()
 
 
 async def respond_to_slash_command_with_view(interaction: discord.Interaction, view: discord.ui.View,
@@ -289,10 +295,12 @@ async def respond_to_slash_command_with_view(interaction: discord.Interaction, v
     """
     try:
         # Try to respond to the interaction
-        return await interaction.response.send_message(view=view, ephemeral=ephemeral)
+        await interaction.response.send_message(view=view, ephemeral=ephemeral)
     except discord.errors.InteractionResponded:
-        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then get the original response message
-        return await interaction.edit_original_response(view=view)
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then edit the original response message
+        await interaction.edit_original_response(view=view)
+
+    return await interaction.original_response()
 
 
 async def respond_to_slash_command_with_embed(interaction: discord.Interaction, embed: discord.Embed,
@@ -306,10 +314,12 @@ async def respond_to_slash_command_with_embed(interaction: discord.Interaction, 
     """
     try:
         # Try to respond to the interaction
-        return await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
     except discord.errors.InteractionResponded:
-        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then get the original response message
-        return await interaction.edit_original_response(embed=embed)
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then edit the original response message
+        await interaction.edit_original_response(embed=embed)
+
+    return await interaction.original_response()
 
 
 async def respond_to_slash_command_with_file(interaction: discord.Interaction, file: discord.File,
@@ -321,7 +331,14 @@ async def respond_to_slash_command_with_file(interaction: discord.Interaction, f
     :param ephemeral: Whether the response should be ephemeral
     :return: Message sent
     """
-    return await interaction.response.send_message(file=file, ephemeral=ephemeral)
+    try:
+        # Try to respond to the interaction
+        return await interaction.response.send_message(file=file, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), send a follow-up message with the file
+        # TODO: In newer versions of discord.py, we can use interaction.edit_original_response to edit the original response to include the file:
+        # https://discordpy-reborn.readthedocs.io/en/latest/api.html?highlight=followup#discord.Interaction.edit_original_message
+        return await interaction.followup.send(file=file)
 
 
 async def respond_to_slash_command_with_thinking(interaction: discord.Interaction, ephemeral: bool = True) -> None:
