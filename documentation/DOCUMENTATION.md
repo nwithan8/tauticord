@@ -112,9 +112,11 @@ administrators only.
 Tauticord can post an auto-updating summary message of current activity to the admin text channel, detailing
 basic metadata about each current stream such as title, user, device, quality, bandwidth and progress.
 
-If the Plex server administrator has a Plex Pass, Tauticord will also provide reactions to the message, each 
+If the Plex server administrator has a Plex Pass, Tauticord can also add reactions to the message, each 
 corresponding to an active stream. The specified Discord administrators can click on a reaction to stop the 
-corresponding stream. Individual elements of the message can be redacted or removed.
+corresponding stream.
+
+Individual elements of the message can be redacted or removed.
 
 ## Public Channel
 
@@ -126,7 +128,8 @@ this channel are intended for public consumption.
 ### Recently-Added Poster Carousel
 
 Tauticord can post an auto-updating "Recently Added" poster carousel to the public channel, displaying the posters of 
-the five most recently added pieces of media to the Plex server. This message automatically updates every five minutes.
+the five most recently added items on the Plex server. This message automatically updates every five minutes 
+(non-configurable).
 
 <img src="https://raw.githubusercontent.com/nwithan8/tauticord/master/documentation/images/recently_added_poster_carousel.png" alt="recently_added_poster_carousel">
 

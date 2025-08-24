@@ -23,12 +23,14 @@ Discord:
   AdminIDs:
     - '00000000000000000001' # Right-click on your profile picture -> "Copy ID"
   # The name of the channel where admin-only messages will be posted
-  AdminChannelName: "tautulli"
+  AdminChannelName: "tauticord"
   # Whether to post a live stats summary message in the AdminChannelName channel
+  # Note: If AdminChannelName is empty or unset, the summary will not be posted
   PostSummaryMessage: true
   # The name of the channel where public announcements will be posted
   PublicChannelName: "announcements"
   # Whether to post a recently-added posters carousel in the PublicChannelName channel
+  # Note: If PublicChannelName is empty or unset, the carousel will not be posted
   PostRecentlyAddedMessage: true
   # Whether to enable termination capabilities (requires Plex Pass)
   EnableTermination: true
