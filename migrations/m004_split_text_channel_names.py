@@ -136,7 +136,7 @@ class Migration(BaseMigration, ABC):
         with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
 
-            path = ["Discord", "AnnouncementsChannelName"]
+            path = ["Discord", "PublicChannelName"]
 
             return path_exists_in_yaml(yaml_data=data, path=path)
 
@@ -152,7 +152,7 @@ class Migration(BaseMigration, ABC):
         with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
 
-            path = ["Discord", "SummaryChannelName"]
+            path = ["Discord", "AdminChannelName"]
 
             return path_exists_in_yaml(yaml_data=data, path=path)
 
@@ -178,22 +178,22 @@ class Migration(BaseMigration, ABC):
         ])
 
     def forward(self):
-        self.log("Renaming ChannelName to SummaryChannelName and adding AnnouncementsChannelName")
+        self.log("Renaming ChannelName to AdminChannelName and adding PublicChannelName")
 
         with open(self.old_config_file, 'r') as f:
             old_config_data = yaml.safe_load(f)
 
             new_config = ConfigWriter(initial_data=old_config_data, config_file_path=self.new_config_file)
 
-            # Rename ChannelName to SummaryChannelName
+            # Rename ChannelName to AdminChannelName
             legacy_channel_name = get_value_at_yaml_path(yaml_data=old_config_data, path=["Discord", "ChannelName"]) or "tauticord"
             new_config.add(value=legacy_channel_name,
-                           key_path=["Discord", "SummaryChannelName"])
+                           key_path=["Discord", "AdminChannelName"])
             new_config.remove_key_value_pair(key_path=["Discord", "ChannelName"])
 
-            # Add AnnouncementsChannelName with an empty string value
+            # Add PublicChannelName with an empty string value
             new_config.add(value="",
-                           key_path=["Discord", "AnnouncementsChannelName"])
+                           key_path=["Discord", "PublicChannelName"])
             # Add PostRecentlyAddedMessage with a default value
             new_config.add(value=False,
                            key_path=["Discord", "PostRecentlyAddedMessage"])

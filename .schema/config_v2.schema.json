@@ -398,7 +398,7 @@
           "description": "Whether to post a summary message in the activity summary channel",
           "type": "boolean"
         },
-        "SummaryChannelName": {
+        "AdminChannelName": {
           "title": "Activity summary channel name",
           "description": "The name of the channel where the bot will post activity messages. It's recommended that this be an admin-only channel.",
           "$ref": "#/definitions/discordTextChannelName"
@@ -408,7 +408,7 @@
           "description": "Whether to post a poster carousel of recently-added content in the announcements channel",
           "type": "boolean"
         },
-        "AnnouncementsChannelName": {
+        "PublicChannelName": {
           "title": "Announcements channel name",
           "description": "The name of the channel where the bot will post announcement messages. This can be a public channel.",
           "$ref": "#/definitions/discordTextChannelName"
@@ -450,7 +450,7 @@
         "BotToken",
         "ServerID",
         "AdminIDs",
-        "SummaryChannelName",
+        "AdminChannelName",
         "PostSummaryMessage",
         "EnableSlashCommands"
       ]

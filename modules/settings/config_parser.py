@@ -108,10 +108,10 @@ class DiscordConfig(ConfigSection):
         bot_token = self.get_value(key="BotToken")
         server_id = self.get_value(key="ServerID")
         admin_ids = self.get_value(key="AdminIDs", default=[])
-        announcements_channel_name = self.get_value(key="AnnouncementsChannelName", default=None)
+        announcements_channel_name = self.get_value(key="PublicChannelName", default=None)
         announcements_channel_name = utils.discord_text_channel_name_format(string=announcements_channel_name) if announcements_channel_name else None
         use_recently_added_carousel_message = utils.extract_boolean(self.get_value(key="PostRecentlyAddedMessage", default=False))
-        summary_channel_name = self.get_value(key="SummaryChannelName", default="tauticord")
+        summary_channel_name = self.get_value(key="AdminChannelName", default="tauticord")
         summary_channel_name = utils.discord_text_channel_name_format(string=summary_channel_name)
         use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
         enable_termination = utils.extract_boolean(self.get_value(key="EnableTermination", default=False))
