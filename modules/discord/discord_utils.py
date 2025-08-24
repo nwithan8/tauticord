@@ -333,12 +333,14 @@ async def respond_to_slash_command_with_file(interaction: discord.Interaction, f
     """
     try:
         # Try to respond to the interaction
-        return await interaction.response.send_message(file=file, ephemeral=ephemeral)
+        await interaction.response.send_message(file=file, ephemeral=ephemeral)
     except discord.errors.InteractionResponded:
         # If the interaction has already been responded to (e.g. with a "thinking" placeholder), send a follow-up message with the file
         # TODO: In newer versions of discord.py, we can use interaction.edit_original_response to edit the original response to include the file:
         # https://discordpy-reborn.readthedocs.io/en/latest/api.html?highlight=followup#discord.Interaction.edit_original_message
-        return await interaction.followup.send(file=file)
+        await interaction.followup.send(file=file, ephemeral=ephemeral)
+
+    return await interaction.original_response()
 
 
 async def respond_to_slash_command_with_thinking(interaction: discord.Interaction, ephemeral: bool = True) -> None:

@@ -54,13 +54,6 @@ class ServiceRunner:
             try:
                 await self.service_entrypoint()
                 await asyncio.sleep(interval_seconds)
-            except Exception:
-                exit(1)  # Die on any unhandled exception for this subprocess (i.e. internet connection loss)
-
-        while True:
-            try:
-                await self.service_entrypoint()
-                await asyncio.sleep(interval_seconds)
             except asyncio.CancelledError:
                 logging.info(f"{self.__class__.__name__}: Service loop cancelled; shutting down gracefully.")
                 break
