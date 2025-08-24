@@ -42,7 +42,7 @@ class ServiceRunner:
         :param override_conditions: Conditions that, if provided, will replace the default conditions. Will work in conjunction with additional_conditions.
         :return: None
         """
-        conditions = override_conditions or self._run_service_conditions
+        conditions = override_conditions or self._run_service_conditions.copy()
         if additional_conditions:
             conditions += additional_conditions
 
@@ -50,19 +50,21 @@ class ServiceRunner:
             logging.error(f'{self.__class__.__name__}: Service loop conditions not met, {self._run_service_error_message}')
             return
 
+        calculated_interval = interval_seconds
         while True:
             try:
                 await self.service_entrypoint()
-                await asyncio.sleep(interval_seconds)
+                # reset calculated_interval after a successful run
+                calculated_interval = interval_seconds
+                await asyncio.sleep(calculated_interval)
             except asyncio.CancelledError:
                 logging.info(f"{self.__class__.__name__}: Service loop cancelled; shutting down gracefully.")
                 break
             except Exception as e:
                 # Log and back off instead of killing the whole process
                 logging.error(f"{self.__class__.__name__}: Unhandled exception in service loop: {e}. Backing off.")
-                interval_seconds *= 2  # Exponential backoff
-                interval_seconds = min(interval_seconds, 3600)  # Cap backoff at 1 hour
-                await asyncio.sleep(interval_seconds)
+                calculated_interval *= 2  # Exponential backoff
+                await asyncio.sleep(min(calculated_interval, 86400))  # Cap sleep at 24 hours
 
 
 class TextChannelMessageMonitor(ServiceRunner):
