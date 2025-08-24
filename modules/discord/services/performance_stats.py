@@ -48,4 +48,4 @@ class PerformanceStatsMonitor(BaseService):
                                                             guild_id=self.guild_id,
                                                             voice_category=voice_category)
         # noinspection PyAsyncCall
-        asyncio.create_task(self.performance_stats_monitor.run_service(interval_seconds=refresh_time))
+        asyncio.create_task(self.performance_stats_monitor.run_service_override(interval_seconds=refresh_time))

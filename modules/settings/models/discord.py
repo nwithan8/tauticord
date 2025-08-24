@@ -42,8 +42,10 @@ class StatusMessage(BaseConfig):
 class Discord(BaseConfig):
     admin_ids: list[int]
     bot_token: str
-    channel_name: str
+    announcements_channel_name: Optional[str]
+    summary_channel_name: str
     enable_slash_commands: bool
+    use_recently_added_carousel_message: bool
     use_summary_message: bool
     enable_termination: bool
     server_id: int
@@ -53,8 +55,10 @@ class Discord(BaseConfig):
         return {
             "admin_ids": self.admin_ids,
             "bot_token": mark_exists(self.bot_token),
-            "channel_name": self.channel_name,
+            "announcements_channel_name": self.announcements_channel_name,
+            "summary_channel_name": self.summary_channel_name,
             "enable_slash_commands": self.enable_slash_commands,
+            "use_recently_added_carousel_message": self.use_recently_added_carousel_message,
             "use_summary_message": self.use_summary_message,
             "enable_termination": self.enable_termination,
             "server_id": self.server_id,

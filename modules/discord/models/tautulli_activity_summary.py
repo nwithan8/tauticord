@@ -2,7 +2,10 @@ from typing import Union, List
 
 import discord
 
+from modules.discord import discord_utils
 from modules.discord.models.tautulli_stream_info import TautulliStreamInfo
+from modules.discord.views import PaginatedCardView, PaginatedViewStyle, ButtonColor
+from modules.discord.views.activity_summary import ActivitySummaryView
 from modules.emojis import EmojiManager
 from modules.tautulli.models.activity import Activity
 from modules.text_manager import TextManager
@@ -29,6 +32,8 @@ class TautulliActivitySummary:
         self._server_name = server_name
         self._text_manager = text_manager
 
+    # This embed is used in the summary text channel and in responding to a slash command
+    # This will eventually be replaced by a View stored in the "views" directory
     @property
     def embed(self) -> discord.Embed:
         title = f"Current activity on {self._server_name}"
@@ -57,3 +62,17 @@ class TautulliActivitySummary:
         embed.timestamp = discord.utils.utcnow()
 
         return embed
+
+    # This view is currently not used
+    @property
+    def view(self) -> PaginatedCardView:
+        return ActivitySummaryView(activity=[])
+
+    async def reply_to_slash_command(self, interaction: discord.Interaction, ephemeral: bool = False) -> None:
+        # TODO: Replace with paginated view (posters)?
+        await discord_utils.respond_to_slash_command_with_embed(interaction=interaction, embed=self.embed,
+                                                                ephemeral=ephemeral)
+
+    async def send_to_channel(self, message: discord.Message) -> discord.Message:
+        # TODO: Replace with paginated view, or stick with classic embed?
+        return await discord_utils.send_embed_message(message=message, embed=self.embed)

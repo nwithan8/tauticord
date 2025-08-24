@@ -6,7 +6,7 @@ import plexapi.server
 import modules.logs as logging
 import modules.settings.models
 from modules import system_stats
-from modules.tasks.voice_category_stats import VoiceCategoryStatsMonitor
+from modules.tasks.base import VoiceCategoryStatsMonitor
 from modules.tautulli.tautulli_connector import TautulliConnector
 from modules.utils import quote
 

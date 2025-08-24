@@ -108,8 +108,11 @@ class DiscordConfig(ConfigSection):
         bot_token = self.get_value(key="BotToken")
         server_id = self.get_value(key="ServerID")
         admin_ids = self.get_value(key="AdminIDs", default=[])
-        channel_name = self.get_value(key="ChannelName", default="tauticord")
-        channel_name = utils.discord_text_channel_name_format(string=channel_name)
+        announcements_channel_name = self.get_value(key="PublicChannelName", default=None)
+        announcements_channel_name = utils.discord_text_channel_name_format(string=announcements_channel_name) if announcements_channel_name else None
+        use_recently_added_carousel_message = utils.extract_boolean(self.get_value(key="PostRecentlyAddedMessage", default=False))
+        summary_channel_name = self.get_value(key="AdminChannelName", default="tauticord")
+        summary_channel_name = utils.discord_text_channel_name_format(string=summary_channel_name)
         use_summary_message = utils.extract_boolean(self.get_value(key="PostSummaryMessage", default=True))
         enable_termination = utils.extract_boolean(self.get_value(key="EnableTermination", default=False))
         enable_slash_commands = utils.extract_boolean(self.get_value(key="EnableSlashCommands", default=False))
@@ -121,7 +124,9 @@ class DiscordConfig(ConfigSection):
             bot_token=bot_token,
             server_id=server_id,
             admin_ids=admin_ids,
-            channel_name=channel_name,
+            announcements_channel_name=announcements_channel_name,
+            use_recently_added_carousel_message=use_recently_added_carousel_message,
+            summary_channel_name=summary_channel_name,
             use_summary_message=use_summary_message,
             enable_termination=enable_termination,
             enable_slash_commands=enable_slash_commands,

@@ -5,6 +5,7 @@ import modules.logs as logging
 from migrations.m001_env_var_to_config_yaml import Migration as Migration001
 from migrations.m002_old_config_to_new_config import Migration as Migration002
 from migrations.m003_add_recently_added_webhook import Migration as Migration003
+from migrations.m004_split_text_channel_names import Migration as Migration004
 
 # NOTE:
 # MigrationManager assumes you are using the default tauticord.yaml config file name.
@@ -38,6 +39,11 @@ class MigrationManager:
                          migration_data_directory=self.migration_data_directory,
                          config_folder=self.config_directory,
                          logs_folder=self.logs_directory),
+            # Split text channels into two separate channels: one for public announcements and one for private/public monitoring logs
+            Migration004(number="004",
+                          migration_data_directory=self.migration_data_directory,
+                          config_folder=self.config_directory,
+                          logs_folder=self.logs_directory),
         ]
 
     def run_migrations(self) -> bool:

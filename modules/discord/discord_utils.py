@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Union, List, Optional
 
 import discord
@@ -154,10 +155,70 @@ async def get_or_create_discord_category_by_name(client: discord.Client,
                                          channel_name=category_name)
 
 
-async def send_embed_message(embed: discord.Embed = None, message: discord.Message = None,
+async def delete_all_channel_messages(channel: discord.TextChannel) -> None:
+    """
+    Delete all messages in a text channel.
+    :param channel: Channel to delete messages from
+    :return: None
+    """
+    await channel.purge()
+
+
+async def get_very_last_message_in_channel(channel: discord.TextChannel, validators: list[Callable[[discord.Message], bool]] = None) -> Optional[discord.Message]:
+    """
+    Get the very last message in a text channel.
+    :param channel: Channel to get the message from
+    :param validators: List of validation functions to check the message against. Each function should take a discord.Message as input and return a boolean.
+    :return: The very last message in the channel if all validators passed, else None
+    """
+    return await get_most_recent_message_in_channel_matching_validators(channel=channel, validators=validators or [], max_depth=1)
+
+
+async def get_most_recent_message_in_channel_matching_validators(channel: discord.TextChannel, validators: list[Callable[[discord.Message], bool]], max_depth: int = 50) -> Optional[discord.Message]:
+    """
+    Get the most recent message in a text channel that matches all validators.
+    :param channel: Channel to get the message from
+    :param validators: List of validation functions to check the message against. Each function should take a discord.Message as input and return a boolean.
+    :param max_depth: Maximum number of messages to search through
+    :return: The most recent message in the channel that matches all validators, else None
+    """
+    async for msg in channel.history(limit=max_depth):
+        if all(validator(msg) for validator in validators):
+            return msg
+
+    return None
+
+async def send_text_message(text: str = None,
+                            message: discord.Message = None,
+                            channel: discord.TextChannel = None):
+    """
+    Send or edit a message with text.
+    :param text: Text to send
+    :param message: Message to edit
+    :param channel: Channel to send the message to
+    :return: Message sent
+    """
+    # if neither channel nor message is specified, throw an error
+    if not channel and not message:
+        raise ValueError("Must specify either a channel or a message")
+    if message:  # if message exists, use it to edit the message
+        if not text:  # oops, no text to send
+            await message.edit(content="Something went wrong.", embed=None)
+        else:
+            await message.edit(content=text, embed=None)
+        return message
+    else:  # otherwise, send a new message in the channel
+        if not text:  # oops, no text to send
+            return await channel.send(content="Something went wrong.")
+        else:
+            return await channel.send(content=text)
+
+
+async def send_embed_message(embed: discord.Embed = None,
+                             message: discord.Message = None,
                              channel: discord.TextChannel = None):
     """
-    Send or edit a message.
+    Send or edit a message with an embed.
     :param embed: Embed to send
     :param message: Message to edit
     :param channel: Channel to send the message to
@@ -177,6 +238,128 @@ async def send_embed_message(embed: discord.Embed = None, message: discord.Messa
             return await channel.send(content="Something went wrong.")
         else:
             return await channel.send(content=None, embed=embed)
+
+
+async def send_view_message(view: discord.ui.View = None,
+                            message: discord.Message = None,
+                            channel: discord.TextChannel = None):
+    """
+    Send or edit a message with a View.
+    :param view: View to send
+    :param message: Message to edit
+    :param channel: Channel to send the message to
+    :return: Message sent
+    """
+    # if neither channel nor message is specified, throw an error
+    if not channel and not message:
+        raise ValueError("Must specify either a channel or a message")
+    if message:  # if message exists, use it to edit the message
+        if not view:  # oops, no view to send
+            await message.edit(content="Something went wrong.", view=None)  # erase any existing content and views
+        else:
+            await message.edit(content=None, view=view)  # erase any existing content and views
+        return message
+    else:  # otherwise, send a new message in the channel
+        if not view:  # oops, no view to send
+            return await channel.send(content="Something went wrong.")
+        else:
+            return await channel.send(content=None, view=view)
+
+
+async def respond_to_slash_command_with_text(interaction: discord.Interaction, text: str, ephemeral: bool = False):
+    """
+    Respond to a slash command with text.
+    :param interaction: Interaction to respond to
+    :param text: Text to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    try:
+        # Try to respond to the interaction
+        await interaction.response.send_message(text, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then edit the original response message
+        await interaction.edit_original_response(content=text)
+
+    return await interaction.original_response()
+
+
+async def respond_to_slash_command_with_view(interaction: discord.Interaction, view: discord.ui.View,
+                                             ephemeral: bool = False):
+    """
+    Respond to a slash command with a View.
+    :param interaction: Interaction to respond to
+    :param view: View to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    try:
+        # Try to respond to the interaction
+        await interaction.response.send_message(view=view, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then edit the original response message
+        await interaction.edit_original_response(view=view)
+
+    return await interaction.original_response()
+
+
+async def respond_to_slash_command_with_embed(interaction: discord.Interaction, embed: discord.Embed,
+                                              ephemeral: bool = False):
+    """
+    Respond to a slash command with an embed.
+    :param interaction: Interaction to respond to
+    :param embed: Embed to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    try:
+        # Try to respond to the interaction
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then edit the original response message
+        await interaction.edit_original_response(embed=embed)
+
+    return await interaction.original_response()
+
+
+async def respond_to_slash_command_with_file(interaction: discord.Interaction, file: discord.File,
+                                             ephemeral: bool = False):
+    """
+    Respond to a slash command with a file.
+    :param interaction: Interaction to respond to
+    :param file: File to send
+    :param ephemeral: Whether the response should be ephemeral
+    :return: Message sent
+    """
+    try:
+        # Try to respond to the interaction
+        await interaction.response.send_message(file=file, ephemeral=ephemeral)
+    except discord.errors.InteractionResponded:
+        # If the interaction has already been responded to (e.g. with a "thinking" placeholder), send a follow-up message with the file
+        # TODO: In newer versions of discord.py, we can use interaction.edit_original_response to edit the original response to include the file:
+        # https://discordpy-reborn.readthedocs.io/en/latest/api.html?highlight=followup#discord.Interaction.edit_original_message
+        await interaction.followup.send(file=file, ephemeral=ephemeral)
+
+    return await interaction.original_response()
+
+
+async def respond_to_slash_command_with_thinking(interaction: discord.Interaction, ephemeral: bool = True) -> None:
+    """
+    Send a "thinking" placeholder response to a slash command.
+    :param interaction: Interaction to respond to
+    :param ephemeral: Whether the response should be ephemeral
+    :return: None
+    """
+    await interaction.response.defer(thinking=True, ephemeral=ephemeral)
+
+
+async def defer_slash_command_response(interaction: discord.Interaction) -> None:
+    """
+    Defer a slash command response. Use to process a command for longer than 3 seconds.
+    :param interaction: Interaction to defer the response for
+    :return: None
+    """
+    await interaction.response.defer()
 
 
 async def update_presence(client: discord.Client,

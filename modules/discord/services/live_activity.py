@@ -40,7 +40,7 @@ class LiveActivityMonitor(BaseService):
         self.version_checker: versioning.VersionChecker = version_checker
         self.analytics: GoogleAnalytics = analytics
         self.discord_status_settings: settings_models.DiscordStatusMessage = discord_settings.status_message_settings
-        self.tautulli_summary_channel_name: str = discord_settings.channel_name
+        self.tautulli_summary_channel_name: str = discord_settings.summary_channel_name
 
         self.tautulli_summary_channel: discord.TextChannel = None
         self.activity_monitor: ActivityStatsAndSummaryMessage = None
@@ -73,23 +73,23 @@ class LiveActivityMonitor(BaseService):
             logging.debug(f"{quote(self.tautulli_summary_channel_name)} channel collected.")
 
             # If the very last message in the channel is from Tauticord, use it
-            async for msg in self.tautulli_summary_channel.history(limit=1):
-                if msg.author == self.bot.user:
-                    await msg.clear_reactions()
-
-                    # Store the message
-                    summary_message = msg
-                    break
-
-            # If the very last message in the channel is not from Tauticord, make a new one.
-            if not summary_message:
-                logging.info("Couldn't find old message, sending initial message...")
-                embed = discord.Embed(title="Welcome to Tauticord!")
-                embed.add_field(name="Starting up...",
-                                value='This will be replaced once we get data.',
-                                inline=False)
-                summary_message = await discord_utils.send_embed_message(embed=embed,
-                                                                         channel=self.tautulli_summary_channel)
+            summary_message = await discord_utils.get_very_last_message_in_channel(
+                channel=self.tautulli_summary_channel,
+                validators=[
+                    lambda m: m.author == self.bot.user
+                ])
+            if summary_message:
+                await summary_message.clear_reactions()
+            else:
+                # If the very last message in the channel is not from Tauticord, make a new one.
+                if not summary_message:
+                    logging.info("Couldn't find old message, sending initial message...")
+                    embed = discord.Embed(title="Welcome to Tauticord!")
+                    embed.add_field(name="Starting up...",
+                                    value='This will be replaced once we get data.',
+                                    inline=False)
+                    summary_message = await discord_utils.send_embed_message(embed=embed,
+                                                                             channel=self.tautulli_summary_channel)
 
             if not summary_message:
                 raise TauticordSetupFailure("Could not prepare activity summary message")
@@ -124,7 +124,7 @@ class LiveActivityMonitor(BaseService):
                                                                voice_category=activity_stats_voice_category)
         # noinspection PyAsyncCall
         # Want the service to run even if the voice channel is not found (e.g. text summary only)
-        asyncio.create_task(self.activity_monitor.run_service(interval_seconds=refresh_time,
+        asyncio.create_task(self.activity_monitor.run_service_override(interval_seconds=refresh_time,
                                                               override_voice_channel_check=True))
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:

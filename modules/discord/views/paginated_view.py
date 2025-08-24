@@ -3,6 +3,7 @@ import enum
 import discord
 
 import modules.logs as logging
+from modules.discord import discord_utils
 
 
 class EmbedColor(enum.Enum):
@@ -81,16 +82,22 @@ class PaginatedView(discord.ui.View):
         """
         return discord.Embed(title=self._title)
 
-    async def send(self, interaction: discord.Interaction, ephemeral: bool = False):
-        try:
-            # Try to respond to the interaction
-            self._message = await interaction.response.send_message(view=self, ephemeral=ephemeral)
-        except discord.errors.InteractionResponded:
-            # If the interaction has already been responded to (e.g. with a "thinking" placeholder), then get the original response message
-            self._message = await interaction.edit_original_response(view=self)
+    async def respond_to_slash_command(self, interaction: discord.Interaction, ephemeral: bool = False):
+        self._message = await discord_utils.respond_to_slash_command_with_view(interaction=interaction,
+                                                                               view=self,
+                                                                               ephemeral=ephemeral)
 
         # Need to immediately update the message to set the initial embed
         await self.update_message()
+
+    async def send_to_channel(self, message: discord.Message) -> discord.Message:
+        self._message = message
+        self._message = await discord_utils.send_view_message(message=self._message, view=self)
+
+        # Need to immediately update the message to set the initial embed
+        await self.update_message()
+
+        return self._message
 
     async def update_message(self):
         if not self._message:
@@ -127,7 +134,7 @@ class PaginatedView(discord.ui.View):
 
     @discord.ui.button(label="|<", style=discord.ButtonStyle.primary)
     async def first(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer()
+        await discord_utils.defer_slash_command_response(interaction=interaction)
 
         self._current_page_number = 1  # Always update the current page number first before updating the message
 
@@ -135,7 +142,7 @@ class PaginatedView(discord.ui.View):
 
     @discord.ui.button(label="<", style=discord.ButtonStyle.primary)
     async def previous(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer()
+        await discord_utils.defer_slash_command_response(interaction=interaction)
 
         self._current_page_number -= 1  # Always update the current page number first before updating the message
 
@@ -143,7 +150,7 @@ class PaginatedView(discord.ui.View):
 
     @discord.ui.button(label=">", style=discord.ButtonStyle.primary)
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer()
+        await discord_utils.defer_slash_command_response(interaction=interaction)
 
         self._current_page_number += 1  # Always update the current page number first before updating the message
 
@@ -151,7 +158,7 @@ class PaginatedView(discord.ui.View):
 
     @discord.ui.button(label=">|", style=discord.ButtonStyle.primary)
     async def last(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer()
+        await discord_utils.defer_slash_command_response(interaction=interaction)
 
         self._current_page_number = self.get_total_page_count()  # Always update the current page number first before updating the message
 
