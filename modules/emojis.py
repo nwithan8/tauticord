@@ -90,6 +90,7 @@ class Emoji(enum.Enum):
     Resolution = "🖥"
     Progress = "⏰"
     Series = "📺"
+    Season = "🍂"
     Artist = "🎤"
     Album = "📀"
     Track = "🎵"
@@ -177,6 +178,8 @@ class EmojiManager:
             "show": Emoji.Series.value,
             "shows": Emoji.Series.value,
             "series": Emoji.Series.value,
+            "season": Emoji.Season.value,
+            "seasons": Emoji.Season.value,
             "artist": Emoji.Artist.value,
             "artists": Emoji.Artist.value,
             "album": Emoji.Album.value,

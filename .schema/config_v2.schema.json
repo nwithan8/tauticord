@@ -233,6 +233,10 @@
           "description": "Settings for the voice channel about series/show information (used if the library is a TV show library)",
           "$ref": "#/definitions/voiceChannel"
         },
+        "Seasons": {
+          "description": "Settings for the voice channel about season information (used if the library is a TV show library)",
+          "$ref": "#/definitions/voiceChannel"
+        },
         "Tracks": {
           "description": "Settings for the voice channel about track information (used if the library is a music library)",
           "$ref": "#/definitions/voiceChannel"
@@ -311,6 +315,10 @@
         },
         "Series": {
           "description": "Settings for the voice channel about series/show information (used if the library is a TV show library)",
+          "$ref": "#/definitions/voiceChannel"
+        },
+        "Seasons": {
+          "description": "Settings for the voice channel about season information (used if the library is a TV show library)",
           "$ref": "#/definitions/voiceChannel"
         },
         "Tracks": {
