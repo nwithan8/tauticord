@@ -289,6 +289,9 @@ class StatsLibrariesConfig(ConfigSection):
             series = VoiceChannelConfig(channel_name=voice_channel_name,
                                         emoji=Emoji.Series,
                                         data=details_config.get_subsection_data("Series", optional=True)).to_model()
+            season = VoiceChannelConfig(channel_name=voice_channel_name,
+                                        emoji=Emoji.Season,
+                                        data=details_config.get_subsection_data("Seasons", optional=True)).to_model()
             track = VoiceChannelConfig(channel_name=voice_channel_name,
                                        emoji=Emoji.Track,
                                        data=details_config.get_subsection_data("Tracks", optional=True)).to_model()
@@ -308,6 +311,7 @@ class StatsLibrariesConfig(ConfigSection):
                         artist=artist,
                         episode=episode,
                         series=series,
+                        season=season,
                         track=track,
                         recently_added=recently_added
                     )
@@ -351,6 +355,9 @@ class StatsLibrariesConfig(ConfigSection):
             series = VoiceChannelConfig(channel_name=combined_library_name,
                                         emoji=Emoji.Series,
                                         data=details_config.get_subsection_data("Series", optional=True)).to_model()
+            season = VoiceChannelConfig(channel_name=combined_library_name,
+                                        emoji=Emoji.Season,
+                                        data=details_config.get_subsection_data("Seasons", optional=True)).to_model()
             track = VoiceChannelConfig(channel_name=combined_library_name,
                                        emoji=Emoji.Track,
                                        data=details_config.get_subsection_data("Tracks", optional=True)).to_model()
@@ -370,6 +377,7 @@ class StatsLibrariesConfig(ConfigSection):
                         artist=artist,
                         episode=episode,
                         series=series,
+                        season=season,
                         track=track,
                         recently_added=recently_added
                     )

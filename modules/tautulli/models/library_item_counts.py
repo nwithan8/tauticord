@@ -12,5 +12,6 @@ class LibraryItemCounts(BaseModel):
     albums: Optional[int] = None
     artists: Optional[int] = None
     episodes: Optional[int] = None
+    seasons: Optional[int] = None
     series: Optional[int] = None
     tracks: Optional[int] = None

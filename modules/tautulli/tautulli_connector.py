@@ -217,6 +217,7 @@ class TautulliConnector:
 
         movies = 0
         series = 0
+        seasons = 0
         episodes = 0
         artists = 0
         albums = 0
@@ -224,20 +225,22 @@ class TautulliConnector:
 
         match library_type:
             case LibraryType.MOVIE:
-                movies = library_info.get('count')
+                movies = library_info.get('count', 0)
             case LibraryType.SHOW:
-                series = library_info.get('count')
-                episodes = library_info.get('child_count')
+                series = library_info.get('count', 0)
+                seasons = library_info.get('parent_count', 0)
+                episodes = library_info.get('child_count', 0)
             case LibraryType.MUSIC:
-                artists = library_info.get('count')
-                albums = library_info.get('parent_count')
-                tracks = library_info.get('child_count')
+                artists = library_info.get('count', 0)
+                albums = library_info.get('parent_count', 0)
+                tracks = library_info.get('child_count', 0)
 
         return LibraryItemCounts(
             library_name=library_name,
             library_type=library_type,
             movies=movies,
             series=series,
+            seasons=seasons,
             episodes=episodes,
             artists=artists,
             albums=albums,
@@ -252,6 +255,7 @@ class TautulliConnector:
 
         movies = 0
         series = 0
+        seasons = 0
         episodes = 0
         artists = 0
         albums = 0
@@ -273,6 +277,7 @@ class TautulliConnector:
 
             movies += library_item_counts.movies
             series += library_item_counts.series
+            seasons += library_item_counts.seasons
             episodes += library_item_counts.episodes
             artists += library_item_counts.artists
             albums += library_item_counts.albums
@@ -283,6 +288,7 @@ class TautulliConnector:
             library_type=rolling_library_type,
             movies=movies,
             series=series,
+            seasons=seasons,
             episodes=episodes,
             artists=artists,
             albums=albums,

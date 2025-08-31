@@ -44,6 +44,9 @@ class LibraryStats(VoiceCategoryStatsMonitor):
                 if library_settings.voice_channels.series.enable:
                     await self.edit_stat_voice_channel(voice_channel_settings=library_settings.voice_channels.series,
                                                        stat=item_counts.series)
+                if library_settings.voice_channels.season.enable:
+                    await self.edit_stat_voice_channel(voice_channel_settings=library_settings.voice_channels.season,
+                                                       stat=item_counts.seasons)
                 if library_settings.voice_channels.episode.enable:
                     await self.edit_stat_voice_channel(voice_channel_settings=library_settings.voice_channels.episode,
                                                        stat=item_counts.episodes)

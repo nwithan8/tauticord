@@ -52,12 +52,13 @@ class LibraryVoiceChannels(BaseConfig):
     artist: VoiceChannel
     episode: VoiceChannel
     series: VoiceChannel
+    season: VoiceChannel
     track: VoiceChannel
     recently_added: RecentlyAddedVoiceChannel
 
     @property
     def _channels(self) -> list[VoiceChannel]:
-        return [self.movie, self.album, self.artist, self.episode, self.series, self.track, self.recently_added]
+        return [self.movie, self.album, self.artist, self.episode, self.series, self.season, self.track, self.recently_added]
 
     @property
     def enabled_channels(self) -> list[VoiceChannel]:
@@ -70,6 +71,7 @@ class LibraryVoiceChannels(BaseConfig):
             "artist": self.artist.as_dict(),
             "episode": self.episode.as_dict(),
             "series": self.series.as_dict(),
+            "season": self.season.as_dict(),
             "track": self.track.as_dict(),
             "recently_added": self.recently_added.as_dict()
         }

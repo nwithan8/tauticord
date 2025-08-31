@@ -169,33 +169,6 @@ Stats:
         ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
-        Albums:
-          # The custom name for this metric
-          CustomName: ''
-          # The custom emoji for this metric
-          CustomEmoji: ''
-          # Whether to display this metric for this library
-          Enable: true
-          # Use a specific voice channel for this library's stats, rather than generating a new one
-          VoiceChannelID: 0
-        Artists:
-          # The custom name for this metric
-          CustomName: ''
-          # The custom emoji for this metric
-          CustomEmoji: ''
-          # Whether to display this metric for this library
-          Enable: true
-          # The ID of the voice channel
-          VoiceChannelID: 0
-        Episodes:
-          # The custom name for this metric
-          CustomName: ''
-          # The custom emoji for this metric
-          CustomEmoji: ''
-          # Whether to display this metric for this library
-          Enable: true
-          # The ID of the voice channel
-          VoiceChannelID: 0
         Movies:
           # The custom name for this metric
           CustomName: ''
@@ -213,6 +186,42 @@ Stats:
           # Whether to display this metric for this library
           Enable: true
           # The ID of the voice channel
+          VoiceChannelID: 0
+        Seasons:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Episodes:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Artists:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Albums:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # Use a specific voice channel for this library's stats, rather than generating a new one
           VoiceChannelID: 0
         Tracks:
           # The custom name for this metric
@@ -242,7 +251,7 @@ Stats:
         ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
-        Albums:
+        Movies:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -251,7 +260,16 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Artists:
+        Series:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Seasons:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -269,7 +287,7 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Movies:
+        Artists:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -278,7 +296,7 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Series:
+        Albums:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -315,7 +333,7 @@ Stats:
         ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
-        Albums:
+        Movies:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -324,7 +342,16 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Artists:
+        Series:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Seasons:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -342,7 +369,7 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Movies:
+        Artists:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -351,7 +378,7 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Series:
+        Albums:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -398,7 +425,7 @@ Stats:
             ID: 0
         # How to display stats for each type of media in this library
         # Only relevant stats will be included based on library type (e.g. a TV Show library will ignore Album settings)
-        Albums:
+        Movies:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -407,7 +434,16 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Artists:
+        Series:
+          # The custom name for this metric
+          CustomName: ''
+          # The custom emoji for this metric
+          CustomEmoji: ''
+          # Whether to display this metric for this library
+          Enable: true
+          # The ID of the voice channel
+          VoiceChannelID: 0
+        Seasons:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -425,7 +461,7 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Movies:
+        Artists:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
@@ -434,7 +470,7 @@ Stats:
           Enable: true
           # The ID of the voice channel
           VoiceChannelID: 0
-        Series:
+        Albums:
           # The custom name for this metric
           CustomName: ''
           # The custom emoji for this metric
