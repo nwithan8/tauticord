@@ -6,7 +6,7 @@ from typing import Union
 import yaml
 
 from migrations.base import BaseMigration
-from migrations.migration_names import V2_CONFIG_FILE, MIGRATION_003_CONFIG_FILE
+from migrations.migration_names import V2_CONFIG_FILE, MIGRATION_005_CONFIG_FILE
 
 
 def json_to_yaml(json_data) -> str:
@@ -112,7 +112,7 @@ class Migration(BaseMigration, ABC):
         self.config_folder = config_folder
         self.logs_folder = logs_folder
         self.old_config_file = f"{self.config_folder}/{V2_CONFIG_FILE}"
-        self.new_config_file = f"{migration_data_directory}/{MIGRATION_003_CONFIG_FILE}"
+        self.new_config_file = f"{migration_data_directory}/{MIGRATION_005_CONFIG_FILE}"
 
     def seasons_libraries_config_section_exists(self, file_path: str) -> bool:
         with open(file_path, 'r') as f:

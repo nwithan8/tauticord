@@ -225,15 +225,15 @@ class TautulliConnector:
 
         match library_type:
             case LibraryType.MOVIE:
-                movies = library_info.get('count')
+                movies = library_info.get('count', 0)
             case LibraryType.SHOW:
-                series = library_info.get('count')
-                seasons = library_info.get('parent_count')
-                episodes = library_info.get('child_count')
+                series = library_info.get('count', 0)
+                seasons = library_info.get('parent_count', 0)
+                episodes = library_info.get('child_count', 0)
             case LibraryType.MUSIC:
-                artists = library_info.get('count')
-                albums = library_info.get('parent_count')
-                tracks = library_info.get('child_count')
+                artists = library_info.get('count', 0)
+                albums = library_info.get('parent_count', 0)
+                tracks = library_info.get('child_count', 0)
 
         return LibraryItemCounts(
             library_name=library_name,
