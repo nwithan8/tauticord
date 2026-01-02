@@ -1,10 +1,10 @@
-from typing import Union, Optional, Any
+from typing import Any
 
 from pydantic import BaseModel, BeforeValidator
 from typing_extensions import Annotated
 
 
-def int_to_string(value: Any) -> Union[str, None]:
+def int_to_string(value: Any) -> str | None:
     """
     Handle coercing ints to strings for Pydantic models.
     :param value: The value to be converted.
@@ -26,7 +26,7 @@ def int_to_string(value: Any) -> Union[str, None]:
     raise ValueError("Input value is not an int or string")
 
 
-IntAsString: Union[str, None] = Annotated[Optional[int | str], BeforeValidator(int_to_string)]
+IntAsString: str | None = Annotated[str | None, BeforeValidator(int_to_string)]
 
 
 class _Base(BaseModel):
