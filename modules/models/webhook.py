@@ -1,10 +1,10 @@
-from pydantic import BaseModel
 from tautulli.tools.webhooks import TautulliWebhookTrigger
 
 from modules.database.models.webhooks import Webhook as WebhookDatabaseModel
+from modules.models._base import _Base
 
 
-class Webhook(BaseModel):
+class Webhook(_Base):
     webhook_type: TautulliWebhookTrigger
     received_at: int
 

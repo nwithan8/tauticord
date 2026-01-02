@@ -376,21 +376,21 @@ To set up Tautulli to send webhooks to Tauticord, follow these steps:
 1. On the "Data" tab, add the following to "JSON Data" under "Recently Added":
    ```json
    {
-     "media_type": "{{media_type}}",
-     "library_name": "{{library_name}}",
-     "title": "{{title}}",
-     "year": "{{year}}",
-     "duration": "{{duration}}",
-     "tagline": "{{tagline}}",
-     "summary": "{{summary}}",
-     "studio": "{{studio}}",
-     "directors": "{{directors}}",
-     "actors": "{{actors}}",
-     "genres": "{{genres}}",
-     "plex_id": "{{plex_id}}",
-     "critic_rating": "{{critic_rating}}",
-     "audience_rating": "{{audience_rating}}",
-     "poster_url": "{{poster_url}}"
+       "media_type": "{media_type}",
+       "library_name": "{library_name}",
+       "title": "{title}",
+       "year": "{year}",
+       "duration": "{duration}",
+       "tagline": "{tagline}",
+       "summary": "{summary}",
+       "studio": "{studio}",
+       "directors": "{directors}",
+       "actors": "{actors}",
+       "genres": "{genres}",
+       "plex_id": "{plex_id}",
+       "critic_rating": "{critic_rating}",
+       "audience_rating": "{audience_rating}",
+       "poster_url": "{poster_url}"
    }
    ```
     1. Leave "JSON Headers" blank.
