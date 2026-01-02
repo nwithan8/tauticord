@@ -11,3 +11,4 @@ matplotlib==3.9.2
 SQLAlchemy~=2.0.25
 sqlalchemy-utils==0.41.1
 pydantic>=2.10.0
+typing-extensions

@@ -1,18 +1,20 @@
 import json
 from typing import Union, Optional
 
-from pydantic import Field, BaseModel
+from pydantic import Field
 from tautulli.tools.webhooks import TautulliWebhook, TautulliWebhookTrigger
 
+from modules.models._base import _Base, IntAsString
 
-class RecentlyAddedWebhookData(BaseModel):
+
+class RecentlyAddedWebhookData(_Base):
     """
     Data from a configured webhook for recently added media
     """
     media_type: Optional[str] = None
     library_name: Optional[str] = None
     title: Optional[str] = None
-    year_: Optional[str] = Field(None, alias='year')
+    year_: IntAsString = Field(None, alias='year')
     duration_: Optional[str] = Field(None, alias='duration')
     tagline: Optional[str] = None
     summary: Optional[str] = None
