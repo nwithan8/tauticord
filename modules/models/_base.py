@@ -13,6 +13,9 @@ def int_to_string(value: Any) -> str | None:
     if value is None:
         return None
 
+    if isinstance(value, bool):
+        raise ValueError("Boolean value is not allowed")
+
     if isinstance(value, int):
         return str(value)
 
@@ -20,10 +23,10 @@ def int_to_string(value: Any) -> str | None:
         try:
             int(value)
         except ValueError as e:
-            raise ValueError("String value cannot be converted to int") from e
+            raise ValueError("String value is not a valid integer representation") from e
         return value
 
-    raise ValueError("Input value is not an int or string")
+    raise ValueError("Input value must be an int, string, or None")
 
 
 IntAsString: str | None = Annotated[str | None, BeforeValidator(int_to_string)]
