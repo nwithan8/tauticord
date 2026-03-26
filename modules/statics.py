@@ -1,5 +1,6 @@
 # Number 1-9, and A-Z
 import subprocess
+import shutil
 import sys
 
 VERSION = "VERSIONADDEDBYGITHUB"
@@ -44,8 +45,12 @@ def get_last_commit_hash() -> str:
     Get the seven character commit hash of the last commit.
     """
     try:
-        sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
-    except subprocess.SubprocessError:
+        # If git isn't available on the host (e.g. slim containers), avoid raising
+        if shutil.which("git") is None:
+            raise FileNotFoundError("git executable not found")
+
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
         sha = UNKNOWN_COMMIT_HASH
 
     return get_sha_hash(sha)

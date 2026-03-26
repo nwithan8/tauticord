@@ -16,3 +16,8 @@ templates
 on_host
 00*.yaml
 .migration_*
+database.db
+.venv
+Dockerfile
+Dockerfile.*
+.idea

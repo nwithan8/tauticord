@@ -94,7 +94,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          platforms: linux/amd64,linux/armhf,linux/arm64
+          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
           tags: |
             nwithan8/${{ steps.vars.outputs.app_name }}:latest
             nwithan8/${{ steps.vars.outputs.app_name }}:${{ steps.vars.outputs.version }}

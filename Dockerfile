@@ -1,5 +1,5 @@
 # Node.js 18.19 and Python 3.11.x pre-installed on Alpine Linux 3.19
-FROM nwithan8/python-3.x-node-18.19.0-alpine3.19:latest
+FROM nwithan8/python-node-alpine:03232026_2
 WORKDIR /app
 
 # Copy requirements.txt from build machine to WORKDIR (/app) folder (important we do this BEFORE copying the rest of the files to avoid re-running pip install on every code change)
